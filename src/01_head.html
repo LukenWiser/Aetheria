@@ -567,5 +567,26 @@ body.introfade #ui .scr.on{transition:opacity 1s ease}
 .mm-row{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;justify-content:flex-start}.mm-row::-webkit-scrollbar{display:none}
 .mm-ic{flex:1 1 0;min-width:56px;max-width:86px;width:auto!important}
 .mm-ic span{font-size:10.5px;line-height:1.15;text-align:center}
+
+/* Play screen: Expedition front and centre */
+.lay-modes2{display:flex;flex-direction:column;gap:14px;width:100%;max-width:1180px;height:100%}
+.sm-scroll{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding-right:4px}
+.xp-hero{flex:none;position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"tag num" "t num" "d num" "prog prog" "go go";gap:6px 20px;text-align:left;padding:22px 26px;border-radius:18px;border:2px solid var(--wc);background:linear-gradient(115deg,color-mix(in srgb,var(--wc) 34%,#050a16) 0%,rgba(5,10,22,.88) 60%);box-shadow:0 0 0 1px rgba(255,255,255,.05) inset,0 18px 50px -20px var(--wc);color:#fff;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.xp-hero:hover,.xp-hero.gpf{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 24px 60px -18px var(--wc)}
+.xp-hero::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 22px,rgba(255,255,255,.025) 22px 23px);pointer-events:none}
+.xp-tag{grid-area:tag;font:800 12px system-ui,sans-serif;letter-spacing:.2em;color:#fde047}
+.xp-t{grid-area:t;font:900 italic clamp(52px,9vh,96px)/.9 var(--disp,Impact,sans-serif);text-transform:uppercase;text-shadow:0 0 30px color-mix(in srgb,var(--wc) 60%,transparent)}
+.xp-d{grid-area:d;font:500 15px/1.5 var(--mono,system-ui);color:#d6e2f5;max-width:58ch}
+.xp-prog{grid-area:prog;display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:6px;font:600 13px var(--mono,system-ui);color:#cbd5e1}.xp-w b{color:#fff;font-size:16px}
+.xp-bar{flex:1 1 220px;height:8px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden}.xp-bar i{display:block;height:100%;background:var(--wc);box-shadow:0 0 12px var(--wc)}
+.xp-go{grid-area:go;justify-self:start;margin-top:8px;pointer-events:none;font-size:20px!important;padding:16px 34px!important}
+.xp-num{grid-area:num;align-self:center;font:900 italic clamp(90px,18vh,190px)/.8 var(--disp,Impact,sans-serif);color:transparent;-webkit-text-stroke:2px color-mix(in srgb,var(--wc) 70%,#fff);opacity:.55}
+.sm-grp2{font:800 13px system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8ea4c4;margin-top:6px}
+.sm-tiles{flex:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.sm-tile{display:grid;grid-template-columns:22px 1fr;grid-template-areas:"ic nm" "ic ds";gap:2px 10px;align-items:start;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid rgba(142,164,196,.16);background:rgba(7,13,28,.62);color:#e7eefb;cursor:pointer;transition:background .15s,border-color .15s}
+.sm-tile:hover,.sm-tile.gpf{background:rgba(255,255,255,.06);border-color:var(--pa,#22d3ee)}
+.sm-tile .sm-ic{grid-area:ic;width:20px;height:20px;margin-top:2px}.sm-tile b{grid-area:nm;font:800 15px var(--disp,Impact,sans-serif);letter-spacing:.04em;text-transform:uppercase}.sm-tile small{grid-area:ds;font:500 11.5px/1.35 var(--mono,system-ui);color:#94a3b8}
+.sm-tile.lk{opacity:.55}
+@media (max-width:640px){.xp-hero{grid-template-columns:1fr;grid-template-areas:"tag" "t" "d" "prog" "go";padding:18px}.xp-num{display:none}.xp-go{justify-self:stretch;text-align:center}}
 </style>
 </head>
