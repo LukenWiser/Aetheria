@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04070f">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&display=swap" rel="stylesheet">
 <title>Aetheria: Quantum Strike</title>
 <style>
 :root{
@@ -239,6 +240,57 @@ body.retro canvas{image-rendering:pixelated;image-rendering:crisp-edges}body.ret
 .fo-win{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);width:min(420px,86vw);background:#e2e8f0;color:#0f172a;border-radius:8px;box-shadow:0 18px 50px rgba(0,0,0,.55);overflow:hidden}.fo-win.sm{transform:none;width:min(260px,70vw)}
 .fo-t{background:#1d4ed8;color:#fff;padding:7px 10px;font-weight:800;display:flex;justify-content:space-between}.fo-t u{text-decoration:none;background:#ef4444;padding:0 6px;border-radius:3px}.fo-b{padding:14px 12px;line-height:1.5}.fo-btns{display:flex;gap:8px;justify-content:flex-end;padding:0 12px 12px}.fo-btns button{padding:7px 12px;border-radius:6px;border:1px solid #64748b;background:#f8fafc;font:700 12px ui-monospace,Menlo,monospace;cursor:pointer}
 .ndot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#475569;margin-right:6px;vertical-align:middle}.ndot.on{background:#4ade80;box-shadow:0 0 8px #4ade80}.nh{letter-spacing:.14em;margin:12px 0 6px}.flist{max-height:min(46vh,420px);overflow-y:auto}.frow{padding:8px 10px}
+
+/* ---------- main menu ---------- */
+.scr:has(>.mm){padding:0;background:linear-gradient(90deg,rgba(3,7,16,.82) 0%,rgba(3,7,16,.55) 34%,rgba(3,7,16,0) 62%),linear-gradient(0deg,rgba(3,7,16,.7),rgba(3,7,16,0) 30%);-webkit-backdrop-filter:none;backdrop-filter:none;align-items:stretch;justify-content:stretch}
+.mm{--disp:"Big Shoulders Display",Impact,"Arial Narrow",sans-serif;position:relative;flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,300px);grid-template-rows:auto 1fr auto auto;grid-template-areas:"top top" "main ." "row card" "foot foot";gap:14px 28px;padding:max(22px,env(safe-area-inset-top)) max(4.5vw,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(4.5vw,env(safe-area-inset-left));color:#e7eefb;min-height:0}
+.mm button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0;text-align:left}
+.mm button:focus-visible{outline:2px solid var(--pa);outline-offset:4px;border-radius:4px}
+.mm-top{grid-area:top;display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.mm-logo{display:flex;flex-direction:column;line-height:.82;animation:mmLogo .9s cubic-bezier(.2,.8,.2,1) both}
+.mm-l1{font:900 clamp(48px,min(10.5vh,15vw),128px)/.82 var(--disp);text-transform:uppercase;letter-spacing:.015em;background:linear-gradient(180deg,#fff 38%,color-mix(in srgb,var(--pa) 55%,#fff));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 22px color-mix(in srgb,var(--pa) 40%,transparent))}
+.mm-l2{font:600 clamp(15px,2.1vh,22px)/1.2 var(--disp);text-transform:uppercase;letter-spacing:.62em;color:var(--pa);margin-top:10px;padding-left:4px}
+.mm-tr{display:flex;align-items:center;gap:10px;padding-top:6px}
+.mm-pill{display:flex;align-items:center;gap:8px;padding:8px 14px!important;border-radius:999px;background:rgba(10,18,36,.6)!important;border:1px solid rgba(142,164,196,.3)!important;font:700 12px var(--mono)!important;color:#c7d4ea!important}
+.mm-pill i{width:8px;height:8px;border-radius:50%;background:#64748b}.mm-pill.on i{background:#4ade80;box-shadow:0 0 8px #4ade80}
+.mm-seg{display:flex;border-radius:999px;overflow:hidden;border:1px solid rgba(142,164,196,.3);background:rgba(10,18,36,.6)}
+.mm-seg button{padding:8px 13px!important;font:800 12px var(--mono)!important;color:#8ea4c4!important}.mm-seg button.on{background:var(--pa)!important;color:#04101c!important}
+.mm-main{grid-area:main;align-self:center;display:flex;flex-direction:column;align-items:flex-start;gap:clamp(0px,.6vh,8px);min-width:0}
+.mm-nav{position:relative;display:flex;align-items:baseline;gap:18px;padding:0 18px 0 6px!important;animation:mmIn .55s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.25s + var(--i) * .07s)}
+.mm-nav::before{content:"";position:absolute;left:-12px;right:0;top:12%;bottom:8%;background:linear-gradient(90deg,var(--pa),color-mix(in srgb,var(--pa) 0%,transparent));transform:skewX(-14deg) scaleX(0);transform-origin:left;transition:transform .22s cubic-bezier(.2,.8,.2,1);opacity:.28;z-index:-1}
+.mm-w{font:800 clamp(40px,8.2vh,92px)/1 var(--disp);text-transform:uppercase;letter-spacing:.01em;color:transparent;-webkit-text-stroke:1.5px rgba(231,238,251,.7);transform:skewX(-8deg);transition:color .15s,-webkit-text-stroke-color .15s,transform .22s;display:inline-block}
+.mm-nav:first-child .mm-w{color:#fff;-webkit-text-stroke:0}
+.mm-d{font:600 clamp(12px,.8vw,15px) var(--mono);color:#a9bbd6;opacity:0;transform:translateX(-8px);transition:opacity .18s,transform .18s;white-space:nowrap}
+.mm-nav:hover::before,.mm-nav:focus-visible::before,.mm-nav.gpf::before{transform:skewX(-14deg) scaleX(1)}
+.mm-nav:hover .mm-w,.mm-nav:focus-visible .mm-w,.mm-nav.gpf .mm-w{color:#fff;-webkit-text-stroke:0;transform:skewX(-8deg) translateX(10px)}
+.mm-nav:hover .mm-d,.mm-nav:focus-visible .mm-d,.mm-nav.gpf .mm-d{opacity:1;transform:none}
+.mm-nav:focus-visible{outline:none!important}
+.mm-row{grid-area:row;align-self:end;display:flex;flex-wrap:wrap;gap:6px}
+.mm-ic{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;width:clamp(70px,5.2vw,96px);padding:10px 4px 8px!important;border-radius:10px;color:#a9bbd6!important;transition:background .15s,color .15s}
+.mm-ic svg{width:clamp(22px,1.6vw,30px);height:clamp(22px,1.6vw,30px);fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mm-ic span{font:700 clamp(10px,.62vw,12px) var(--mono);text-align:center;line-height:1.15}
+.mm-ic b{position:absolute;top:4px;right:12px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--gold);color:#1a1200;font:900 9px/16px var(--mono);text-align:center;text-transform:uppercase}
+.mm-ic:hover,.mm-ic:focus-visible,.mm-ic.gpf{background:rgba(255,255,255,.08)!important;color:#fff!important}
+.mm-card{grid-area:card;align-self:end;padding:14px 16px;border-radius:14px;background:rgba(7,13,28,.66);border:1px solid rgba(142,164,196,.2);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.mm-who{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.mm-name{font:800 22px/1 var(--disp);text-transform:uppercase;letter-spacing:.03em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mm-rank{font:700 11px var(--mono);color:var(--pa);white-space:nowrap}
+.mm-xp{height:4px;border-radius:3px;background:rgba(142,164,196,.2);margin:10px 0 12px;overflow:hidden}.mm-xp i{display:block;height:100%;background:var(--pa)}
+.mm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0}.mm-stats dt{font:600 10px var(--mono);color:#8ea4c4}.mm-stats dd{margin:2px 0 0;font:800 20px/1 var(--disp);letter-spacing:.02em}
+.mm-foot{grid-area:foot;display:flex;align-items:center;gap:18px;font:600 11px var(--mono);color:#7d90ad;border-top:1px solid rgba(142,164,196,.14);padding-top:10px}
+.mm-news{color:#c7d4ea!important;font:600 11px var(--mono)!important}.mm-news b{color:var(--pa)}.mm-news:hover{color:#fff!important}
+.mm-keys{flex:1;display:flex;justify-content:center;gap:16px;flex-wrap:wrap}.mm-cred{color:#7d90ad!important;font:600 11px var(--mono)!important}.mm-cred b{color:var(--gold)}
+@keyframes mmLogo{from{clip-path:inset(0 100% 0 0);transform:translateX(-14px)}to{clip-path:inset(0 0 0 0);transform:none}}
+@keyframes mmIn{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+body.reduce .mm-logo,body.reduce .mm-nav,body.nofx .mm-logo,body.nofx .mm-nav{animation:none}
+@media (prefers-reduced-motion:reduce){.mm-logo,.mm-nav{animation:none}}
+@media (max-width:760px),(max-aspect-ratio:1/1){
+  .scr:has(>.mm){background:linear-gradient(180deg,rgba(3,7,16,.35) 0%,rgba(3,7,16,.15) 30%,rgba(3,7,16,.85) 52%,rgba(3,7,16,.95));overflow-y:auto}
+  .mm-l1{font-size:clamp(40px,15vw,72px)}.mm-w{font-size:clamp(34px,6.4vh,56px)}
+  .mm{grid-template-columns:1fr;grid-template-rows:auto 26vh auto auto auto auto;grid-template-areas:"top" "." "main" "row" "card" "foot";gap:12px;padding-left:16px;padding-right:16px}
+  .mm-top{flex-direction:column;align-items:center;text-align:center}.mm-logo{align-items:center}.mm-l2{letter-spacing:.42em;padding-left:.42em}
+  .mm-main{align-items:stretch;align-self:start}.mm-nav{justify-content:center;padding:0!important}.mm-nav::before{left:10%;right:10%}.mm-d{display:none}
+  .mm-row{justify-content:center}.mm-ic{width:72px}.mm-foot{flex-wrap:wrap;justify-content:space-between}.mm-keys{display:none}
+}
+@media (max-height:520px) and (min-aspect-ratio:1/1){.mm{gap:8px 20px;padding-top:12px}.mm-l1{font-size:46px}.mm-l2{margin-top:4px}.mm-w{font-size:36px}.mm-ic{width:64px;padding:6px 2px!important}.mm-ic span{display:none}.mm-card{padding:10px 12px}.mm-keys{display:none}}
 #photoBar{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:70;display:flex;gap:8px;padding:8px;border-radius:12px;background:rgba(6,12,26,.82);border:1px solid rgba(148,163,184,.4)}
 #photoBar button{padding:9px 12px;border-radius:9px;border:1px solid rgba(148,163,184,.45);background:rgba(15,23,42,.9);color:#e2e8f0;font:800 11px var(--mono);letter-spacing:.12em;cursor:pointer}#photoBar .snap{background:#0e7490;border-color:#22d3ee}
 #photoShot{position:fixed;inset:0;z-index:80;background:rgba(2,6,16,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}#photoShot img{max-width:94vw;max-height:78vh;border-radius:10px;border:2px solid #22d3ee}#photoShot div{color:#cbd5e1;font:700 11px var(--mono);letter-spacing:.12em;text-align:center}#photoShot button{margin-left:10px;padding:8px 12px;border-radius:8px;background:#0f172a;color:#e2e8f0;border:1px solid #64748b;font:800 11px var(--mono)}
@@ -5857,8 +5909,9 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V30';
+const GAME_VER = 'V31';
 const UPDATES = [
+  ['V31', 'New Main Menu', ['A brand-new full-screen main menu: big title, your ship front and centre, and everything else tidied into one row', 'The menu takes its colour from your ship\'s accent', 'Pilot card with your rank, level progress, cores and worlds', 'Works with mouse, touch and controller, on any screen size']],
   ['V30', 'Online', ['Online play on the Aetheria website: sign in with Google', 'Pilot names and friend codes, friend requests, and see which friends are online', 'Online co-op and versus: quick match, private rooms with a 4-letter code, or invite a friend', 'Direct connection between players, with an automatic backup route if a network blocks it', 'Quick emotes in online matches (keys 7 8 9 0)', 'Block and report options for other pilots']],
   ['V29', 'Make It Yours', ['Creator mode: a level editor - pick a world, build waves from any enemy you have met, add an end boss', 'Boss builder: choose a body, colour, health, phases and attacks, then fight it', 'Share codes for levels (AQL1:) and bosses (AQB1:) so friends can play what you made', 'The glitch is spreading: once The Glitch opens, corrupted sectors appear in older worlds until you beat the Null Process', 'Corrupted sectors have glitched enemies and +50% cores - clear them to push the glitch back', 'Beat the Null Process and see what happens to the game itself...', 'New achievements: Maker, Antivirus, and a secret one']],
   ['V28', 'Together and Fair', ['Co-op: fly to a downed teammate to revive them', 'Co-op link beam: stay close and a beam between your ships cuts enemies and bullets', 'Team Finisher: when both supers are full, one press fires a double Nova Beam', 'Versus mode: a 2-minute score duel for two players', 'Ghost replays: race a ghost of your best run of every sector', 'Challenge codes: share a code so a friend gets the exact same waves and tries to beat your score', 'Controller remapping (Settings > Controls > Keys)', 'Accessibility: colour-blind palettes, bigger enemy bullets, hitbox display and slower game speeds', 'Download and load a backup file of your save', 'Auto performance mode lowers graphics if the game starts to lag', 'Stats page with charts (Profile > Stats)']],
@@ -6797,6 +6850,41 @@ document.addEventListener('change', e => { const el = e.target && e.target.close
 // leaving the online screens any other way (Esc, back gesture) never traps you in a room
 const _uiBack = UI.back.bind(UI);
 UI.back = function () { if (this.top === 'scOnline' || this.top === 'scName') { ACT.nhome(); return; } if (this.top === 'scRoom') { ACT.nleave(); return; } return _uiBack(); };
+
+// ================= MAIN MENU: full-screen title screen =================
+// Big condensed type on the left, your ship on the right, everything secondary tucked into one quiet row.
+const MI = { // small line icons for the secondary row
+  profile: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-7 8-7s7 2.5 8 7"/></svg>',
+  missions: '<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>',
+  daily: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  cos: '<svg viewBox="0 0 24 24"><path d="M14.5 4.5l5 5-9 9H5.5v-5z"/><path d="M12.5 6.5l5 5"/></svg>',
+  settings: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>',
+  tutorial: '<svg viewBox="0 0 24 24"><path d="M2.5 9L12 4.5 21.5 9 12 13.5z"/><path d="M6.5 11v5c3 2.5 8 2.5 11 0v-5"/></svg>',
+  updates: '<svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>',
+  fs: '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+  fsx: '<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>'
+};
+const MAINNAV = [
+  ['play', 'Play', 'Campaign, endless, boss rush and every challenge'],
+  ['online', 'Online', 'Friends, co-op and versus with other pilots'],
+  ['hangar', 'Hangar', 'Build, paint and arm your ship'],
+  ['shop', 'Shop', 'Upgrades and new weapons']
+];
+SCR.scMenu = () => {
+  const t = touchOn(), X = PS().xp, pc = SAVE.pl[0].cfg, ac = pc.accent || '#22d3ee', ms = msnReady(), dNew = !SAVE.dl.done[dayKey()], fsOn = !!document.fullscreenElement;
+  const online = NET.user && NET.me && NET.me.name ? NET.me.name : null, U = UPDATES[0];
+  const nav = MAINNAV.map((n, i) => '<button class="mm-nav" data-act="' + n[0] + '" style="--i:' + i + '"><span class="mm-w">' + n[1] + '</span><span class="mm-d">' + n[2] + '</span></button>').join('');
+  const ic = (act, key, label, badge) => '<button class="mm-ic" data-act="' + act + '" title="' + label + '" aria-label="' + label + '">' + MI[key] + '<span>' + label + '</span>' + (badge ? '<b>' + badge + '</b>' : '') + '</button>';
+  return '<div class="mm" style="--pa:' + ac + '">' +
+    '<header class="mm-top"><button class="mm-logo" data-act="tap" aria-label="Aetheria: Quantum Strike"><span class="mm-l1">Aetheria</span><span class="mm-l2">Quantum Strike</span></button>' +
+      '<div class="mm-tr"><button class="mm-pill' + (online ? ' on' : '') + '" data-act="online"><i></i>' + (online ? escH(online) : 'Offline') + '</button><div class="mm-seg" role="group" aria-label="Players"><button data-act="players:1" class="' + (SAVE.players === 1 ? 'on' : '') + '">1P</button><button data-act="players:2" class="' + (SAVE.players === 2 ? 'on' : '') + '">2P</button></div></div></header>' +
+    '<nav class="mm-main">' + nav + '</nav>' +
+    '<div class="mm-row">' + ic('profile', 'profile', 'Profile') + ic('missions', 'missions', 'Missions', ms ? ms : '') + ic('daily', 'daily', 'Daily', dNew ? 'new' : '') + ic('cos', 'cos', 'Cosmetics') + ic('settings', 'settings', 'Settings') + ic('tutorial', 'tutorial', 'Flight school') + ic('updates', 'updates', 'Updates') + ic('fs', fsOn ? 'fsx' : 'fs', fsOn ? 'Exit full screen' : 'Full screen') + '</div>' +
+    '<aside class="mm-card"><div class="mm-who"><span class="mm-name">' + escH(online || 'Pilot') + '</span><span class="mm-rank">' + 'Level ' + X.lv + ' ' + rankName(X.lv) + '</span></div><div class="mm-xp"><i style="width:' + Math.round(X.xp / xpNeed(X.lv) * 100) + '%"></i></div>' +
+      '<dl class="mm-stats"><div><dt>Cores</dt><dd class="gold">' + fmt(SAVE.cores) + '</dd></div><div><dt>Worlds</dt><dd>' + Math.min(SAVE.wu, WORLDS.length) + '/' + WORLDS.length + '</dd></div><div><dt>Kills</dt><dd>' + fmt(SAVE.st.kills) + '</dd></div></dl></aside>' +
+    '<footer class="mm-foot"><button class="mm-news" data-act="updates"><b>' + U[0] + '</b> ' + escH(U[1]) + '</button><span class="mm-keys">' + (t ? '' : (SAVE.players === 2 ? ['P1: WASD + Space', 'P2: arrows + Enter'] : ['WASD or mouse to fly', 'Space or click to fire', 'Esc to pause']).map(k => '<span>' + k + '</span>').join('')) + '</span><button class="mm-cred" data-act="credits">Made by <b>Luken Wiser</b></button></footer>' +
+  '</div>';
+};
 
 // ================= BOOT =================
 function boot() {
