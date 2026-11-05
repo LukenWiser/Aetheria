@@ -372,7 +372,8 @@
     on: false, hy: 0, lastErr: null, bgActive: false, get bg() { return BG3; }, get __scene() { return scene; }, get __renderer() { return renderer; },
     resize(iw, ih, lh, pr) { if (BG3) BG3.resize(iw, ih); camera.fov = 2 * Math.atan(lh / 2 / DIST) * 180 / PI; camera.aspect = iw / ih; camera.updateProjectionMatrix(); renderer.setPixelRatio(pr); renderer.setSize(iw, ih); ch = lh; cw = lh * iw / ih; },
     setQuality(pr) { renderer.setPixelRatio(pr); },
-    setView(v) { view = v; },
+    setView(v) { view = v; }, getView() { return view; },
+    shipModel(cfg) { return buildShip(cfg); }, flickerShip(s, tk, thr) { flicker({ s }, tk, thr); },
     spin(d) { R.hy += d; },
     boom,
     hit(p, sev) {
@@ -427,6 +428,7 @@
       if (SET.toon) { keyL.intensity = .72; rimL.intensity = 1.05; hemiL.intensity = .26; } else { keyL.intensity = 3.2; rimL.intensity = 2.2; hemiL.intensity = .55; }
       if (!on) return;
       const W = Vw.W, Hh = Vw.H, tk = Gs.t, df = Math.min(4, Math.max(0, tk - lastTk)); lastTk = tk; cw = W; ch = Hh;
+      if (view === 'ship' && R.shipDraw && !R.shipFail) { try { renderer.autoClear = true; R.shipDraw(renderer, W, Hh, df); if (SET.bloom !== false) { try { bloom(); } catch (e) { SET.bloom = false; } } return; } catch (e) { console.warn('ship menu failed, using the flat menus', e); R.shipFail = 1; R.lastErr = String(e && e.message || e); } }
       for (const k in rigs) if (!rigs[k].bad) rigs[k].rig.visible = false; if (MV) MV.hold.visible = false;
       enemies.forEach(o => { if (!o.bad) o.root.visible = false; });
       if (view === 'play') {

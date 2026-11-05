@@ -119,7 +119,7 @@ function gxBind() {
   cv.addEventListener('pointermove', e => { const p = pts.get(e.pointerId); if (!p) return; const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
     if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y); if (pd) GXV.zoom = clamp(GXV.zoom * d / pd, .6, 2.4); pd = d; return; }
     GXV.yaw -= dx * .006; GXV.pitch = clamp(GXV.pitch + dy * .004, .25, 1.35); });
-  const up = e => { const was = pts.size; pts.delete(e.pointerId); if (!pts.size) GXV.drag = 0; if (was === 1 && moved < 8) { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; let best = null, bd = 1e9; for (const h of GXV.hit || []) { const d = Math.hypot(h.x - x, h.y - y); if (d < h.r && d < bd) { bd = d; best = h; } } if (best) { if (GXV.sel === best.i && best.i !== GXS().at && best.i < gxOpen()) gxJump(best.i); else { GXV.sel = best.i; GXV.enc = null; gxPanel(); } } } };
+  const up = e => { const was = pts.size; pts.delete(e.pointerId); if (!pts.size) GXV.drag = 0; if (was === 1 && moved < 8) { const [x, y] = locXY(e, cv); let best = null, bd = 1e9; for (const h of GXV.hit || []) { const d = Math.hypot(h.x - x, h.y - y); if (d < h.r && d < bd) { bd = d; best = h; } } if (best) { if (GXV.sel === best.i && best.i !== GXS().at && best.i < gxOpen()) gxJump(best.i); else { GXV.sel = best.i; GXV.enc = null; gxPanel(); } } } };
   cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   cv.addEventListener('wheel', e => { e.preventDefault(); GXV.zoom = clamp(GXV.zoom * (e.deltaY > 0 ? .9 : 1.1), .6, 2.4); }, { passive: false });
 }

@@ -123,7 +123,7 @@ function bDraw() {
   pods.filter(q => q.z >= 0).sort((a, b) => a.z - b.z).forEach(q => { g.strokeStyle = 'rgba(100,116,139,.8)'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx, cy); g.lineTo(q.x, q.y); g.stroke(); pod(q); });
   if (raidOn() && t % 50 < 25) { g.fillStyle = 'rgba(239,68,68,.12)'; g.fillRect(0, 0, W, H); }
 }
-function bBind() { const cv = document.getElementById('bCv'); if (!cv || cv._b) return; cv._b = 1; cv.addEventListener('click', e => { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; let best = null, bd = 1e9; for (const h of BV.hit) { const d = Math.hypot(h.x - x, h.y - y); if (d < h.r && d < bd) { bd = d; best = h; } } if (best) { BV.sel = best.k; BV.tab = 'station'; SFX.click(); UI.refresh(); } }); }
+function bBind() { const cv = document.getElementById('bCv'); if (!cv || cv._b) return; cv._b = 1; cv.addEventListener('click', e => { const [x, y] = locXY(e, cv); let best = null, bd = 1e9; for (const h of BV.hit) { const d = Math.hypot(h.x - x, h.y - y); if (d < h.r && d < bd) { bd = d; best = h; } } if (best) { BV.sel = best.k; BV.tab = 'station'; SFX.click(); UI.refresh(); } }); }
 SCR.scBase = () => {
   bTick(); const B = BS(), D = DS(), raid = raidOn(); setTimeout(() => { bBind(); if (!BV.raf) bDraw(); }, 0);
   const k = BV.sel, M = BMOD[k], lv = bLv(k), cost = bCost(k), ore = Math.floor(B.ore || 0);
