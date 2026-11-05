@@ -73,6 +73,7 @@ const SCR = {
     const t = touchOn();
     return '<div class="card" style="width:min(450px,100%)"><div class="title" data-act="tap">AETHERIA</div><div class="subt">QUANTUM STRIKE</div><div class="stack">' +
       '<button class="btn big" data-act="play">PLAY</button>' +
+      '<button class="btn" data-act="online" style="border-color:#22d3ee">ONLINE <span class="xs mut">FRIENDS, CO-OP, VERSUS</span></button>' +
       '<div class="grid2"><button class="btn" data-act="hangar">HANGAR</button><button class="btn" data-act="shop">SHOP</button></div>' +
       '<div class="grid2"><button class="btn" data-act="settings">SETTINGS</button><button class="btn" data-act="tutorial">FLIGHT SCHOOL</button></div>' +
       '<div class="grid2"><button class="btn sm" data-act="fs">' + (document.fullscreenElement ? 'EXIT FULL SCREEN' : 'FULL SCREEN') + '</button><button class="btn sm" data-act="updates">UPDATES <span class="gold">' + GAME_VER + '</span></button></div>' +

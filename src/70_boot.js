@@ -13,6 +13,7 @@ window.AET = {
   CARDS, ABIL, WEVO, useAbility, offerCards, pickCard, rollCards, graze, rankFor, buyWup, buyWevo, wupPrice, wevoPrice, hurtPod, breakPod, podOf, ramCheck, updEB, updPB, killBoss, nextStage, hurtEnemy,
   startDaily, dailyInfo, DMODS, dayKey, ACH, achScan, mkStation, stnHit, STN_X, slotInfo, switchSlot, deleteSlot, exportCode, importCode, setKey, keyLabel, KB, KDEF, applyKeys, hintFor, unlockHull, padNav, navEls, navMove, navAct, toast, variantFinish, checkUnlocks, genWave,
   musTap() { audio(); if (AC.state !== 'running') AC.resume(); const a = AC.createAnalyser(); a.fftSize = 2048; musG.connect(a); const buf = new Float32Array(a.fftSize); return () => { a.getFloatTimeDomainData(buf); let s = 0, pk = 0; for (const v of buf) { s += v * v; pk = Math.max(pk, Math.abs(v)); } return { rms: Math.sqrt(s / buf.length), pk, st: AC.state }; }; },
+  NET, netInit, netSetName, netAddFriend, netAccept, netCreateRoom, netJoinRoom, netStart, netQuick, netSendEmote,
   CR, startCrash, crashIntro, startCBoss, packCode, unpackCode, glitchSpreading, isCorrupt, newLevel, newCBoss,
   chCode, chParse, startChallenge, randChal, coopDead, PERF, ghDec, PADA, padLabel,
   SFX, jbPlay, jbStop, jbTracks, STEMS, get sfxG() { return sfxG; }, get AC() { return AC; },

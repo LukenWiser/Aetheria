@@ -12,12 +12,12 @@ function applyKeys() {
   for (const a of ['l', 'r', 'u', 'd', 'f', 'a', 'c', 'v']) KALL[a] = KB[0][a].concat(KB[1][a]);
 }
 applyKeys();
-const abKey = c => { if (G.players.length > 1) return KB[0].a.indexOf(c) >= 0 ? 0 : KB[1].a.indexOf(c) >= 0 ? 1 : -1; return KALL.a.indexOf(c) >= 0 ? 0 : -1; };
+const abKey = c => { if (G.players.length > 1 && !G.net) return KB[0].a.indexOf(c) >= 0 ? 0 : KB[1].a.indexOf(c) >= 0 ? 1 : -1; return KALL.a.indexOf(c) >= 0 ? 0 : -1; };
 const kdown = list => { for (let i = 0; i < list.length; i++) if (IN.keys[list[i]]) return true; return false; };
 const DIFFM = [{ hp: .8, dm: .7 }, { hp: 1, dm: 1 }, { hp: 1.25, dm: 1.35 }];
 
 function mkPlayer(i) {
-  const pl = SAVE.pl[i], st = shipStats(pl);
+  const pl = (G.netPl && G.netPl[i]) || SAVE.pl[i], st = shipStats(pl);
   return { id: i, pl, cfg: pl.cfg, x: 140, y: V.H / 2 + (i ? 70 : -70) * (G.coop ? 1 : 0), vx: 0, vy: 0, st, hp: st.hp, mhp: st.hp, sh: st.sh, msh: st.sh, am: st.am, mam: st.am, wpn: WPN[pl.wpn] && pl.wown.indexOf(pl.wpn) >= 0 ? pl.wpn : 'twin', alive: true, inv: 100, blink: false, fcd: 0, od: 0, slow: 0, rest: 0, shT: 0, score: 0, kills: 0, lastHit: 0, gx: 0, mod: newMod(), cards: {}, abCd: 0, abMax: 1, wallT: 0, ovl: 0, dashT: 0, dvx: 0, dvy: 0, lmx: 0, lmy: 0, gzc: 0, bcd: 0, dr: [], oa: 0, orbP: [], phaseT: 0, reflT: 0, sup: 0, supT: 0, chg: 0, secCd: 0, pcd: 0, parT: 0, secH: false };
 }
 function setWeapon(p, id) { if (p.pl.wown.indexOf(id) >= 0 && p.wpn !== id) { p.wpn = id; p.pl.wpn = id; SFX.click(); alertMsg(WPN[id].nm.toUpperCase()); } }
@@ -28,14 +28,15 @@ function nearE(x, y, maxD, skip) { let b = null, bd = maxD * maxD; for (const e 
 
 // ---------- input -> intent ----------
 function inputFor(p) {
-  const co = G.players.length > 1, o = { mx: 0, my: 0, tx: null, ty: null, fire: false }, k = co ? KB[p.id] : KALL, P = IN.ptr;
+  if (p.remote) return netRemoteInput(p);
+  const co = G.players.length > 1 && !G.net, me = G.net ? !!p.local : p.id === 0, o = { mx: 0, my: 0, tx: null, ty: null, fire: false }, k = co ? KB[p.id] : KALL, P = IN.ptr;
   if (kdown(k.l)) o.mx -= 1; if (kdown(k.r)) o.mx += 1; if (kdown(k.u)) o.my -= 1; if (kdown(k.d)) o.my += 1; if (kdown(k.f)) o.fire = true;
   if (o.mx || o.my) P.fresh = false;
   const pad = co ? IN.pads[p.id] : IN.pads[0]; if (pad) { o.mx += pad.x; o.my += pad.y; if (pad.fire) o.fire = true; if (pad.x || pad.y) P.fresh = false; }
-  if (IN.swap[p.id]) { cycleWeapon(p, IN.swap[p.id]); IN.swap[p.id] = 0; }
-  if (p.id === 0 && P.type === 'mouse' && P.fresh) { o.tx = P.tx; o.ty = P.ty; if (P.down) o.fire = true; }
+  const si = G.net ? 0 : p.id; if (IN.swap[si]) { cycleWeapon(p, IN.swap[si]); IN.swap[si] = 0; }
+  if (me && P.type === 'mouse' && P.fresh) { o.tx = P.tx; o.ty = P.ty; if (P.down) o.fire = true; }
   if (touchOn()) {
-    if (SET.scheme === 'stick') { if (p.id === 0 || !co) { if (IN.stick.x || IN.stick.y) { o.mx += IN.stick.x; o.my += IN.stick.y; } if (IN.tfire) o.fire = true; } }
+    if (SET.scheme === 'stick') { if (me || !co) { if (IN.stick.x || IN.stick.y) { o.mx += IN.stick.x; o.my += IN.stick.y; } if (IN.tfire) o.fire = true; } }
     else { const ids = Object.keys(IN.tp); let pt = null; for (const id of ids) { const q = IN.tp[id]; if (!co || (p.id === 0) === (q.x < V.W / 2)) { pt = q; break; } } if (pt) { o.tx = pt.tx; o.ty = pt.ty; o.fire = true; } }
   }
   p.lmx = o.mx; p.lmy = o.my; if (o.tx !== null) { p.lmx = o.tx - p.x; p.lmy = o.ty - p.y; }
@@ -49,8 +50,9 @@ function updPlayer(p) {
   if (p.alive && !SET.reduce) { const f = p.hp / p.mhp; if (f < .6 && G.t % (f < .3 ? 3 : 7) === 0) smoke(p.x - 14, p.y + rnd(-4, 4), 1, f < .3 ? 12 : 8); if (f < .35 && G.t % 4 === 0) spark(p.x - 10, p.y + rnd(-6, 6), 1, Math.random() < .5 ? '#fb923c' : '#fde047', 2.2, 16, 2.4); }
   if (!p.alive) { if (G.run && G.run.var === 'versus') return; if (G.players.length > 1 && alive().length && p.rest > 0) { if (!coopDead(p) && --p.rest <= 0) revive(p); } return; }
   const o = inputFor(p), hz = curHz(), sp = p.st.spd * 1.25 * (p.slow > 0 ? .55 : 1) * (p.phaseT > 0 ? 1.4 : 1);
-  if (IN.ab[p.id]) { IN.ab[p.id] = 0; useAbility(p); }
-  if (o.tx !== null) {
+  const ai = G.net ? (p.local ? 0 : -1) : p.id; if (ai >= 0 && IN.ab[ai]) { IN.ab[ai] = 0; useAbility(p); } if (p.remote && p.netAb) { p.netAb = 0; useAbility(p); }
+  if (p.remote) { const B0 = BOUND(); p.vx = (o.x - p.x) * .5; p.vy = (o.y - p.y) * .5; p.x = clamp(o.x, B0.x0, B0.x1); p.y = clamp(o.y, B0.y0, B0.y1); }
+  else if (o.tx !== null) {
     const dx = o.tx - p.x, dy = o.ty - p.y, d = Math.hypot(dx, dy) || 1, v = Math.min(d * .22, sp * 2.2);
     p.vx += (dx / d * v - p.vx) * .5; p.vy += (dy / d * v - p.vy) * .5;
   } else {
@@ -61,8 +63,8 @@ function updPlayer(p) {
   if (hz === 'current') p.vx += Math.sin(G.t * .008) * .08 - .02;
   if (hz === 'pulse' && G.t % 480 > 430) p.vx -= .4;
   if (hz === 'bhole') { const dx = V.W * .82 - p.x, dy = V.H * .5 - p.y, d = Math.hypot(dx, dy) || 1; p.vx += dx / d * .07 * Math.min(2, 260 / d); p.vy += dy / d * .07 * Math.min(2, 260 / d); }
-  if (p.dashT > 0) { p.dashT--; p.vx = p.dvx; p.vy = p.dvy; if (!p.dashT) { p.dvx *= .3; p.dvy *= .3; p.vx = p.dvx; p.vy = p.dvy; } }
-  p.x += p.vx; p.y += p.vy; const B = BOUND(); p.x = clamp(p.x, B.x0, B.x1); p.y = clamp(p.y, B.y0, B.y1);
+  if (p.remote) { if (p.dashT > 0) p.dashT--; } else if (p.dashT > 0) { p.dashT--; p.vx = p.dvx; p.vy = p.dvy; if (!p.dashT) { p.dvx *= .3; p.dvy *= .3; p.vx = p.dvx; p.vy = p.dvy; } }
+  if (!p.remote) { p.x += p.vx; p.y += p.vy; const B = BOUND(); p.x = clamp(p.x, B.x0, B.x1); p.y = clamp(p.y, B.y0, B.y1); }
   if (p.inv > 0) p.inv--; if (p.slow > 0) p.slow--; if (p.od > 0) p.od--; p.lastHit++;
   if (p.lastHit > 200 && p.sh < p.msh) p.sh = Math.min(p.msh, p.sh + .22);
   if (G.run && G.run.freeAmmo) p.am = p.mam;
@@ -235,7 +237,7 @@ function updPickups() {
 }
 function collect(p, k) {
   const R = G.run; SFX.pick();
-  if (k.k === 'core') { SAVE.cores += k.v; R.cores += k.v; ftext(p.x, p.y - 22, '+' + k.v, '#fbbf24', 12); }
+  if (k.k === 'core') { if (p.remote) { R.rCores = (R.rCores | 0) + k.v; ftext(p.x, p.y - 22, '+' + k.v, '#fbbf24', 12); } else { SAVE.cores += k.v; R.cores += k.v; } ftext(p.x, p.y - 22, '+' + k.v, '#fbbf24', 12); }
   else if (k.k === 'ammo') { const a = Math.max(30, p.mam * .4); p.am = Math.min(p.mam, p.am + a); ftext(p.x, p.y - 22, '+PLASMA', '#2dd4bf', 12); shock(p.x, p.y, '#2dd4bf', 50, 14); }
   else if (k.k === 'hp') { const a = Math.max(30, p.mhp * .3); p.hp = Math.min(p.mhp, p.hp + a); ftext(p.x, p.y - 22, '+HULL', '#4ade80', 12); shock(p.x, p.y, '#4ade80', 56, 16); SFX.power(); if (R3) { if (p.hp > p.mhp * .9) R3.repair(p); } }
   else if (k.k === 'sh') { p.sh = Math.min(p.msh, p.sh + Math.max(30, p.msh * .6)); ftext(p.x, p.y - 22, '+SHIELD', '#38bdf8', 12); shock(p.x, p.y, '#38bdf8', 56, 16); SFX.power(); }

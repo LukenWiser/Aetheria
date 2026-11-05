@@ -67,7 +67,7 @@ function beginRun(o) {
   G.ent = { en: [], pb: [], eb: [], pk: [], pa: [], fl: [], bm: [], hz: [] }; G.freeze = 0; G.shake = 0; G.hitT = 0; G.ts = 1; G.paused = false; G.god = false; G.pick = null; G.abTs = 0; G.slowUntil = 0; IN.ab = [0, 0];
   if (o.mode === 'expedition') { const sp = R.spec = levelSpec(R.w, R.lv, R.tier, o.alt); R.diff = sp.diff; R.waves = sp.waves; R.hazMode = sp.type === 'h'; R.hpm = sp.diff; R.edm = 1 + (sp.diff - 1) * .35; R.alt = sp.alt; applyRoute(R); }
   if (R.mode === 'expedition' && !o.var && R.tier > 1) R.remix = R.tier;
-  if (R.mode === 'expedition' && !o.var && (o.lv | 0) === 0 && SET.brief !== 'off') { R.brief = 1; if (SET.brief === 'always' || !(SAVE.flags.brief && SAVE.flags.brief[R.w])) { G.brief = 1; setTimeout(() => { if (G.brief) UI.show('scBrief'); }, 30); } }
+  if (R.mode === 'expedition' && !o.var && !G.net && (o.lv | 0) === 0 && SET.brief !== 'off') { R.brief = 1; if (SET.brief === 'always' || !(SAVE.flags.brief && SAVE.flags.brief[R.w])) { G.brief = 1; setTimeout(() => { if (G.brief) UI.show('scBrief'); }, 30); } }
   if (R.mode === 'expedition' && !o.var && SAVE.devAll && R.spec && R.spec.type === 'B') R.skipToBoss = 1; // dev: boss sectors jump straight to the boss
   else if (o.mode === 'endless') { R.hpm = 1; R.edm = 1; R.waves = 1e9; }
   else if (o.mode === 'rush') { R.rush = []; for (let i = 0; i < Math.min(WORLDS.length, SAVE.wu); i++) R.rush.push(i); R.waves = 0; R.hpm = 1.1; R.edm = 1.15; }
@@ -166,7 +166,7 @@ function nextStage(R, st, force) { if (cardsDue(R, st, force) && offerCards()) {
 
 // ---------- results ----------
 function finishRun(win) {
-  const R = G.run; if (!R || R.over) return; R.over = true; G.inCombat = false; $('touch').classList.remove('on'); music.stop();
+  const R = G.run; if (!R || R.over) return; R.over = true; G.inCombat = false; if (G.netHost) netSendEnd(R, win); $('touch').classList.remove('on'); music.stop();
   const tot = G.players.reduce((a, p) => a + p.mhp, 0), stars = win ? (R.hurt < tot * .25 ? 3 : R.hurt < tot * .75 ? 2 : 1) : 0;
   const rk0 = rankFor(R, win), rk = R.assist && (rk0 === 'S' || rk0 === 'A') ? 'B' : rk0, d = { rank: rk, assist: !!R.assist, killer: R.lastSrc || 'b', hadBoss: !!R.boss, graze: R.graze, maxCombo: R.maxCombo, win, mode: R.var || R.mode, base: R.mode, score: Math.round(R.score), kills: R.kills, cores: R.cores, stars, bonus: 0, w: R.w, lv: R.lv, tier: R.tier, wave: R.wave, time: Math.round((G.t - R.t0) / 60), best: false, next: null, unlockW: -1, name: R.spec ? R.spec.name : '' };
   if (R.mode === 'expedition' && !R.var && win) {
@@ -200,7 +200,7 @@ function exitToMenu(to) {
   G.pick = null; G.abTs = 0; G.slowUntil = 0; IN.ab = [0, 0]; clearMsgs(); document.body.classList.remove('lb'); G.inCombat = false; G.scene = 'ui'; G.paused = false; G.run = null; G.players = []; G.ent = { en: [], pb: [], eb: [], pk: [], pa: [], fl: [], bm: [], hz: [] }; $('hud').classList.remove('on'); $('touch').classList.remove('on'); $('coach').classList.remove('on'); $('hl').style.display = 'none'; $('boss').classList.remove('on');
   music.stop(); if (R3) { R3.reset(); R3.setView('menu'); } G.showCfg = null; saveGame(); UI.show(to || 'scMenu');
 }
-function togglePause() { if (!G.inCombat || !G.run || G.run.over || G.pick || G.cut || G.brief) return; G.paused = !G.paused; if (G.paused) { UI.pause(); SFX.click(); } else UI.resume(); }
+function togglePause() { if (G.net) { netPauseKey(); return; } if (!G.inCombat || !G.run || G.run.over || G.pick || G.cut || G.brief) return; G.paused = !G.paused; if (G.paused) { UI.pause(); SFX.click(); } else UI.resume(); }
 
 // ---------- tutorial ----------
 const TUT = [
@@ -271,6 +271,7 @@ function update() {
   pollPads();
   if (G.scene !== 'play') { updParticles(); if (R3) R3.tick(); uiTick(); return; }
   const R = G.run; if (!R) return;
+  if (G.netGuest) { netGuestUpdate(R); return; }
   if (G.paused || G.pick || G.cut || G.brief) return;
   if (G.freeze > 0) { G.freeze--; return; }
   if (R.over) { updParticles(); if (R3) R3.tick(); updPB(); updEB(); return; }
@@ -279,7 +280,7 @@ function update() {
   for (const e of G.ent.en) { if (e.dead) continue; if (e.boss) updBoss(e); else updEnemy(e); }
   updPB(); ramCheck(); updEB(); updPickups(); updBeams();
   const en = G.ent.en; for (let i = en.length - 1; i >= 0; i--) if (en[i].dead) { if (en[i].boss && R.boss === en[i]) R.boss = null; en.splice(i, 1); }
-  updParticles(); if (R3) R3.tick();
+  updParticles(); if (R3) R3.tick(); if (G.netHost) netHostTick(R);
   if (R.comboT > 0) R.comboT--; else R.combo = 0;
   if (G.abTs > 0) G.abTs--; if (R.gzT > 0) R.gzT--;
   if (G.shake > 0) G.shake--; if (G.hitT > 0) G.hitT--; if (G.flashT > 0) G.flashT--;

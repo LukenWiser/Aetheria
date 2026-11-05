@@ -7,13 +7,14 @@ const SECW = {
 const secOf = p => SECW[p.pl.sec] ? p.pl.sec : 'salvo';
 const IN2 = { tsec: false, sup: [0, 0], rdown: false };
 function secHeld(p) {
-  const co = G.players.length > 1, k = co ? KB[p.id] : KALL;
+  if (p.remote) return !!(p.netIn && p.netIn.sec);
+  const co = G.players.length > 1 && !G.net, k = co ? KB[p.id] : KALL;
   if (k.c && kdown(k.c)) return true;
   const pad = co ? IN.pads[p.id] : IN.pads[0]; if (pad && pad.sec) return true;
-  if (p.id === 0 && (IN2.rdown || IN2.tsec)) return true;
+  if ((G.net ? p.local : p.id === 0) && (IN2.rdown || IN2.tsec)) return true;
   return false;
 }
-function supPressed(p) { if (IN2.sup[p.id]) { IN2.sup[p.id] = 0; return true; } return false; }
+function supPressed(p) { if (p.remote) { if (p.netSup) { p.netSup = 0; return true; } return false; } const i = G.net ? 0 : p.id; if (IN2.sup[i]) { IN2.sup[i] = 0; return true; } return false; }
 function addSup(p, v) { if (!p || !p.alive || p.supT > 0 || p.noSup) return; const was = p.sup >= 100; p.sup = Math.min(100, (p.sup || 0) + v); if (!was && p.sup >= 100) { alertMsg((G.players.length > 1 ? 'P' + (p.id + 1) + ' ' : '') + 'SUPER READY - ' + (touchOn() ? 'TAP SUPER' : 'PRESS ' + keyLabel(KB[p.id].v[0]))); SFX.power(); } }
 
 // ---- per pilot, every frame ----

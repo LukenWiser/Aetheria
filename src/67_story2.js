@@ -62,7 +62,7 @@ function rivalTick(R) {
     R.rivalOn = 1; const panels = V0.talk.map(p => ({ kind: p[0], who: p[1], col: p[1] === 'VEX' ? VEXC : undefined, text: p[2], bi: R.w, nob: 1 }));
     panels[panels.length - 1].choices = V0.ch; panels[panels.length - 1].cid = 'vex' + i;
     const go = () => { const e = mkEnemy('rival', V.W + 80, V.H / 2, { hpm: V0.hp }); e.rv = i; e.hx = V.W * .78; banner('RIVAL: VEX', 'BEAT HER', true); };
-    if (SET.story !== 'off') playCut(panels, go); else go();
+    if (SET.story !== 'off' && !G.net) playCut(panels, go); else go();
   }
   for (const e of G.ent.en) { if (e.id !== 'rival' || e.dead) continue; // pilot-like movement: pick a lane, strafe, dash, fire fans
     e.rT = (e.rT | 0) + 1; if (e.rT % 80 === 1) e.ty = clamp((nearP(e.x, e.y) || { y: V.H / 2 }).y + rnd(-140, 140), 70, V.H - 70);
@@ -77,7 +77,7 @@ function rivalDown(e) {
   if (i === RIVAL.length - 1) { S.ally = S.res >= 3 ? 1 : 0; }
   saveGame();
   const line = i === RIVAL.length - 1 ? (S.ally ? 'You fly like someone worth following. When you go to the first world... I will be on your wing.' : 'Fine. You win. Go to the first world alone, rookie.') : V0.lose;
-  if (line && SET.story !== 'off') setTimeout(() => { if (G.run && !G.run.over) playCut([{ kind: 'close', who: 'VEX', col: VEXC, text: line, bi: G.run.w, nob: 1 }], () => { }); }, 500);
+  if (line && SET.story !== 'off' && !G.net) setTimeout(() => { if (G.run && !G.run.over) playCut([{ kind: 'close', who: 'VEX', col: VEXC, text: line, bi: G.run.w, nob: 1 }], () => { }); }, 500);
 }
 // ally Vex in the World 17 boss fight: a crimson wingman that strafes the boss
 function vexAllyTick(R) {

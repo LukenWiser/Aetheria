@@ -145,11 +145,12 @@ function onKey(e, down) {
   if (c === 'KeyP' || c === 'Escape') { if (G.inCombat) { togglePause(); e.preventDefault(); } else if (G.scene !== 'play' && UI.top && c === 'Escape') UI.escape(); }
   else if (c === 'KeyN') { SET.vol = SET.vol > 0 ? 0 : .8; applyVol(); saveSet(); alertMsg(SET.vol ? 'SOUND ON' : 'SOUND OFF'); }
   else if (G.inCombat && !G.paused) {
+    if (G.netGuest) { const i2 = '123456'.indexOf(e.key); if (i2 >= 0) NETG.wsel = i2 + 1; if (KALL.a.indexOf(c) >= 0) IN.ab[0] = 1; if (KB[0].wl.indexOf(c) >= 0 || KB[1].wl.indexOf(c) >= 0) IN.swap[0] = -1; if (KB[0].wr.indexOf(c) >= 0 || KB[1].wr.indexOf(c) >= 0) IN.swap[0] = 1; return; }
     const i = '123456'.indexOf(e.key); if (i >= 0 && G.players[0]) setWeapon(G.players[0], WORDER[i]);
     if (G.players[0]) { if (KB[0].wl.indexOf(c) >= 0) cycleWeapon(G.players[0], -1); if (KB[0].wr.indexOf(c) >= 0) cycleWeapon(G.players[0], 1); }
-    if (G.players[1]) { if (KB[1].wl.indexOf(c) >= 0) cycleWeapon(G.players[1], -1); if (KB[1].wr.indexOf(c) >= 0) cycleWeapon(G.players[1], 1); }
+    if (G.players[1] && !G.net) { if (KB[1].wl.indexOf(c) >= 0) cycleWeapon(G.players[1], -1); if (KB[1].wr.indexOf(c) >= 0) cycleWeapon(G.players[1], 1); }
     const ai = abKey(c); if (ai >= 0) IN.ab[ai] = 1;
-    for (let q = 0; q < G.players.length; q++) if ((G.players.length > 1 ? KB[q].v : KALL.v).indexOf(c) >= 0 && !e.repeat) { IN2.sup[q] = 1; break; }
+    for (let q = 0; q < G.players.length; q++) if ((G.players.length > 1 && !G.net ? KB[q].v : KALL.v).indexOf(c) >= 0 && !e.repeat) { IN2.sup[q] = 1; break; }
   }
 }
 function pollPads() {

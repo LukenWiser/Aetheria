@@ -60,7 +60,7 @@ function pickCard(i) {
   endPick();
 }
 function cardsDue(R, st, force) {
-  if (SET.cards === false) return false;
+  if (SET.cards === false || G.net) return false;
   if (force) return true;
   if (R.mode === 'expedition') return st === 'boss' || R.wave === 1 || R.wave === 3 || R.wave === 5;
   if (R.mode === 'endless') return st === 'wave' && R.wave > 0 && R.wave % 3 === 0 && R.wave % 10 !== 0;

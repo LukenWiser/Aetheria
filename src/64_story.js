@@ -28,7 +28,7 @@ const ENDING = [
 const bossPanels = wi => (STORY[wi] || []).map(p => ({ kind: p[0], who: p[1] === 'BOSS' ? BOSSES[wi].nm : p[1], text: p[2], bi: wi, boss: p[1] === 'BOSS' }));
 const endingPanels = () => ENDING.map(p => Object.assign({}, p));
 function storyDue(wi) {
-  const R = G.run; if (!R || SET.story === 'off' || R.mode !== 'expedition' || R.var || !STORY[wi]) return false;
+  const R = G.run; if (!R || G.net || SET.story === 'off' || R.mode !== 'expedition' || R.var || !STORY[wi]) return false;
   const seen = SAVE.flags.cut && SAVE.flags.cut[wi]; return SET.story === 'always' || !seen;
 }
 
