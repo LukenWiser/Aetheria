@@ -46,7 +46,7 @@ Object.assign(ACT, {
   edplay() { const L = crLv(); if (!L.waves.length && !L.cb && (L.boss === null || L.boss === undefined)) { crMsg('!Add a wave or a boss first.'); return; } const o = { mode: 'expedition', var: 'custom', w: L.w | 0, lv: 6, tier: 1, co: SAVE.players === 2, cust: JSON.parse(JSON.stringify(L)) }; G.last = o; beginRun(o); },
   edsave() { crSaveList('lvls', crLv(), 10); crMsg('Level saved.'); },
   edshare() { const L = crLv(); CR.code = packCode('AQL1:', { v: 1, nm: L.nm, w: L.w, waves: L.waves, boss: L.boss, cb: L.cb }); crMsg('Code ready - copy it and send it to a friend.'); },
-  edload() { const v = ($('crCode') || {}).value || ''; const L = unpackCode('AQL1:', v); if (!L || !Array.isArray(L.waves)) { crMsg('!That is not a level code (level codes start with AQL1:).'); return; } L.w = clamp(L.w | 0, 0, WORLDS.length - 1); if (L.w >= SAVE.wu) L.w = 0; L.waves = L.waves.slice(0, 8).map(W => (W || []).slice(0, 6).map(g => ({ id: EN[g.id] ? g.id : 'jet', n: clamp(g.n | 0, 1, 12), f: FORMS[g.f] ? g.f : 'line' }))); CR.lv = L; CR.tab = 'level'; crMsg('Level loaded: ' + L.nm); },
+  edload() { const v = inVal('crCode') || ''; const L = unpackCode('AQL1:', v); if (!L || !Array.isArray(L.waves)) { crMsg('!That is not a level code (level codes start with AQL1:).'); return; } L.w = clamp(L.w | 0, 0, WORLDS.length - 1); if (L.w >= SAVE.wu) L.w = 0; L.waves = L.waves.slice(0, 8).map(W => (W || []).slice(0, 6).map(g => ({ id: EN[g.id] ? g.id : 'jet', n: clamp(g.n | 0, 1, 12), f: FORMS[g.f] ? g.f : 'line' }))); CR.lv = L; CR.tab = 'level'; crMsg('Level loaded: ' + L.nm); },
   ednew() { CR.lv = newLevel(); crMsg('New level.'); },
   edopen(a) { CR.lv = JSON.parse(JSON.stringify(SAVE.lvls[+a[0]])); crMsg('Opened ' + CR.lv.nm); },
   cbpa() { crCb().ph.push({ mv: 'orbit', atk: [['ring', 1]] }); UI.refresh(); },
@@ -57,10 +57,10 @@ Object.assign(ACT, {
   cbplay() { startCBoss(crCb(), Math.min(crCb().m | 0, SAVE.wu - 1)); },
   cbsave() { crSaveList('cbs', crCb(), 8); crMsg('Boss saved - pick it as an END BOSS in the level editor.'); },
   cbshare() { CR.code = packCode('AQB1:', crCb()); crMsg('Code ready - copy it and send it to a friend.'); },
-  cbload() { const v = ($('crCode') || {}).value || ''; const C = unpackCode('AQB1:', v); if (!C || !Array.isArray(C.ph) || !C.ph.length) { crMsg('!That is not a boss code (boss codes start with AQB1:).'); return; } C.ph = C.ph.slice(0, 5).map(p => ({ mv: BMOVES[p.mv] ? p.mv : 'hover', atk: (p.atk || []).slice(0, 4).filter(x => ATKP[x[0]]).map(x => [x[0], clamp(x[1] | 0, 0, 2)]) })); C.hp = clamp(+C.hp || 4000, 1000, 14000); C.m = clamp(C.m | 0, 0, BASE_BOSSES - 1); CR.cb = C; CR.tab = 'boss'; crMsg('Boss loaded: ' + C.nm); },
+  cbload() { const v = inVal('crCode') || ''; const C = unpackCode('AQB1:', v); if (!C || !Array.isArray(C.ph) || !C.ph.length) { crMsg('!That is not a boss code (boss codes start with AQB1:).'); return; } C.ph = C.ph.slice(0, 5).map(p => ({ mv: BMOVES[p.mv] ? p.mv : 'hover', atk: (p.atk || []).slice(0, 4).filter(x => ATKP[x[0]]).map(x => [x[0], clamp(x[1] | 0, 0, 2)]) })); C.hp = clamp(+C.hp || 4000, 1000, 14000); C.m = clamp(C.m | 0, 0, BASE_BOSSES - 1); CR.cb = C; CR.tab = 'boss'; crMsg('Boss loaded: ' + C.nm); },
   cbnew() { CR.cb = newCBoss(); crMsg('New boss.'); },
   cbopen(a) { CR.cb = JSON.parse(JSON.stringify(SAVE.cbs[+a[0]])); crMsg('Opened ' + CR.cb.nm); },
-  crcopy() { const v = ($('crCode') || {}).value || ''; if (!v) return; try { navigator.clipboard.writeText(v).then(() => alertMsg('CODE COPIED')); } catch (e) { } }
+  crcopy() { const v = inVal('crCode') || ''; if (!v) return; try { navigator.clipboard.writeText(v).then(() => alertMsg('CODE COPIED')); } catch (e) { } }
 });
 function crChange(k, v) {
   const p = k.split(':'), L = crLv(), C = crCb();

@@ -42,7 +42,7 @@ Object.assign(SCR, {
   }
 });
 Object.assign(ACT, {
-  chgo() { const v = ($('chIn') || {}).value || ''; UI.chTxt = v; const c = chParse(v); if (!c) { UI.chMsg = '!That code does not look right. Check it and try again.'; SFX.no(); UI.refresh(); return; } if (c.w >= SAVE.wu) { UI.chMsg = '!You need to unlock World ' + (c.w + 1) + ' first.'; SFX.no(); UI.refresh(); return; } startChallenge(c); },
+  chgo() { const v = inVal('chIn') || ''; UI.chTxt = v; const c = chParse(v); if (!c) { UI.chMsg = '!That code does not look right. Check it and try again.'; SFX.no(); UI.refresh(); return; } if (c.w >= SAVE.wu) { UI.chMsg = '!You need to unlock World ' + (c.w + 1) + ' first.'; SFX.no(); UI.refresh(); return; } startChallenge(c); },
   chrand() { const c = randChal(); UI.chPrev = c; UI.chTxt = c.code; UI.chMsg = 'New challenge ready - press PLAY, or copy the code for a friend.'; SFX.click(); UI.refresh(); },
   copycode(a) { const c = a[0]; try { navigator.clipboard.writeText(c).then(() => alertMsg('CODE COPIED'), () => alertMsg('CODE: ' + c)); } catch (e) { alertMsg('CODE: ' + c); } },
   stats() { UI.show('scStats'); },

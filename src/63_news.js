@@ -1,4 +1,5 @@
 // ================= UPDATES (patch notes) + CREDITS =================
+const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
 const GAME_VER = 'V30';
 const UPDATES = [
   ['V30', 'Online', ['Online play on the Aetheria website: sign in with Google', 'Pilot names and friend codes, friend requests, and see which friends are online', 'Online co-op and versus: quick match, private rooms with a 4-letter code, or invite a friend', 'Direct connection between players, with an automatic backup route if a network blocks it', 'Quick emotes in online matches (keys 7 8 9 0)', 'Block and report options for other pilots']],

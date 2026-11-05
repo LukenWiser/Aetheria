@@ -5856,6 +5856,7 @@ ACT.photo = () => { UI.hideAll(); G.photo = true; document.body.classList.add('p
 ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGame(); SFX.click(); UI.refresh(); };
 
 // ================= UPDATES (patch notes) + CREDITS =================
+const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
 const GAME_VER = 'V30';
 const UPDATES = [
   ['V30', 'Online', ['Online play on the Aetheria website: sign in with Google', 'Pilot names and friend codes, friend requests, and see which friends are online', 'Online co-op and versus: quick match, private rooms with a 4-letter code, or invite a friend', 'Direct connection between players, with an automatic backup route if a network blocks it', 'Quick emotes in online matches (keys 7 8 9 0)', 'Block and report options for other pilots']],
@@ -6337,7 +6338,7 @@ Object.assign(SCR, {
   }
 });
 Object.assign(ACT, {
-  chgo() { const v = ($('chIn') || {}).value || ''; UI.chTxt = v; const c = chParse(v); if (!c) { UI.chMsg = '!That code does not look right. Check it and try again.'; SFX.no(); UI.refresh(); return; } if (c.w >= SAVE.wu) { UI.chMsg = '!You need to unlock World ' + (c.w + 1) + ' first.'; SFX.no(); UI.refresh(); return; } startChallenge(c); },
+  chgo() { const v = inVal('chIn') || ''; UI.chTxt = v; const c = chParse(v); if (!c) { UI.chMsg = '!That code does not look right. Check it and try again.'; SFX.no(); UI.refresh(); return; } if (c.w >= SAVE.wu) { UI.chMsg = '!You need to unlock World ' + (c.w + 1) + ' first.'; SFX.no(); UI.refresh(); return; } startChallenge(c); },
   chrand() { const c = randChal(); UI.chPrev = c; UI.chTxt = c.code; UI.chMsg = 'New challenge ready - press PLAY, or copy the code for a friend.'; SFX.click(); UI.refresh(); },
   copycode(a) { const c = a[0]; try { navigator.clipboard.writeText(c).then(() => alertMsg('CODE COPIED'), () => alertMsg('CODE: ' + c)); } catch (e) { alertMsg('CODE: ' + c); } },
   stats() { UI.show('scStats'); },
@@ -6396,7 +6397,7 @@ Object.assign(ACT, {
   edplay() { const L = crLv(); if (!L.waves.length && !L.cb && (L.boss === null || L.boss === undefined)) { crMsg('!Add a wave or a boss first.'); return; } const o = { mode: 'expedition', var: 'custom', w: L.w | 0, lv: 6, tier: 1, co: SAVE.players === 2, cust: JSON.parse(JSON.stringify(L)) }; G.last = o; beginRun(o); },
   edsave() { crSaveList('lvls', crLv(), 10); crMsg('Level saved.'); },
   edshare() { const L = crLv(); CR.code = packCode('AQL1:', { v: 1, nm: L.nm, w: L.w, waves: L.waves, boss: L.boss, cb: L.cb }); crMsg('Code ready - copy it and send it to a friend.'); },
-  edload() { const v = ($('crCode') || {}).value || ''; const L = unpackCode('AQL1:', v); if (!L || !Array.isArray(L.waves)) { crMsg('!That is not a level code (level codes start with AQL1:).'); return; } L.w = clamp(L.w | 0, 0, WORLDS.length - 1); if (L.w >= SAVE.wu) L.w = 0; L.waves = L.waves.slice(0, 8).map(W => (W || []).slice(0, 6).map(g => ({ id: EN[g.id] ? g.id : 'jet', n: clamp(g.n | 0, 1, 12), f: FORMS[g.f] ? g.f : 'line' }))); CR.lv = L; CR.tab = 'level'; crMsg('Level loaded: ' + L.nm); },
+  edload() { const v = inVal('crCode') || ''; const L = unpackCode('AQL1:', v); if (!L || !Array.isArray(L.waves)) { crMsg('!That is not a level code (level codes start with AQL1:).'); return; } L.w = clamp(L.w | 0, 0, WORLDS.length - 1); if (L.w >= SAVE.wu) L.w = 0; L.waves = L.waves.slice(0, 8).map(W => (W || []).slice(0, 6).map(g => ({ id: EN[g.id] ? g.id : 'jet', n: clamp(g.n | 0, 1, 12), f: FORMS[g.f] ? g.f : 'line' }))); CR.lv = L; CR.tab = 'level'; crMsg('Level loaded: ' + L.nm); },
   ednew() { CR.lv = newLevel(); crMsg('New level.'); },
   edopen(a) { CR.lv = JSON.parse(JSON.stringify(SAVE.lvls[+a[0]])); crMsg('Opened ' + CR.lv.nm); },
   cbpa() { crCb().ph.push({ mv: 'orbit', atk: [['ring', 1]] }); UI.refresh(); },
@@ -6407,10 +6408,10 @@ Object.assign(ACT, {
   cbplay() { startCBoss(crCb(), Math.min(crCb().m | 0, SAVE.wu - 1)); },
   cbsave() { crSaveList('cbs', crCb(), 8); crMsg('Boss saved - pick it as an END BOSS in the level editor.'); },
   cbshare() { CR.code = packCode('AQB1:', crCb()); crMsg('Code ready - copy it and send it to a friend.'); },
-  cbload() { const v = ($('crCode') || {}).value || ''; const C = unpackCode('AQB1:', v); if (!C || !Array.isArray(C.ph) || !C.ph.length) { crMsg('!That is not a boss code (boss codes start with AQB1:).'); return; } C.ph = C.ph.slice(0, 5).map(p => ({ mv: BMOVES[p.mv] ? p.mv : 'hover', atk: (p.atk || []).slice(0, 4).filter(x => ATKP[x[0]]).map(x => [x[0], clamp(x[1] | 0, 0, 2)]) })); C.hp = clamp(+C.hp || 4000, 1000, 14000); C.m = clamp(C.m | 0, 0, BASE_BOSSES - 1); CR.cb = C; CR.tab = 'boss'; crMsg('Boss loaded: ' + C.nm); },
+  cbload() { const v = inVal('crCode') || ''; const C = unpackCode('AQB1:', v); if (!C || !Array.isArray(C.ph) || !C.ph.length) { crMsg('!That is not a boss code (boss codes start with AQB1:).'); return; } C.ph = C.ph.slice(0, 5).map(p => ({ mv: BMOVES[p.mv] ? p.mv : 'hover', atk: (p.atk || []).slice(0, 4).filter(x => ATKP[x[0]]).map(x => [x[0], clamp(x[1] | 0, 0, 2)]) })); C.hp = clamp(+C.hp || 4000, 1000, 14000); C.m = clamp(C.m | 0, 0, BASE_BOSSES - 1); CR.cb = C; CR.tab = 'boss'; crMsg('Boss loaded: ' + C.nm); },
   cbnew() { CR.cb = newCBoss(); crMsg('New boss.'); },
   cbopen(a) { CR.cb = JSON.parse(JSON.stringify(SAVE.cbs[+a[0]])); crMsg('Opened ' + CR.cb.nm); },
-  crcopy() { const v = ($('crCode') || {}).value || ''; if (!v) return; try { navigator.clipboard.writeText(v).then(() => alertMsg('CODE COPIED')); } catch (e) { } }
+  crcopy() { const v = inVal('crCode') || ''; if (!v) return; try { navigator.clipboard.writeText(v).then(() => alertMsg('CODE COPIED')); } catch (e) { } }
 });
 function crChange(k, v) {
   const p = k.split(':'), L = crLv(), C = crCb();
@@ -6770,8 +6771,8 @@ Object.assign(ACT, {
   nsignout() { netSignOut(); NET.msg = 'Signed out.'; UI.refresh(); },
   nrename() { UI.nErr = ''; UI.show('scName'); },
   nback() { UI.show('scOnline'); },
-  nsetname() { const v = ($('nName') || {}).value || ''; UI.nName = v; UI.nErr = 'Saving...'; UI.refresh(); const to = new Promise((_, rej) => setTimeout(() => rej({ code: 'timeout' }), 9000)); Promise.race([netSetName(v), to]).then(err => { UI.nErr = err; if (!err) { NET.msg = 'Welcome, ' + v + '!'; UI.show('scOnline'); } else UI.refresh(); }).catch(e => { const c = (e && (e.code || e.message)) || 'unknown'; UI.nErr = /PERMISSION|permission/.test(c) ? 'The database said no (permission denied). Make sure the security rules are published in Firebase > Realtime Database > Rules.' : c === 'timeout' ? 'Could not reach the database. Make sure the Realtime Database is created, and check its link.' : 'Error: ' + c; UI.refresh(); }); },
-  nadd() { nAsync(netAddFriend(($('nFriend') || {}).value)); },
+  nsetname() { const v = inVal('nName') || ''; UI.nName = v; UI.nErr = 'Saving...'; UI.refresh(); const to = new Promise((_, rej) => setTimeout(() => rej({ code: 'timeout' }), 9000)); Promise.race([netSetName(v), to]).then(err => { UI.nErr = err; if (!err) { NET.msg = 'Welcome, ' + v + '!'; UI.show('scOnline'); } else UI.refresh(); }).catch(e => { const c = (e && (e.code || e.message)) || 'unknown'; UI.nErr = /PERMISSION|permission/.test(c) ? 'The database said no (permission denied). Make sure the security rules are published in Firebase > Realtime Database > Rules.' : c === 'timeout' ? 'Could not reach the database. Make sure the Realtime Database is created, and check its link.' : 'Error: ' + c; UI.refresh(); }); },
+  nadd() { nAsync(netAddFriend(inVal('nFriend'))); },
   nacc(a) { nAsync(netAccept(a[0]), 'Friend added!'); },
   ndec(a) { nAsync(netDecline(a[0])); },
   nmore(a) { UI.nmore = UI.nmore === a[0] ? null : a[0]; UI.refresh(); },
@@ -6783,7 +6784,7 @@ Object.assign(ACT, {
   ndelinv(a) { nAsync(R_('invites/' + NET.user.uid + '/' + a[0]).remove()); },
   nquick(a) { NET.msg = 'Looking for a match...'; UI.refresh(); nAsync(netQuick(a[0])); },
   ncreate() { NET.msg = ''; nAsync(netCreateRoom(false, 'coop').then(() => '')); },
-  njoin() { nAsync(netJoinRoom(($('nRoom') || {}).value)); },
+  njoin() { nAsync(netJoinRoom(inVal('nRoom'))); },
   nmode(a) { netRoomSet('mode', a[0]); },
   nstart() { nAsync(netStart()); },
   nleave() { netLeaveRoom(); NET.msg = ''; UI.show('scOnline'); }
