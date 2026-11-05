@@ -605,11 +605,11 @@ body.introfade #ui .scr.on{transition:opacity 1s ease}
 .wm-in{position:relative}
 .wm-deco,.wm-paths{position:absolute;left:0;top:0}
 .wm-p{fill:none;stroke:rgba(148,163,184,.28);stroke-width:4;stroke-linecap:round}.wm-p.on{stroke:var(--wc);filter:drop-shadow(0 0 6px var(--wc))}.wm-p.br{stroke-dasharray:2 10;stroke-width:4}.wm-p.br.on{stroke:#fbbf24;filter:drop-shadow(0 0 5px #fbbf24)}
-.wm-n{position:absolute;transform:translate(-50%,-50%);width:58px;height:58px;margin:0!important;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0!important;border:2px solid rgba(148,163,184,.3);background:radial-gradient(circle at 40% 30%,#1e293b,#070d1c);color:#cbd5e1;cursor:pointer;transition:transform .15s}
+.wm-n{position:absolute;transform:none!important;translate:-50% -50%;transition:scale .15s,box-shadow .2s,border-color .2s;width:58px;height:58px;margin:0!important;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0!important;border:2px solid rgba(148,163,184,.3);background:radial-gradient(circle at 40% 30%,#1e293b,#070d1c);color:#cbd5e1;cursor:pointer;transition:transform .15s}
 .wm-n svg{width:20px;height:20px}.wm-n span{font:800 11px system-ui,sans-serif;color:#fde047;line-height:1}
 .wm-n.av{border-color:var(--wc);color:#fff;box-shadow:0 0 0 4px color-mix(in srgb,var(--wc) 20%,transparent),0 0 18px -2px var(--wc);animation:nodep 1.6s ease-in-out infinite}
 .wm-n.dn{border-color:color-mix(in srgb,var(--wc) 70%,#fff);background:radial-gradient(circle at 40% 30%,color-mix(in srgb,var(--wc) 40%,#0b1222),#070d1c);color:#fff}
-.wm-n.lk{opacity:.45}.wm-n:hover{transform:translate(-50%,-50%) scale(1.08)}
+.wm-n.lk{opacity:.45}.wm-n:hover{scale:1.1}
 .wm-n.sel{outline:3px solid #fff;outline-offset:4px}
 .wm-n.bs{width:78px;height:78px;border-color:#ef4444;box-shadow:0 0 22px -2px #ef4444}.wm-n.bs svg{width:30px;height:30px;color:#fca5a5}
 .wm-n.brn{width:50px;height:50px;border-radius:14px;border-style:dashed;border-color:rgba(251,191,36,.45)}.wm-n.brn.av{border-style:solid;border-color:#fbbf24;box-shadow:0 0 0 4px rgba(251,191,36,.18),0 0 16px -2px #fbbf24}.wm-n.brn.dn{border-color:#fbbf24}

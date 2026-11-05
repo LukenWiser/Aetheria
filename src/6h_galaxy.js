@@ -6,7 +6,8 @@ const GX_T = {
   bounty: { nm: 'Bounty', ds: 'A wanted ace is hiding in this system. Two waves, then take them down.', lv: 12, k: 1.8, ic: 'skull' },
   hazard: { nm: 'Hazard Run', ds: 'Fly a supply route through a storm of hazards.', lv: 7, k: 1.3, ic: 'bolt' },
   swarm: { nm: 'Swarm Purge', ds: 'A nest has hatched. Far more enemies, each one weaker.', lv: 5, k: 1.2, ic: 'multi' },
-  elite: { nm: 'Elite Hunt', ds: 'Elite squads are raiding traders. Hunt them down.', lv: 9, k: 1.5, ic: 'target' }
+  elite: { nm: 'Elite Hunt', ds: 'Elite squads are raiding traders. Hunt them down.', lv: 9, k: 1.5, ic: 'target' },
+  ambush: { nm: 'Ambush', ds: 'Raiders dropped out of warp on top of you. Survive and drive them off.', lv: 5, k: 1.2, ic: 'skull' }
 };
 const GX_NAMES = ['Red Vane', 'Mother Static', 'Kessler', 'The Widow', 'Sable Jack', 'Quill', 'Ironjaw', 'Nightcap', 'Ghost Ferris', 'Hex Marrow'];
 function GXS() { const S = SAVE.gx || (SAVE.gx = { at: 0, rep: {}, done: {}, crate: {}, runs: 0, jumps: 0 }); return S; }
@@ -26,13 +27,13 @@ const gxDone = id => !!(GXS().done[id.split(':')[0]] || {})[id];
 const _setupVar = setupVariant;
 setupVariant = function (R, o) {
   if (o.var !== 'side') return _setupVar(R, o);
-  const sp = R.spec, m = o.side; R.side = m; R.hazMode = false; sp.name = GX_T[m.t].nm + ': ' + (m.tgt || GX_ST[m.w]);
+  const sp = R.spec, m = o.side; R.side = m; R.hazMode = false; sp.name = ((GX_T[m.t] || GX_T.patrol).nm) + ': ' + (m.tgt || GX_ST[m.w]);
   if (m.t === 'patrol') { sp.type = 'c'; sp.waves = R.waves = 4; }
   else if (m.t === 'bounty') { sp.type = 'B'; sp.waves = R.waves = 2; R.bmul = .55; }
   else if (m.t === 'hazard') { sp.type = 'h'; sp.waves = R.waves = 3; R.hazMode = true; }
   else if (m.t === 'swarm') { sp.type = 'c'; sp.waves = R.waves = 3; R.hpm *= .65; R.swarm = 1.6; }
   else if (m.t === 'elite') { sp.type = 'e'; sp.waves = R.waves = 3; R.hpm *= 1.1; }
-  else if (m.t === 'ambush') { sp.type = 'c'; sp.waves = R.waves = 3; sp.name = 'Ambush!'; }
+  else if (m.t === 'ambush') { sp.type = 'e'; sp.waves = R.waves = 3; R.swarm = 1.25; sp.name = 'Ambush at ' + GX_ST[m.w]; }
 };
 const _varFin = variantFinish;
 variantFinish = function (R, win, d) {
@@ -134,7 +135,7 @@ Object.assign(ACT, {
   gxhome() { GXV.sel = GXS().at; GXV.enc = null; gxPanel(); },
   gxjob(a) { const id = a.join(':'), w = +id.split(':')[1], m = gxMissions(w).find(x => x.id === id); if (m && !gxDone(id)) gxPlay(m); },
   gxcrate() { const S = GXS(), w = S.at; S.crate = S.crate || {}; if (S.crate[w] === dayKey()) return; S.crate[w] = dayKey(); const c = Math.round((40 + 20 * w) * (1 + gxLv(w) * .25)); SAVE.cores += c; saveGame(); toast('SUPPLY CRATE', '+' + fmt(c) + ' cores from ' + GX_ST[w], '#fbbf24'); gxPanel(); },
-  gxfight() { const E = GXV.enc; if (!E) return; GXV.enc = null; gxPlay({ t: 'ambush', w: E.w, lv: 5, rew: E.rew, rep: 20, id: '', map: GXM[Math.floor(Math.random() * GXM.length)] }); },
+  gxfight() { const E = GXV.enc; if (!E) return; GXV.enc = null; gxPlay({ t: 'ambush', w: E.w, lv: Math.min(12, 4 + (E.w >> 1)), rew: E.rew, rep: 20, id: '', map: GXM[Math.floor(Math.random() * GXM.length)] }); },
   gxflee() { const E = GXV.enc; if (!E) return; SAVE.cores = Math.max(0, SAVE.cores - E.loss); saveGame(); alertMsg('ESCAPED - ' + fmt(E.loss) + ' CORES DROPPED'); GXV.enc = null; gxPanel(); }
 });
 MODES.galaxy = { nm: 'Open Galaxy', ds: 'Fly a 3D star map between every system you have charted. Dock at stations, take bounties and side jobs, earn reputation and survive ambushes on the way.', ic: 'map' };

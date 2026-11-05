@@ -12,8 +12,10 @@ function menuMusic(id) {
     const t = menuTheme(id), target = t === 15 ? 23 : t === 16 ? 24 : t;
     if (music.on && music.menuOn && music.w === target) return;
     if (AC.state !== 'running') { try { AC.resume(); } catch (e) { } }
-    const go = () => { if (G.scene === 'play' || G.cut || music.jbx >= 0) return; const mx = G.mapX; G.mapX = null; music.on = false; clearInterval(music.timer); music.force = 1; music._menuCall = 1; music.start(t, false); music._menuCall = 0; music.menuOn = true; G.mapX = mx; };
-    if (music.on && music.menuOn) { music.stop(); clearTimeout(menuMusic.tm); menuMusic.tm = setTimeout(go, 450); } else go();
+    if (menuMusic.want === target && menuMusic.tm) return; // a switch to this theme is already on its way
+    menuMusic.want = target; clearTimeout(menuMusic.tm); menuMusic.tm = 0;
+    const go = () => { menuMusic.tm = 0; if (G.scene === 'play' || G.cut || music.jbx >= 0 || menuMusic.want !== target) return; const mx = G.mapX; G.mapX = null; music.on = false; clearInterval(music.timer); music.force = 1; music._menuCall = 1; try { music.start(t, false); } finally { music._menuCall = 0; } music.menuOn = true; G.mapX = mx; audioUnmute(); };
+    if (music.on && music.menuOn) { music._menuCall = 1; music.stop(); music._menuCall = 0; music.menuOn = false; menuMusic.tm = setTimeout(go, 520); } else go();
   } catch (e) { console.warn('menu music', e); }
 }
 const _mStartM = music.start;

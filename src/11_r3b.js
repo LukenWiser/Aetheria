@@ -149,14 +149,65 @@
       slices.forEach((s, i) => { s.position.x = (tick + i * 3) % 9 === 0 ? (i % 2 ? .5 : -.5) : 0; s.visible = (tick + i) % 13 !== 0; });
       body.position.x = tick % 17 === 0 ? .25 : 0; } };
   }
-  function B16() { // Aetheria Prime: a golden sun-core with a halo crown and six blade wings (faces the camera)
-    const g = grp(), gold = M(0xfbbf24, .9, .22, { emissive: 0x92400e, emissiveIntensity: .35 }), wht = M(0xfff7ed, .4, .2, { emissive: 0xfde68a, emissiveIntensity: .3 }), sun = E(0xfde047, 3), hal = E(0xffffff, 2.4), wings = [], halos = [];
+  function B16() { // Aetheria Prime, the First Signal: a living sun-eye inside a cathedral of halos, eight feathered light-wings, a crown and a storm of orbiting shards
+    const g = grp(), gold = M(0xd97706, .95, .22, { emissive: 0x92400e, emissiveIntensity: .5 }), dgold = M(0x78350f, .9, .35, { emissive: 0x451a03, emissiveIntensity: .3 }), ivory = M(0xfde68a, .5, .25, { emissive: 0xd97706, emissiveIntensity: .4 });
+    const sun = E(0xf59e0b, 2.8), hot = E(0xfff7ed, 3.4), hal = E(0xf59e0b, 1.35), amber = E(0xf59e0b, 2.2), rose = E(0xfb7185, 2.4), iris = M(0x0c0a09, .6, .25, { emissive: 0x1c0a00, emissiveIntensity: .4 });
+    const glass = (c, o) => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: o, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
     g.userData.face = 1;
-    const core = mesh(SP(1.5, 28), sun); g.add(core, mesh(new THREE.IcosahedronGeometry(2.1, 1), M(0xfde047, .2, .1, { transparent: true, opacity: .16 })));
-    for (let i = 0; i < 6; i++) { const w = grp(), a = i / 6 * TAU + TAU / 12; w.add(mesh(BX(.5, 3.6, .16), gold, [0, 2.6, 0]), mesh(BX(.18, 2.8, .2), hal, [0, 2.5, .12]), mesh(OC(.4), wht, [0, 4.6, 0], null, [.6, 1.6, .6])); w.rotation.z = a; g.add(w); wings.push(w); }
-    [[2.5, .09], [3.1, .06]].forEach(r => { const t = mesh(TO(r[0], r[1], 8, 72), hal); g.add(t); halos.push(t); });
-    const crown = grp(); for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; crown.add(mesh(CO(.22, .9, 6), gold, [Math.cos(a) * 2.9, Math.sin(a) * 2.9, 0], [0, 0, a - H])); } g.add(crown);
-    return { g, anim: a => { core.scale.setScalar(1 + Math.sin(a * 4) * .06); halos[0].rotation.set(a * .6, a * .3, 0); halos[1].rotation.set(-a * .4, a * .5, a * .2); crown.rotation.z = a * .2; wings.forEach((w, i) => { w.rotation.z = i / 6 * TAU + TAU / 12 + Math.sin(a * 1.5 + i) * .08; w.position.z = Math.sin(a * 2 + i) * .2; }); } };
+    // the sun-eye
+    const core = grp(); g.add(core);
+    const ball = mesh(SP(1.55, 32), sun), heart = mesh(SP(.95, 24), hot); core.add(ball, heart);
+    const corona = mesh(SP(2.05, 28), glass(0xf59e0b, .12)), corona2 = mesh(SP(2.6, 24), glass(0xea580c, .06)); core.add(corona, corona2);
+    const eye = grp(mesh(TO(1.18, .2, 10, 48), iris), mesh(TO(.82, .09, 8, 40), amber), mesh(CY(.42, .42, .12, 24), iris, [0, 0, 0], [H, 0, 0]), mesh(SP(.24, 16), hot, [0, 0, .12])); eye.position.z = 1.42; core.add(eye);
+    const cage = mesh(new THREE.IcosahedronGeometry(2.25, 1), new THREE.MeshBasicMaterial({ color: 0xfbbf24, wireframe: true, transparent: true, opacity: .35 })), cage2 = mesh(new THREE.DodecahedronGeometry(2.9, 0), new THREE.MeshBasicMaterial({ color: 0xf59e0b, wireframe: true, transparent: true, opacity: .22 })); g.add(cage, cage2);
+    // the halo cathedral: three great rings with runes riding on them
+    const halos = [];
+    [[3.3, .11, 0, 40], [4.1, .08, .55, 28], [4.9, .13, -.35, 52]].forEach(([r, t, tilt, runes], k) => {
+      const h = grp(mesh(TO(r, t, 8, 120), k === 1 ? rose : hal), mesh(TO(r + .22, t * .35, 6, 120), gold), mesh(TO(r - .22, t * .35, 6, 120), gold));
+      for (let i = 0; i < runes; i++) { const a = i / runes * TAU, big = i % 4 === 0; h.add(mesh(big ? OC(.2) : BX(.1, .32, .1), big ? hot : gold, [Math.cos(a) * r, Math.sin(a) * r, 0], [0, 0, a], big ? [1, 1.8, 1] : null)); }
+      h.userData.tilt = tilt; g.add(h); halos.push(h);
+    });
+    // eight feathered wings in two tiers
+    const wings = [];
+    for (let i = 0; i < 8; i++) {
+      const w = grp(), up = i < 4, side = i % 2 ? 1 : -1, tier = (i >> 1) % 2;
+      for (let f = 0; f < 5; f++) {
+        const L = 3.4 + f * .55 - tier * .6, ang = (f - 2) * .13, fe = grp(mesh(CO(.34, L, 4), f === 2 ? ivory : gold, [0, L / 2, 0], null, [1, 1, .22]), mesh(BX(.07, L * .8, .06), f % 2 ? hal : amber, [0, L * .45, -.08]));
+        fe.rotation.z = ang; w.add(fe);
+      }
+      w.add(mesh(OC(.42), dgold, [0, .2, 0], null, [.8, 1.4, .6]));
+      const ang = up ? (tier ? 1.05 : .55) : (tier ? 1.85 : 2.4); w.position.set(side * 1.5, up ? .5 : -.5, -.25); w.userData.base = -side * ang; w.rotation.z = w.userData.base; if (!up) w.scale.setScalar(.82);
+      g.add(w); wings.push(w);
+    }
+    // the crown: tall spikes over the top arc, a jewel in the middle
+    const crown = grp();
+    for (let i = 0; i < 9; i++) { const a = H + (i - 4) * .22, hgt = 1.1 + (4 - Math.abs(i - 4)) * .32; crown.add(mesh(CO(.2, hgt, 6), i === 4 ? hot : gold, [Math.cos(a) * 3.65, Math.sin(a) * 3.65 + hgt * .2, -.1], [0, 0, a - H])); }
+    crown.add(mesh(OC(.42), rose, [0, 5.25, -.15], null, [.8, 1.5, .8])); g.add(crown);
+    // a storm of shards on tilted orbits, and two halo-blades crossing behind
+    const shards = [];
+    for (let i = 0; i < 14; i++) { const s = mesh(OC(.16 + (i % 3) * .07), i % 5 === 0 ? rose : i % 2 ? hot : gold); s.userData = { r: 2.6 + (i % 4) * .55, sp: .5 + (i % 5) * .12, ph: i * 1.7, tl: (i % 3 - 1) * .7 }; g.add(s); shards.push(s); }
+    const blades = grp(mesh(BX(10.5, .14, .06), glass(0xfde68a, .55), [0, 0, -.7]), mesh(BX(.14, 10.5, .06), glass(0xfde68a, .55), [0, 0, -.7])); g.add(blades);
+    // sunburst rays as lines (light, and they never change the boss's size on screen)
+    const rp = []; for (let i = 0; i < 48; i++) { const a = i / 48 * TAU, r0 = 2.2, r1 = i % 2 ? 6.2 : 8.4; rp.push(Math.cos(a) * r0, Math.sin(a) * r0, -.9, Math.cos(a) * r1, Math.sin(a) * r1, -.9); }
+    const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3)); const rays = new THREE.LineSegments(rg, new THREE.LineBasicMaterial({ color: 0xfde047, transparent: true, opacity: .4, blending: THREE.AdditiveBlending, depthWrite: false })); g.add(rays);
+    const dp = []; for (let i = 0; i < 220; i++) { const a = Math.random() * TAU, r = 2.5 + Math.random() * 4.5; dp.push(Math.cos(a) * r, Math.sin(a) * r, (Math.random() - .5) * 2); }
+    const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3)); const dust = new THREE.Points(dg, new THREE.PointsMaterial({ color: 0xfff1b8, size: .09, transparent: true, opacity: .8, blending: THREE.AdditiveBlending, depthWrite: false })); g.add(dust);
+    return { g, anim: a => {
+      const B = G.run && G.run.boss, rage = B && B.mhp ? Math.max(0, Math.min(1, 1 - B.hp / B.mhp)) : 0, sp = 1 + rage * 1.6;
+      const beat = Math.pow(Math.max(0, Math.sin(a * 3.2)), 6);
+      ball.scale.setScalar(1 + Math.sin(a * 4) * .05 + beat * .08); heart.scale.setScalar(.9 + beat * .35 + rage * .2);
+      corona.scale.setScalar(1 + Math.sin(a * 2.2) * .07 + beat * .1); corona2.scale.setScalar(1 + Math.sin(a * 1.4 + 1) * .1);
+      const blink = Math.sin(a * .7) > .985 ? .15 : 1; eye.scale.set(1, blink, 1);
+      eye.position.x = Math.sin(a * .9) * .18; eye.position.y = Math.cos(a * .6) * .12;
+      cage.rotation.set(a * .25 * sp, a * .33 * sp, 0); cage2.rotation.set(-a * .15, a * .2 * sp, a * .1);
+      halos.forEach((h, k) => { h.rotation.x = h.userData.tilt + Math.sin(a * .5 + k) * .12; h.rotation.y = Math.cos(a * .4 + k * 2) * .18; h.rotation.z = a * (k === 1 ? -.35 : .22 + k * .05) * sp; });
+      wings.forEach((w, i) => { const f = Math.sin(a * 1.6 + (i >> 1) * .7) * (.1 + rage * .08); w.rotation.z = w.userData.base + (i % 2 ? -f : f); w.position.z = -.25 + Math.sin(a * 2 + i) * .15; });
+      crown.position.y = Math.sin(a * 1.2) * .1; crown.rotation.z = Math.sin(a * .5) * .04;
+      shards.forEach(s => { const u = s.userData, t = a * u.sp * sp + u.ph; s.position.set(Math.cos(t) * u.r, Math.sin(t) * u.r * Math.cos(u.tl), Math.sin(t) * u.r * Math.sin(u.tl) - .3); s.rotation.set(t * 2, t * 3, 0); });
+      blades.rotation.z = a * .12 + H / 2; blades.children.forEach(b => b.material.opacity = .3 + beat * .45);
+      rays.rotation.z = -a * .08; rays.material.opacity = .25 + beat * .35 + rage * .2; dust.rotation.z = a * .05;
+      if (sun.emissive) { sun.emissive.setRGB(1, .62 - rage * .2, .05 + rage * .45); sun.emissiveIntensity = 2.6 + beat * 1.4 + rage * 1.2; }
+    } };
   }
   const BM = [B0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, B13, B14, B15, B16];
 

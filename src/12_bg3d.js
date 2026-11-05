@@ -23,7 +23,7 @@ const BG3D_W = [
   { p: 'rock', seed: 139, r: 145, d: 535, h: 30, nx: .56, ny: -.7, atm: '#99f6e4', ramp: [[0, '#0c0a09'], [.4, '#292524'], [.7, '#57534e'], [1, '#a8a29e']], craters: 34, xtra: 'graves', deb: { k: 'hull', n: 22, c: '#3f3f46', s: [3, 10] }, dust: '#99f6e4' },
   { arena: 'sanctum', seed: 151 },
   { arena: 'glitchcore', seed: 301 },
-  { p: 'gas', seed: 163, r: 190, d: 520, h: 40, nx: .5, ny: -.5, atm: '#fde047', ramp: [[0, '#451a03'], [.3, '#b45309'], [.55, '#f59e0b'], [.75, '#fde047'], [1, '#fffbeb']], bands: 9, warp: .7, eye: { x: .64, y: .4, s: .07 }, deb: { k: 'rock', n: 18, c: '#fbbf24', s: [2, 6] }, neb: 1.2, dust: '#fef3c7' }
+  { p: 'gas', seed: 163, r: 150, d: 560, h: 40, nx: .45, ny: -.35, xtra: 'prime', atm: '#fde047', ramp: [[0, '#451a03'], [.3, '#b45309'], [.55, '#f59e0b'], [.75, '#fde047'], [1, '#fffbeb']], bands: 9, warp: .7, eye: { x: .64, y: .4, s: .07 }, deb: { k: 'rock', n: 18, c: '#fbbf24', s: [2, 6] }, neb: 1.2, dust: '#fef3c7' }
 ,
   // galaxy sector maps (17+)
   { p: 'lava', seed: 401, r: 160, d: 540, h: 36, nx: .55, ny: -.6, atm: '#fb923c', ramp: [[0, '#0c0a09'], [.5, '#292524'], [1, '#57534e']], crack: '#f97316', xtra: 'forge', deb: { k: 'slag', n: 24, c: '#44403c', s: [3, 9] }, dust: '#fdba74', neb: .9 },
@@ -277,7 +277,34 @@ function makeBG3D(renderer) {
     const inst = (geo, mat, n) => { const m = new T.InstancedMesh(track(geo), mat, n); m.instanceMatrix.setUsage(T.DynamicDrawUsage); return m; };
     const dmy = new T.Object3D();
     const X = C.xtra;
-    if (X === 'forge') { // a ring of foundry blocks around the molten moon, glowing underneath
+    if (X === 'prime') { // Aetheria Prime: a sun-world crowned by colossal halo rings, a ring of floating white spires and a burst of light
+      const halo = (r, tube, col, i) => new T.Mesh(track(new T.TorusGeometry(r, tube, 10, 220)), std('#92400e', Object.assign({ metalness: .9, roughness: .3 }, emi(col, i))));
+      const add = (c, o) => track(new T.MeshBasicMaterial({ color: lc(c), transparent: true, opacity: o, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false, side: T.DoubleSide }));
+      // a great sunburst behind everything
+      const burst = new T.Group(); body.add(burst);
+      [[R * 7, .35, '#f59e0b'], [R * 3.4, .45, '#fde68a']].forEach(([sc, o, c]) => { const m = new T.Sprite(track(new T.SpriteMaterial({ map: glowTex, color: lc(c), transparent: true, opacity: o, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false }))); m.scale.setScalar(sc); m.renderOrder = -2; burst.add(m); });
+      const rayG = new T.Group(); burst.add(rayG); const nr = Math.round(18 * q + 6);
+      for (let i = 0; i < nr; i++) { const a = i / nr * 6.283 + rs() * .1, L = R * (3 + rs() * 3.5), w = R * (.05 + rs() * .09), m = new T.Mesh(track(new T.PlaneGeometry(w, L)), add(i % 3 ? '#fbbf24' : '#fde68a', .05 + rs() * .05)); m.geometry.translate(0, L / 2 + R * .9, 0); m.rotation.z = a; m.renderOrder = -1; rayG.add(m); }
+      upd.push(df => { burst.quaternion.copy(cam.quaternion); rayG.rotation.z += .0006 * df; rayG.children.forEach((m, i) => { m.material.opacity = (.05 + .045 * Math.sin(performance.now() * .0006 + i * 1.7)); }); });
+      // three colossal halo rings with blazing runes, each turning its own way
+      [[1.45, 2.2, .25, .1, '#f59e0b', 64], [1.8, 1.5, -.55, .7, '#fbbf24', 40], [2.2, 2.6, .9, -.4, '#fb7185', 88]].forEach(([s, tube, tx, ty, col, nRun], k) => {
+        const g = new T.Group(); g.rotation.set(Math.PI / 2 + tx, ty, 0); const r = R * s;
+        g.add(halo(r, tube, col, .55)); g.add(new T.Mesh(track(new T.TorusGeometry(r, tube * 3.2, 6, 220)), add(col, .07)));
+        const rn = inst(new T.BoxGeometry(2.5, 10, 2.5), std('#451a03', emi(col, 1.3)), nRun); for (let i = 0; i < nRun; i++) { const a = i / nRun * 6.283, big = i % 8 === 0; dmy.position.set(Math.cos(a) * r, Math.sin(a) * r, 0); dmy.rotation.set(0, 0, a + Math.PI / 2); dmy.scale.set(big ? 1.8 : 1, big ? 2.2 : 1, big ? 1.8 : 1); dmy.updateMatrix(); rn.setMatrixAt(i, dmy.matrix); }
+        g.add(rn); body.add(g); const spd = [.0011, -.0007, .0005][k]; upd.push(df => { g.rotation.z += spd * df; });
+      });
+      // the Zenith Spires: white-gold monoliths drifting in a slow circle, light running up their spines
+      const sp = new T.Group(); sp.rotation.x = .22; body.add(sp); const ns = Math.round(6 * q + 4), tips = [];
+      for (let i = 0; i < ns; i++) {
+        const a = i / ns * 6.283, d = R * (1.55 + (i % 2) * .35), h = 34 + rs() * 34, g = new T.Group(); g.scale.setScalar(.5);
+        const sh = new T.CylinderGeometry(4, 13, h, 6); g.add(new T.Mesh(track(sh), std('#a16207', Object.assign({ metalness: .85, roughness: .35 }, emi('#451a03', .3)))));
+        const spine = new T.Mesh(track(new T.BoxGeometry(1.4, h * .92, 14)), std('#000000', emi('#fde047', 1.8))); g.add(spine);
+        const tip = new T.Mesh(track(new T.OctahedronGeometry(9, 0)), std('#fde68a', emi('#fbbf24', 1.8))); tip.scale.set(.7, 1.8, .7); tip.position.y = h / 2 + 22; tip.userData.y = tip.position.y; g.add(tip); tips.push(tip);
+        const base = new T.Mesh(track(new T.IcosahedronGeometry(16, 0)), std('#78350f', { metalness: .7, roughness: .5 })); base.scale.set(1.2, .6, 1.2); base.position.y = -h / 2 - 4; g.add(base);
+        g.position.set(Math.cos(a) * d, (rs() - .5) * R * .5, Math.sin(a) * d); g.rotation.z = (rs() - .5) * .3; sp.add(g);
+      }
+      upd.push(df => { sp.rotation.y += .0004 * df; const t = performance.now() * .002; tips.forEach((m, i) => { m.rotation.y = t + i; m.position.y = m.userData.y + Math.sin(t + i) * 5; }); });
+    } else if (X === 'forge') { // a ring of foundry blocks around the molten moon, glowing underneath
       const n = 44, bl = inst(new T.BoxGeometry(18, 9, 26), std('#3f3f46', { metalness: .8, roughness: .35 }), n), gw = inst(new T.BoxGeometry(14, 2, 22), std('#000000', emi('#f97316', 2.4)), n), g = new T.Group();
       for (let i = 0; i < n; i++) { const a = i / n * 6.283; dmy.position.set(Math.cos(a) * R * 1.42, 0, Math.sin(a) * R * 1.42); dmy.rotation.set(0, -a, 0); dmy.scale.setScalar(1); dmy.updateMatrix(); bl.setMatrixAt(i, dmy.matrix); dmy.position.y = -5.5; dmy.updateMatrix(); gw.setMatrixAt(i, dmy.matrix); }
       g.add(bl, gw); g.rotation.x = .28; g.rotation.z = -.12; body.add(g); upd.push(df => { g.rotation.y += .0011 * df; });
