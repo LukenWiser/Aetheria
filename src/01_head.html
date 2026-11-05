@@ -461,5 +461,18 @@ body.introfade #ui .scr.on{transition:opacity 1s ease}
 @keyframes dwPop{0%{opacity:0;transform:scale(0)}100%{opacity:1;transform:scale(1)}}
 @keyframes dwSlide{to{opacity:1;transform:none}}
 @keyframes dwFade{to{opacity:1}}
+
+/* leaderboards / inbox */
+.lb2 .lblist{display:flex;flex-direction:column;gap:4px;max-height:min(52vh,460px);overflow:auto;padding-right:4px}
+.lbrow{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05)}
+.lbrow .lbr{font:900 20px var(--disp,Impact,sans-serif);color:#7d90ad;text-align:center}
+.lbrow .lbn{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lbrow .lbs{font:800 18px var(--disp,Impact,sans-serif);letter-spacing:.04em}
+.lbrow.top1 .lbr{color:#fbbf24}.lbrow.top2 .lbr{color:#e2e8f0}.lbrow.top3 .lbr{color:#fb923c}
+.lbrow.top1{background:linear-gradient(90deg,rgba(251,191,36,.16),rgba(255,255,255,.03));border-color:rgba(251,191,36,.3)}
+.lbrow.me{border-color:var(--pa,#22d3ee);box-shadow:inset 3px 0 0 var(--pa,#22d3ee)}
+.cl-box{align-items:flex-start}.cl-st{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 4px;font-size:14px}.cl-st b{font:800 22px var(--disp,Impact,sans-serif)}
+.mm-ib{margin-left:6px;background:#f43f5e;color:#fff;border-radius:9px;padding:0 6px;font-size:11px;line-height:17px}
+.lb2 .sm-brief{align-self:center}
 </style>
 </head>

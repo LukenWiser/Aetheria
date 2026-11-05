@@ -5269,7 +5269,7 @@ const SCR = {
     const d = UI.res, win = d.win, m = d.mode, titles = { expedition: win ? 'SECTOR CLEARED' : 'STARFIGHTER DESTROYED', endless: 'RUN OVER', blitz: 'TIME!', rush: win ? 'BOSS RUSH COMPLETE' : 'DEFEATED', training: 'SESSION OVER', daily: win ? 'DAILY COMPLETE' : 'DAILY FAILED', nohit: win ? 'FLAWLESS' : 'YOU WERE HIT', vault: win ? 'VAULT CRACKED' : 'VAULT LOCKED', defense: win ? 'STATION SAVED' : d.lost ? 'STATION LOST' : 'SHIP LOST', hardcore: 'HARDCORE OVER', versus: d.vsWin === 1 ? 'PLAYER 1 WINS' : d.vsWin === 2 ? 'PLAYER 2 WINS' : 'DRAW', chal: d.beat ? 'CHALLENGE BEATEN' : win ? 'CHALLENGE DONE' : 'CHALLENGE FAILED', gallery: win ? 'REMATCH WON' : 'REMATCH LOST', retro: win ? 'GAME CLEAR!' : 'GAME OVER' };
     const rows = [['SCORE', fmt(d.score)], ['KILLS', d.kills], ['CORES PICKED UP', '+' + fmt(d.cores)], d.bonus ? ['MISSION BONUS', '+' + fmt(d.bonus)] : null, d.remix ? ['REMIX FIRST-CLEAR (INCLUDED)', '+' + fmt(d.remix)] : null, m === 'endless' || m === 'hardcore' ? ['WAVE REACHED', d.wave + 1] : null, d.alt ? ['SIDE ROUTE BONUS', '+30%'] : null, d.secret ? ['SECRET EXIT', 'FOUND!'] : null, m === 'defense' ? ['WAVES HELD', d.wave] : null, d.stn !== undefined ? ['STATION INTEGRITY', d.stn + '%'] : null, d.streak ? ['DAILY STREAK', d.streak + (d.streak === 1 ? ' day' : ' days')] : null, ['GRAZES', d.graze], ['LONGEST CHAIN', d.maxCombo + ' kills'], ['TIME', d.time + 's'], d.xp ? ['PILOT XP', '+' + fmt(d.xp)] : null, d.lvUp ? ['LEVEL UP!', 'LV ' + d.lv + ' ' + rankName(d.lv).toUpperCase() + ' (+' + fmt(d.lvCores | 0) + ')'] : null, d.medal ? [MEDALS[d.medal][0] + ' MEDAL', '+' + fmt(d.medalCores | 0)] : null, d.missions ? ['MISSIONS DONE', d.missions.length + ' - claim in Missions'] : null, d.mastery ? ['MASTERY', d.mastery.join(', ')] : null, d.vs ? ['PLAYER 1', fmt(d.vs[0])] : null, d.vs ? ['PLAYER 2', fmt(d.vs[1])] : null, d.chal && d.chal.target ? ['SCORE TO BEAT', fmt(d.chal.target)] : null].filter(Boolean);
     return '<div class="card" style="width:min(460px,100%)"><div class="tc"><div class="title" style="font-size:clamp(22px,6vw,34px);background:linear-gradient(180deg,#fff,' + (win ? '#34d399' : '#fb7185') + ');-webkit-background-clip:text;background-clip:text">' + (titles[m] || (win ? 'MISSION COMPLETE' : 'MISSION FAILED')) + '</div>' + (m === 'expedition' && win ? '<div style="font-size:30px;margin:10px 0">' + stars(d.stars) + '</div>' : '') + rankHtml(d) + (titles[m] === undefined ? '' : '') + (d.best ? '<div class="gold b" style="margin-top:8px">★ NEW PERSONAL BEST ★</div>' : '') + (d.unlockW >= 0 ? '<div class="good b" style="margin-top:8px">WORLD ' + (d.unlockW + 1) + ' UNLOCKED: ' + WORLDS[d.unlockW].nm.toUpperCase() + '</div>' : '') + (d.unlock ? '<div class="gold b" style="margin-top:8px">NEW SHIP UNLOCKED: ' + d.unlock + '</div>' : '') + (d.ending ? '<div class="gold b" style="margin-top:8px">CAMPAIGN COMPLETE - THANK YOU FOR FLYING</div>' : '') + (d.assist ? '<div class="mut xs" style="margin-top:6px;letter-spacing:.1em">ASSIST RUN - REDUCED REWARDS</div>' : '') + '</div><div style="margin:14px 0">' + rows.map(r => '<div class="setrow"><span class="mut">' + r[0] + '</span><b>' + r[1] + '</b></div>').join('') + '</div>' + (!win && m !== 'training' && m !== 'blitz' ? '<div class="tipbox"><b class="gold xs" style="letter-spacing:.2em">TIP</b><div class="xs" style="line-height:1.6;margin-top:3px">' + hintFor(d) + '</div></div>' : '') + '<div class="stack">' + (!win && !d.assist && (d.fails | 0) >= 2 && (m === 'expedition' || m === 'daily') ? '<button class="btn gold" data-act="assist">TRY WITH ASSIST: +40% HULL, 35% LESS DAMAGE</button>' : '') +
-      (d.newCode ? '<div class="item" style="flex-direction:column;align-items:stretch;gap:6px"><div class="xs mut b" style="letter-spacing:.12em">CHALLENGE A FRIEND - THEY MUST BEAT ' + fmt(Math.max(d.score, d.chal ? d.chal.target : 0)) + '</div><div class="row sp"><b class="acc" style="letter-spacing:.14em">' + d.newCode + '</b><button class="btn sm" data-act="copycode:' + d.newCode + '">COPY</button></div></div>' : '') + (m === 'expedition' && win && d.next !== null ? '<button class="btn big" data-act="nextlv">NEXT SECTOR</button>' : '') + (m === 'expedition' ? '<button class="btn" data-act="retry">' + (win ? 'REPLAY' : 'RETRY SECTOR') + '</button><button class="btn" data-act="tomap">EXPEDITION MAP</button>' : '<button class="btn big" data-act="retry">PLAY AGAIN</button>') + '<div class="grid2"><button class="btn sm" data-act="shop">SHOP</button><button class="btn sm" data-act="menu">MAIN MENU</button></div></div></div>';
+      (d.newCode ? '<div class="item" style="flex-direction:column;align-items:stretch;gap:6px"><div class="xs mut b" style="letter-spacing:.12em">CHALLENGE A FRIEND - THEY MUST BEAT ' + fmt(Math.max(d.score, d.chal ? d.chal.target : 0)) + '</div><div class="row sp"><b class="acc" style="letter-spacing:.14em">' + d.newCode + '</b><span class="row" style="gap:6px">' + (netOn() ? '<button class="btn sm gold" data-act="chsendto:' + d.newCode + ':' + Math.max(d.score, d.chal ? d.chal.target : 0) + '">SEND</button>' : '') + '<button class="btn sm" data-act="copycode:' + d.newCode + '">COPY</button></span></div></div>' : '') + (m === 'expedition' && win && d.next !== null ? '<button class="btn big" data-act="nextlv">NEXT SECTOR</button>' : '') + (m === 'expedition' ? '<button class="btn" data-act="retry">' + (win ? 'REPLAY' : 'RETRY SECTOR') + '</button><button class="btn" data-act="tomap">EXPEDITION MAP</button>' : '<button class="btn big" data-act="retry">PLAY AGAIN</button>') + '<div class="grid2"><button class="btn sm" data-act="shop">SHOP</button><button class="btn sm" data-act="menu">MAIN MENU</button></div></div></div>';
   }
 };
 const SCLEAR = { scHangar: 1, scBestiary: 1 };
@@ -5596,12 +5596,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V36';
+const GAME_VER = 'V37';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V37', 'Online Records', ['Leaderboards: global top 50 and friends-only boards for Pilot XP, Endless, Blitz, Boss Rush, Hardcore, Station Defense and today\'s Daily', 'Cloud saves: back up your progress to your account and load it on any computer', 'Auto-backup to the cloud after each run (can be turned off)', 'Challenge inbox: send a challenge code straight to a friend, and find out when they beat (or fail to beat) your score', 'REVENGE button when a friend beats your challenge', 'New Leaderboards button on the main menu']],
   ['V36', 'Driftwire Games', ['Aetheria now has a studio: Driftwire Games', 'New animated Driftwire logo in the intro movie', 'The logo also appears in the credits and on the main menu']],
   ['V35', 'Lights, Camera', ['A new intro movie when the game loads: a warp jump, a drop into your world and the title slamming in (press any key to skip)', 'Flying main menu: your ship now cruises through the furthest world you have reached', 'The menu warps between your unlocked worlds every so often, and your ship does the odd barrel roll', 'Both can be turned off in Settings > Graphics']],
   ['V34', 'Difficulty Rebalance', ['Early worlds are tougher: enemies have more health, hit harder and come in bigger waves from World 1', 'Late bosses are fairer: World 15-17 bosses have about 60% less health than before', 'Enemy damage now rises more smoothly from world to world', 'Regular enemies in the last worlds are slightly less tanky']],
@@ -6070,7 +6071,7 @@ Object.assign(SCR, {
   scChal: () => {
     const c = UI.chPrev; return '<div class="card mid"><h2>Challenge Codes</h2><p class="xs mut" style="margin:6px 0 10px;line-height:1.6">A code locks in a world, a sector, a twist and a random seed, so you and a friend get exactly the same waves. Finish a challenge and you get a new code with your score as the target. Send it back!</p>' +
       '<div class="row" style="gap:8px"><input id="chIn" class="code" style="flex:1;font-size:16px;letter-spacing:.12em;text-transform:uppercase" placeholder="e.g. 3A1-0K9F-5Z7" value="' + escH(UI.chTxt || '') + '"><button class="btn" data-act="chgo">PLAY</button></div><div class="xs ' + ((UI.chMsg || '')[0] === '!' ? 'bad' : 'good') + '" style="margin-top:6px">' + escH((UI.chMsg || '').replace(/^!/, '')) + '</div>' +
-      (c ? '<div class="item" style="margin-top:10px;flex-direction:column;align-items:stretch"><div class="b acc">' + c.code + '</div><div class="xs mut" style="margin-top:4px">World ' + (c.w + 1) + ' ' + WORLDS[c.w].nm + ' - sector ' + (c.lv + 1) + ' - ' + (c.mod >= 0 ? DMODS[c.mod].nm : 'no twist') + (c.target ? ' - score to beat ' + fmt(c.target) : '') + '</div></div>' : '') +
+      (c ? '<div class="item" style="margin-top:10px;flex-direction:column;align-items:stretch"><div class="b acc">' + c.code + '</div><div class="xs mut" style="margin-top:4px">World ' + (c.w + 1) + ' ' + WORLDS[c.w].nm + ' - sector ' + (c.lv + 1) + ' - ' + (c.mod >= 0 ? DMODS[c.mod].nm : 'no twist') + (c.target ? ' - score to beat ' + fmt(c.target) : '') + '</div>' + (netOn() ? '<button class="btn sm gold" style="margin-top:8px;align-self:flex-start" data-act="chsendto:' + c.code + ':' + (c.target | 0) + '">SEND TO A FRIEND</button>' : '') + '</div>' : '') +
       '<div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button><button class="btn sm gold" data-act="chrand">MAKE A RANDOM CHALLENGE</button></div></div>';
   },
   scStats: () => {
@@ -6490,7 +6491,7 @@ Object.assign(SCR, {
     if (!NET.me || !NET.me.name) return SCR.scName();
     const me = NET.me, fr = Object.keys(NET.friends), rq = Object.keys(NET.reqs).filter(k => !NET.blocked[k]), inv = Object.keys(NET.invites).filter(k => !NET.blocked[k] && Date.now() - (NET.invites[k].at || 0) < 600000);
     const fl = fr.length ? fr.map(uid => { const f = NET.fdata[uid] || {}, pr = NET.pres[uid], on = !!(pr && pr.on); return '<div class="item frow"><div class="fl"><div class="b sm">' + dot(on) + escH(f.name || '...') + ' <span class="xs mut">' + escH(f.rk || '') + ' LV ' + (f.lv || 1) + '</span></div><div class="xs mut">' + (on ? (pr.room ? 'In a room' : 'Online') : 'Offline') + ' - best endless ' + fmt(f.hi || 0) + ' - ' + (f.wu || 1) + ' worlds</div></div><span class="row" style="gap:6px">' + (NET.code && on ? '<button class="btn sm gold" data-act="ninv:' + uid + '">INVITE</button>' : '') + '<button class="btn sm" data-act="nmore:' + uid + '">...</button></span></div>' + (UI.nmore === uid ? '<div class="row" style="gap:6px;margin:-4px 0 6px 10px"><button class="btn sm warn" data-act="nunf:' + uid + '">REMOVE FRIEND</button><button class="btn sm warn" data-act="nblock:' + uid + '">BLOCK</button><button class="btn sm warn" data-act="nrep:' + uid + '">REPORT NAME</button></div>' : ''); }).join('') : '<div class="xs mut">No friends yet. Share your friend code, or add someone else\'s below.</div>';
-    return '<div class="card wide"><div class="row sp wrap"><div><h2>Online</h2><div class="xs mut">Signed in as <b class="acc">' + escH(me.name) + '</b> - friend code <b class="gold" style="letter-spacing:.1em">' + escH(me.code || '-') + '</b> <button class="btn sm" data-act="copycode:' + escH(me.code || '') + '" style="padding:3px 8px">COPY</button></div></div><span class="row" style="gap:6px"><button class="btn sm" data-act="nrename">CHANGE NAME</button><button class="btn sm" data-act="nsignout">SIGN OUT</button></span></div>' + msg +
+    return '<div class="card wide"><div class="row sp wrap"><div><h2>Online</h2><div class="xs mut">Signed in as <b class="acc">' + escH(me.name) + '</b> - friend code <b class="gold" style="letter-spacing:.1em">' + escH(me.code || '-') + '</b> <button class="btn sm" data-act="copycode:' + escH(me.code || '') + '" style="padding:3px 8px">COPY</button></div></div><span class="row wrap" style="gap:6px"><button class="btn sm gold" data-act="boards">LEADERBOARDS</button><button class="btn sm' + (inboxCount() ? ' gold' : '') + '" data-act="inbox">INBOX' + (inboxCount() ? ' (' + inboxCount() + ')' : '') + '</button><button class="btn sm" data-act="cloud">CLOUD SAVE</button><button class="btn sm" data-act="nrename">CHANGE NAME</button><button class="btn sm" data-act="nsignout">SIGN OUT</button></span></div>' + msg +
       (inv.length ? '<div class="xs mut b nh">INVITES</div>' + inv.map(k => '<div class="item"><div class="fl b sm">' + escH(NET.invites[k].name) + ' invited you to ' + (NET.invites[k].mode === 'vs' ? 'VERSUS' : 'CO-OP') + '</div><span class="row" style="gap:6px"><button class="btn sm gold" data-act="njoininv:' + k + '">JOIN</button><button class="btn sm" data-act="ndelinv:' + k + '">NO</button></span></div>').join('') : '') +
       '<div class="grid2" style="margin-top:10px"><div><div class="xs mut b nh">PLAY</div><div class="stack" style="gap:8px"><div class="grid2"><button class="btn gold" data-act="nquick:coop">QUICK CO-OP</button><button class="btn gold" data-act="nquick:vs">QUICK VERSUS</button></div><button class="btn" data-act="ncreate">CREATE PRIVATE ROOM</button><div class="row" style="gap:6px"><input id="nRoom" class="code" maxlength="4" placeholder="CODE" style="flex:1;text-transform:uppercase;letter-spacing:.3em;font-size:16px"><button class="btn" data-act="njoin">JOIN ROOM</button></div></div>' +
       (rq.length ? '<div class="xs mut b nh">FRIEND REQUESTS</div>' + rq.map(k => '<div class="item"><div class="fl b sm">' + escH(NET.reqs[k].name || '?') + '</div><span class="row" style="gap:6px"><button class="btn sm gold" data-act="nacc:' + k + '">ACCEPT</button><button class="btn sm" data-act="ndec:' + k + '">NO</button><button class="btn sm warn" data-act="nblock:' + k + '">BLOCK</button></span></div>').join('') : '') +
@@ -6556,6 +6557,7 @@ const MI = { // small line icons for the secondary row
   cos: '<svg viewBox="0 0 24 24"><path d="M14.5 4.5l5 5-9 9H5.5v-5z"/><path d="M12.5 6.5l5 5"/></svg>',
   settings: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>',
   tutorial: '<svg viewBox="0 0 24 24"><path d="M2.5 9L12 4.5 21.5 9 12 13.5z"/><path d="M6.5 11v5c3 2.5 8 2.5 11 0v-5"/></svg>',
+  ranks: '<svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg>',
   updates: '<svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>',
   fs: '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
   fsx: '<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>'
@@ -6573,9 +6575,9 @@ SCR.scMenu = () => {
   const ic = (act, key, label, badge) => '<button class="mm-ic" data-act="' + act + '" title="' + label + '" aria-label="' + label + '">' + MI[key] + '<span>' + label + '</span>' + (badge ? '<b>' + badge + '</b>' : '') + '</button>';
   return '<div class="mm" style="--pa:' + ac + '">' +
     '<header class="mm-top"><button class="mm-logo" data-act="tap" aria-label="Aetheria: Quantum Strike"><span class="mm-l1">Aetheria</span><span class="mm-l2">Quantum Strike</span></button>' +
-      '<div class="mm-tr"><button class="mm-pill' + (online ? ' on' : '') + '" data-act="online"><i></i>' + (online ? escH(online) : 'Offline') + '</button><div class="mm-seg" role="group" aria-label="Players"><button data-act="players:1" class="' + (SAVE.players === 1 ? 'on' : '') + '">1P</button><button data-act="players:2" class="' + (SAVE.players === 2 ? 'on' : '') + '">2P</button></div></div></header>' +
+      '<div class="mm-tr"><button class="mm-pill' + (online ? ' on' : '') + '" data-act="online"><i></i>' + (online ? escH(online) : 'Offline') + (online && inboxCount() ? '<b class="mm-ib">' + inboxCount() + '</b>' : '') + '</button><div class="mm-seg" role="group" aria-label="Players"><button data-act="players:1" class="' + (SAVE.players === 1 ? 'on' : '') + '">1P</button><button data-act="players:2" class="' + (SAVE.players === 2 ? 'on' : '') + '">2P</button></div></div></header>' +
     '<nav class="mm-main">' + nav + '</nav>' +
-    '<div class="mm-row">' + ic('profile', 'profile', 'Profile') + ic('missions', 'missions', 'Missions', ms ? ms : '') + ic('daily', 'daily', 'Daily', dNew ? 'new' : '') + ic('cos', 'cos', 'Cosmetics') + ic('settings', 'settings', 'Settings') + ic('tutorial', 'tutorial', 'Flight school') + ic('updates', 'updates', 'Updates') + ic('fs', fsOn ? 'fsx' : 'fs', fsOn ? 'Exit full screen' : 'Full screen') + '</div>' +
+    '<div class="mm-row">' + ic('profile', 'profile', 'Profile') + ic('missions', 'missions', 'Missions', ms ? ms : '') + ic('daily', 'daily', 'Daily', dNew ? 'new' : '') + ic('boards', 'ranks', 'Leaderboards', typeof inboxCount === 'function' && inboxCount() ? '' : '') + ic('cos', 'cos', 'Cosmetics') + ic('settings', 'settings', 'Settings') + ic('tutorial', 'tutorial', 'Flight school') + ic('updates', 'updates', 'Updates') + ic('fs', fsOn ? 'fsx' : 'fs', fsOn ? 'Exit full screen' : 'Full screen') + '</div>' +
     '<aside class="mm-card"><div class="mm-who"><span class="mm-name">' + escH(online || 'Pilot') + '</span><span class="mm-rank">' + 'Level ' + X.lv + ' ' + rankName(X.lv) + '</span></div><div class="mm-xp"><i style="width:' + Math.round(X.xp / xpNeed(X.lv) * 100) + '%"></i></div>' +
       '<dl class="mm-stats"><div><dt>Cores</dt><dd class="gold">' + fmt(SAVE.cores) + '</dd></div><div><dt>Worlds</dt><dd>' + Math.min(SAVE.wu, WORLDS.length) + '/' + WORLDS.length + '</dd></div><div><dt>Kills</dt><dd>' + fmt(SAVE.st.kills) + '</dd></div></dl></aside>' +
     '<footer class="mm-foot"><button class="mm-news" data-act="updates"><b>' + U[0] + '</b> ' + escH(U[1]) + '</button><span class="mm-keys">' + (t ? '' : (SAVE.players === 2 ? ['P1: WASD + Space', 'P2: arrows + Enter'] : ['WASD or mouse to fly', 'Space or click to fire', 'Esc to pause']).map(k => '<span>' + k + '</span>').join('')) + '</span><button class="mm-cred" data-act="credits">' + dwEmblem('dw-sm') + '<b>Driftwire</b> Games</button></footer>' +
@@ -6752,6 +6754,165 @@ function introPlay() {
   requestAnimationFrame(loop);
 }
 
+// ================= ONLINE 2: leaderboards, cloud saves, challenge inbox =================
+const LB = [
+  ['pilot', 'Pilot XP', 'Total pilot XP ever earned'],
+  ['endless', 'Endless', 'Best score in Endless'],
+  ['blitz', 'Blitz', 'Best score in a 90-second Blitz'],
+  ['rush', 'Boss Rush', 'Best score in Boss Rush'],
+  ['hardcore', 'Hardcore', 'Best score in one-life Hardcore'],
+  ['defense', 'Station Defense', 'Best score defending the station'],
+  ['daily', 'Today\'s Daily', 'Best score on today\'s Daily Challenge']
+];
+const lbKey = b => b === 'daily' ? 'daily_' + dayKey().replace(/[^0-9a-z_-]/gi, '') : b;
+const N2 = { lb: {}, lbFr: {}, lbView: 'global', lbB: 'endless', lbLoading: false, inbox: {}, cloud: undefined, cloudBusy: false, msg: '', live: false };
+const netOn = () => !!(NET.ok && NET.ready && NET.user && NET.me && NET.me.name);
+function n2Msg(m) { N2.msg = m || ''; if (['scBoards', 'scCloud', 'scInbox', 'scChSend'].includes(UI.top)) UI.refresh(); }
+
+// ---------- leaderboards ----------
+function lbSubmit(b, s) {
+  s = Math.round(s || 0); if (!netOn() || !(s > 0) || s >= 1e8) return Promise.resolve(false);
+  const best = SAVE.lbb || (SAVE.lbb = {}), k = lbKey(b); if ((best[k] || 0) >= s) return Promise.resolve(false); best[k] = s; saveGame();
+  const row = { n: NET.me.name, s, lv: PS().xp.lv, hull: SAVE.pl[0].cfg.hull, at: TS() };
+  return R_('lb/' + k + '/' + NET.user.uid).transaction(cur => (!cur || !(cur.s >= s)) ? row : undefined).then(() => { delete N2.lb[k]; return true; }).catch(e => { delete best[k]; console.warn('lb', e); return false; });
+}
+function lbSyncAll() { // push local bests once you sign in, so the boards are never empty
+  if (!netOn()) return; const H = SAVE.hi || {};
+  lbSubmit('pilot', PS().xp.tot || 0); lbSubmit('endless', H.endless && H.endless.score); lbSubmit('blitz', H.blitz && H.blitz.score); lbSubmit('defense', H.def && H.def.score);
+  const dl = SAVE.dl && SAVE.dl.best && SAVE.dl.best[dayKey()]; if (dl) lbSubmit('daily', typeof dl === 'object' ? dl.score : dl);
+}
+function lbAfterRun(d) {
+  if (!d || G.net || d.online || d.assist) return; const m = d.mode;
+  if (['endless', 'blitz', 'rush', 'hardcore', 'defense', 'daily'].includes(m)) lbSubmit(m, d.score);
+  lbSubmit('pilot', PS().xp.tot || 0);
+}
+async function lbLoad(b, force) {
+  const k = lbKey(b); if (!netOn()) return;
+  if (N2.lbView === 'global') {
+    if (N2.lb[k] && !force) return; N2.lbLoading = true; n2Msg('');
+    try { const sn = await R_('lb/' + k).orderByChild('s').limitToLast(50).once('value'), out = []; sn.forEach(c => { const v = c.val(); if (v && typeof v.s === 'number') out.push(Object.assign({ uid: c.key }, v)); }); out.sort((a, z) => z.s - a.s); N2.lb[k] = out; }
+    catch (e) { n2Msg('!Could not load the leaderboard (' + (e.code || e.message) + '). Make sure the newest security rules are published in Firebase.'); }
+  } else {
+    N2.lbLoading = true; const ids = [NET.user.uid].concat(Object.keys(NET.friends || {})), out = [];
+    try { await Promise.all(ids.map(u => R_('lb/' + k + '/' + u).once('value').then(s => { const v = s.val(); if (v && typeof v.s === 'number') out.push(Object.assign({ uid: u }, v)); }))); out.sort((a, z) => z.s - a.s); N2.lbFr[k] = out; }
+    catch (e) { n2Msg('!Could not load your friends\' scores (' + (e.code || e.message) + ').'); }
+  }
+  N2.lbLoading = false; if (UI.top === 'scBoards') UI.refresh();
+}
+const lbFmt = (b, s) => b === 'pilot' ? fmt(s) + ' XP' : fmt(s);
+
+// ---------- cloud save ----------
+const saveSum = s => { s = s || SAVE; const x = s.xp || { lv: 1 }; return { wu: Math.min(s.wu || 1, WORLDS.length), lv: x.lv || 1, cores: s.cores | 0, kills: (s.st && s.st.kills) | 0 }; };
+async function cloudPeek() {
+  if (!netOn()) return; try { const s = await R_('saves/' + NET.user.uid).once('value'); const v = s.val(); N2.cloud = v ? { at: v.at, ver: v.ver, sum: v.sum || {}, size: (v.d || '').length } : null; } catch (e) { N2.cloud = undefined; n2Msg('!Could not check your cloud save (' + (e.code || e.message) + ').'); }
+  if (UI.top === 'scCloud') UI.refresh();
+}
+async function cloudUp(quiet) {
+  if (!netOn() || N2.cloudBusy) return; N2.cloudBusy = true; if (!quiet) n2Msg('Uploading...');
+  try { saveGame(); const d = exportCode(SLOT), sum = saveSum(); await R_('saves/' + NET.user.uid).set({ d, ver: GAME_VER, sum, at: TS() }); SAVE.cloudAt = Date.now(); store.set(SAVE_KEY, JSON.stringify(SAVE)); N2.cloud = { at: Date.now(), ver: GAME_VER, sum, size: d.length }; if (!quiet) n2Msg('Saved to the cloud!'); }
+  catch (e) { if (!quiet) n2Msg('!Upload failed (' + (e.code || e.message) + ').'); }
+  N2.cloudBusy = false; if (UI.top === 'scCloud') UI.refresh();
+}
+async function cloudDown() {
+  if (!netOn() || N2.cloudBusy) return; N2.cloudBusy = true; n2Msg('Downloading...');
+  try { const s = await R_('saves/' + NET.user.uid).once('value'), v = s.val(); if (!v || !v.d) { n2Msg('!There is no cloud save yet.'); }
+    else { const err = importCode(v.d, SLOT); if (err) n2Msg('!' + err); else { SAVE.cloudAt = v.at || Date.now(); saveGame(); n2Msg('Cloud save loaded into slot ' + (SLOT + 1) + '!'); } } }
+  catch (e) { n2Msg('!Download failed (' + (e.code || e.message) + ').'); }
+  N2.cloudBusy = false; N2.cloudSure = false; if (UI.top === 'scCloud') UI.refresh();
+}
+let cloudT = 0;
+function cloudAuto() { if (SET.cloudAuto === false || !netOn()) return; const now = Date.now(); if (now - cloudT < 90000) return; cloudT = now; cloudUp(true); }
+
+// ---------- challenge inbox ----------
+function inboxStart() {
+  if (N2.live || !netOn()) return; N2.live = true;
+  netSub(R_('inbox/' + NET.user.uid), 'value', s => { N2.inbox = s.val() || {}; const n = inboxCount(); if (n > (N2.lastN || 0) && N2.lastN !== undefined && G.scene !== 'play') toast('NEW IN YOUR INBOX', n + ' message' + (n > 1 ? 's' : ''), '#22d3ee'); N2.lastN = n; if (['scInbox', 'scOnline', 'scMenu'].includes(UI.top)) UI.refresh(); });
+}
+const inboxList = () => Object.keys(N2.inbox || {}).map(k => Object.assign({ id: k }, N2.inbox[k])).filter(m => m && m.f && !NET.blocked[m.f]).sort((a, z) => (z.at || 0) - (a.at || 0));
+const inboxCount = () => inboxList().length;
+function chSend(uid, code, s) {
+  if (!netOn()) return Promise.reject(new Error('Sign in first'));
+  return R_('inbox/' + uid).push({ t: 'ch', f: NET.user.uid, n: NET.me.name, c: String(code).slice(0, 40), s: Math.round(s || 0), at: TS() });
+}
+function chPlayInbox(id) {
+  const m = (N2.inbox || {})[id]; if (!m) return; const c = chParse(m.c); if (!c) { n2Msg('!That challenge code is broken.'); return; }
+  if (c.w >= SAVE.wu) { n2Msg('!You need to unlock World ' + (c.w + 1) + ' to play this one.'); return; }
+  c.from = { uid: m.f, name: m.n, id, s: m.s }; startChallenge(c);
+}
+function chReplyAfter(d) { // tell the friend how you did, and clear the challenge
+  const c = d && d.chal; if (!c || !c.from || !netOn()) return; const f = c.from;
+  R_('inbox/' + f.uid).push({ t: 'res', f: NET.user.uid, n: NET.me.name, c: c.code || '', s: Math.round(d.score || 0), y: f.s | 0, at: TS() }).catch(() => { });
+  R_('inbox/' + NET.user.uid + '/' + f.id).remove().catch(() => { }); c.from = null;
+}
+
+// ---------- hooks ----------
+const _nStartLive = netStartLive;
+netStartLive = function () { const r = _nStartLive.apply(this, arguments); try { inboxStart(); lbSyncAll(); cloudPeek().then(() => { const c = N2.cloud, mine = saveSum(); if (c && c.sum && (c.sum.wu > mine.wu || c.sum.lv > mine.lv) && !SAVE.cloudAt) toast('CLOUD SAVE FOUND', 'Online > Cloud Save to load it', '#fbbf24'); }); } catch (e) { console.warn('online2', e); } return r; };
+const _nSignOut = netSignOut;
+netSignOut = function () { N2.live = false; N2.inbox = {}; N2.lb = {}; N2.lbFr = {}; N2.cloud = undefined; N2.lastN = undefined; return _nSignOut.apply(this, arguments); };
+const _uiRes = UI.result.bind(UI);
+UI.result = function (d) { const r = _uiRes(d); try { lbAfterRun(d); chReplyAfter(d); cloudAuto(); } catch (e) { console.warn('online2 result', e); } return r; };
+
+// ---------- screens ----------
+const n2m = () => N2.msg ? '<div class="xs ' + (N2.msg[0] === '!' ? 'bad' : 'good') + '" style="margin:6px 0">' + escH(N2.msg.replace(/^!/, '')) + '</div>' : '';
+const n2Gate = t => { if (!NET.ok) return '<div class="card mid"><h2>' + t + '</h2><p class="mut sm" style="line-height:1.7;margin:10px 0">This needs the online version of Aetheria on the website (Google sign-in cannot open inside this window).</p><div class="item"><b class="acc">' + WEB_URL + '</b><button class="btn sm" data-act="copycode:' + WEB_URL + '">COPY LINK</button></div><div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button></div></div>'; if (!netOn()) return '<div class="card mid"><h2>' + t + '</h2><p class="mut sm" style="margin:10px 0">Sign in on the Online screen first.</p><div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button><button class="btn gold" data-act="online">GO ONLINE</button></div></div>'; return null; };
+Object.assign(SCR, {
+  scBoards: () => {
+    const g = n2Gate('Leaderboards'); if (g) return g;
+    const b = N2.lbB, k = lbKey(b), glob = N2.lbView === 'global', rows = (glob ? N2.lb[k] : N2.lbFr[k]), me = NET.user.uid, B = LB.find(x => x[0] === b) || LB[0];
+    if (!rows && !N2.lbLoading) setTimeout(() => lbLoad(b), 0);
+    const mine = rows ? rows.findIndex(r => r.uid === me) : -1, myBest = (SAVE.lbb || {})[k] || 0;
+    const list = !rows ? '<div class="mut sm" style="padding:24px 4px">Loading...</div>' : !rows.length ? '<div class="mut sm" style="padding:24px 4px">No scores yet. Be the first!</div>' : rows.map((r, i) => '<div class="lbrow' + (r.uid === me ? ' me' : '') + (i < 3 ? ' top' + (i + 1) : '') + '"><span class="lbr">' + (i + 1) + '</span><span class="lbn">' + escH(r.n || '?') + '<span class="xs mut"> LV ' + (r.lv | 0 || 1) + '</span></span><span class="lbs">' + lbFmt(b, r.s) + '</span></div>').join('');
+    return '<div class="lay lay-modes lb2"><header class="lay-h"><h1 class="lay-t">Leaderboards</h1><div class="mm-seg" role="group" aria-label="Scope"><button data-act="lbv:global" class="' + (glob ? 'on' : '') + '">Global</button><button data-act="lbv:friends" class="' + (glob ? '' : 'on') + '">Friends</button></div></header>' +
+      '<div class="sm-cols"><nav class="sm-list">' + LB.map(x => '<button class="sm-row' + (x[0] === b ? ' on' : '') + '" data-act="lbb:' + x[0] + '"><span class="sm-nm">' + x[1] + '</span></button>').join('') + '</nav>' +
+      '<section class="sm-brief lbmain"><h2 class="sm-bt">' + B[1] + '</h2><p class="sm-bd" style="margin-bottom:8px">' + B[2] + (b === 'daily' ? ' (' + dayKey() + ')' : '') + '</p>' + n2m() + '<div class="lblist">' + list + '</div>' +
+      '<p class="xs mut" style="margin-top:10px">' + (mine >= 0 ? 'You are #' + (mine + 1) + (glob ? ' in the world' : ' among your friends') : myBest ? 'Your best: ' + lbFmt(b, myBest) + (glob ? ' - not in the top 50 yet' : '') : 'Play this mode to get on the board') + '</p></section></div>' +
+      '<footer class="lay-f"><button class="btn sm" data-act="back">Back</button><button class="btn sm" data-act="lbre">Refresh</button></footer></div>';
+  },
+  scCloud: () => {
+    const g = n2Gate('Cloud Save'); if (g) return g;
+    if (N2.cloud === undefined && !N2.cloudBusy) setTimeout(cloudPeek, 0);
+    const c = N2.cloud, m = saveSum(), d = t => t ? new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '-';
+    const box = (t, s, sub) => '<div class="item cl-box"><div class="fl"><div class="xs mut b nh" style="margin:0">' + t + '</div>' + (s ? '<div class="cl-st"><span><b>' + s.wu + '</b>/' + WORLDS.length + ' worlds</span><span>LV <b>' + s.lv + '</b></span><span><b class="gold">' + fmt(s.cores) + '</b> cores</span></div>' : '<div class="mut sm" style="margin-top:6px">' + (c === undefined ? 'Checking...' : 'Nothing saved yet') + '</div>') + '<div class="xs mut">' + sub + '</div></div></div>';
+    return '<div class="card mid"><h2>Cloud Save</h2><p class="mut sm" style="margin:6px 0 10px">Keep your progress safe in your account and carry it to any computer: sign in there and press DOWNLOAD.</p>' + n2m() +
+      '<div class="grid2">' + box('THIS DEVICE - SLOT ' + (SLOT + 1), m, SAVE.cloudAt ? 'Last synced ' + d(SAVE.cloudAt) : 'Never synced') + box('IN THE CLOUD', c && c.sum, c ? 'Saved ' + d(c.at) + ' (' + escH(c.ver || '') + ')' : '') + '</div>' +
+      '<div class="grid2" style="margin-top:10px"><button class="btn gold' + (N2.cloudBusy ? ' off' : '') + '" data-act="clup">UPLOAD THIS DEVICE</button><button class="btn' + (N2.cloudBusy || !c ? ' off' : '') + (N2.cloudSure ? ' warn' : '') + '" data-act="cldown">' + (N2.cloudSure ? 'PRESS AGAIN TO REPLACE SLOT ' + (SLOT + 1) : 'DOWNLOAD TO THIS DEVICE') + '</button></div>' +
+      '<div class="setrow" style="margin-top:12px"><span>Auto-backup after each run</span><button class="tog' + (SET.cloudAuto !== false ? ' on' : '') + '" data-act="clauto"></button></div>' +
+      '<div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button><span class="xs mut">Downloading replaces the save in slot ' + (SLOT + 1) + '</span></div></div>';
+  },
+  scInbox: () => {
+    const g = n2Gate('Inbox'); if (g) return g; const L = inboxList();
+    const it = m => m.t === 'res'
+      ? '<div class="item"><div class="fl"><div class="b sm">' + escH(m.n) + ' played your challenge</div><div class="xs ' + (m.s > m.y ? 'bad' : 'good') + '">They scored ' + fmt(m.s) + ' - you set ' + fmt(m.y) + (m.s > m.y ? '. They beat you!' : '. You are still the champ!') + '</div></div><span class="row" style="gap:6px">' + (m.s > m.y ? '<button class="btn sm gold" data-act="ibrevenge:' + m.id + '">REVENGE</button>' : '') + '<button class="btn sm" data-act="ibdel:' + m.id + '">OK</button></span></div>'
+      : (() => { const c = chParse(m.c) || {}; return '<div class="item"><div class="fl"><div class="b sm"><span class="acc">' + escH(m.n) + '</span> challenged you</div><div class="xs mut">' + (c.w >= 0 ? 'World ' + (c.w + 1) + ' sector ' + (c.lv + 1) + ' - ' : '') + 'beat <b class="gold">' + fmt(m.s) + '</b></div></div><span class="row" style="gap:6px"><button class="btn sm gold" data-act="ibplay:' + m.id + '">PLAY</button><button class="btn sm" data-act="ibdel:' + m.id + '">X</button></span></div>'; })();
+    return '<div class="card mid"><div class="row sp"><h2>Inbox</h2><span class="xs mut">' + L.length + ' message' + (L.length === 1 ? '' : 's') + '</span></div><p class="mut sm" style="margin:6px 0 10px">Friends send you challenge codes here. Beat their score and they find out!</p>' + n2m() +
+      '<div class="stack" style="gap:6px">' + (L.length ? L.map(it).join('') : '<div class="mut sm" style="padding:18px 4px">Nothing here yet. Finish a challenge or press SEND on the Challenge screen to dare a friend.</div>') + '</div>' +
+      '<div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button><button class="btn sm" data-act="mode:chal">NEW CHALLENGE</button></div></div>';
+  },
+  scChSend: () => {
+    const g = n2Gate('Send a Challenge'); if (g) return g; const S = UI.chSend || {}, fr = Object.keys(NET.friends || {});
+    return '<div class="card mid"><h2>Send a Challenge</h2><div class="xs mut" style="margin:4px 0 10px">Code <b class="acc">' + escH(S.code || '') + '</b> - they need to beat <b class="gold">' + fmt(S.s || 0) + '</b></div>' + n2m() +
+      '<div class="stack" style="gap:6px">' + (fr.length ? fr.map(u => { const f = NET.fdata[u] || {}, sent = (UI.chSent || {})[u]; return '<div class="item"><div class="fl b sm">' + escH(f.name || '...') + '</div><button class="btn sm' + (sent ? ' off' : ' gold') + '" data-act="chsend:' + u + '">' + (sent ? 'SENT' : 'SEND') + '</button></div>'; }).join('') : '<div class="mut sm">Add friends on the Online screen first.</div>') + '</div>' +
+      '<div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">DONE</button></div></div>';
+  }
+});
+Object.assign(ACT, {
+  boards() { N2.msg = ''; UI.show('scBoards'); },
+  lbb(a) { N2.lbB = a[0]; N2.msg = ''; UI.refresh(); },
+  lbv(a) { N2.lbView = a[0]; UI.refresh(); },
+  lbre() { const k = lbKey(N2.lbB); delete N2.lb[k]; delete N2.lbFr[k]; lbLoad(N2.lbB, true); UI.refresh(); },
+  cloud() { N2.msg = ''; N2.cloudSure = false; UI.show('scCloud'); },
+  clup() { cloudUp(); },
+  cldown() { if (!N2.cloud) return; if (!N2.cloudSure) { N2.cloudSure = true; UI.refresh(); return; } cloudDown(); },
+  clauto() { SET.cloudAuto = SET.cloudAuto === false; saveSet(); UI.refresh(); },
+  inbox() { N2.msg = ''; UI.show('scInbox'); },
+  ibplay(a) { chPlayInbox(a[0]); },
+  ibdel(a) { if (netOn()) R_('inbox/' + NET.user.uid + '/' + a[0]).remove().catch(() => { }); },
+  ibrevenge(a) { const m = (N2.inbox || {})[a[0]]; if (!m) return; const c = chParse(m.c); R_('inbox/' + NET.user.uid + '/' + a[0]).remove().catch(() => { }); if (c && c.w < SAVE.wu) { c.target = m.s; startChallenge(c); } },
+  chsendto(a) { UI.chSend = { code: a[0], s: +a[1] || 0 }; UI.chSent = {}; N2.msg = ''; UI.show('scChSend'); },
+  chsend(a) { const S = UI.chSend || {}; if ((UI.chSent || {})[a[0]]) return; chSend(a[0], S.code, S.s).then(() => { (UI.chSent = UI.chSent || {})[a[0]] = 1; SFX.click && SFX.click(); n2Msg('Challenge sent!'); }).catch(e => n2Msg('!Could not send (' + (e.code || e.message) + ').')); }
+});
+
 // ================= BOOT =================
 function boot() {
   layout(); initInput(); initUI();
@@ -6776,7 +6937,7 @@ window.AET = {
   PS, missions, addXP, LOGS, mastery, COS, progAfter, medalAt,
   IN2, SECW, EVENTS, ALT_NODE, RIFTS, GMODS, GAL, startGallery, riftsFound, bossBeaten, retroOff, startEvent, superGo, tryParry, chargeShot, fireSec, goldRoll, combatTick,
   photoSnap, photoExit, GLITCH_W, glitchCtx, MAPS, levelSpec, enemyThumb, INTEL, BOSS_INTEL, worldEnemies, bstCount, BG3D_W, bgPlanetTex, audio, playCut, endCut, cutNext, cutSkip, STORY, ENDING, bossPanels, endingPanels, storyDue, CUT, music, mTheme, mv, drawBossArt,
-  get SLOT() { return SLOT; },
+  get SLOT() { return SLOT; }, N2, lbSubmit, lbLoad, cloudUp, cloudDown, cloudPeek, chSend, inboxCount, chPlayInbox, netOn,
   defs: { WORLDS, EN, BOSSES, WPN, PARTS, UPG }
 };
 boot();

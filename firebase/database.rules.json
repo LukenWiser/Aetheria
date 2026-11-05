@@ -2,46 +2,70 @@
   "rules": {
     "users": {
       ".read": "auth != null",
-      "$uid": { ".write": "auth != null && auth.uid === $uid", ".validate": "newData.hasChildren(['name']) && newData.child('name').isString() && newData.child('name').val().length <= 16" }
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['name']) && newData.child('name').isString() && newData.child('name').val().length <= 16"
+      }
     },
     "names": {
-      "$name": { ".read": "auth != null", ".write": "auth != null && ((!data.exists() && newData.val() === auth.uid) || (data.val() === auth.uid && !newData.exists()))" }
+      "$name": {
+        ".read": "auth != null",
+        ".write": "auth != null && ((!data.exists() && newData.val() === auth.uid) || (data.val() === auth.uid && !newData.exists()))"
+      }
     },
     "codes": {
-      "$code": { ".read": "auth != null", ".write": "auth != null && !data.exists() && newData.val() === auth.uid" }
+      "$code": {
+        ".read": "auth != null",
+        ".write": "auth != null && !data.exists() && newData.val() === auth.uid"
+      }
     },
     "presence": {
       ".read": "auth != null",
-      "$uid": { ".write": "auth != null && auth.uid === $uid" }
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid"
+      }
     },
     "friends": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        "$f": { ".write": "auth != null && (auth.uid === $uid || (auth.uid === $f && (!newData.exists() || root.child('requests').child($f).child($uid).exists())))" }
+        "$f": {
+          ".write": "auth != null && (auth.uid === $uid || (auth.uid === $f && (!newData.exists() || root.child('requests').child($f).child($uid).exists())))"
+        }
       }
     },
     "requests": {
       "$to": {
         ".read": "auth != null && auth.uid === $to",
-        "$from": { ".write": "auth != null && ((auth.uid === $from && newData.exists() && !root.child('blocks').child($to).child($from).exists()) || auth.uid === $to)" }
+        "$from": {
+          ".write": "auth != null && ((auth.uid === $from && newData.exists() && !root.child('blocks').child($to).child($from).exists()) || auth.uid === $to)"
+        }
       }
     },
     "invites": {
       "$to": {
         ".read": "auth != null && auth.uid === $to",
-        "$from": { ".write": "auth != null && ((auth.uid === $from && root.child('friends').child($from).child($to).exists()) || auth.uid === $to)" }
+        "$from": {
+          ".write": "auth != null && ((auth.uid === $from && root.child('friends').child($from).child($to).exists()) || auth.uid === $to)"
+        }
       }
     },
     "blocks": {
-      "$uid": { ".read": "auth != null && auth.uid === $uid", ".write": "auth != null && auth.uid === $uid" }
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
     },
     "reports": {
-      "$id": { ".write": "auth != null && !data.exists() && newData.child('from').val() === auth.uid" }
+      "$id": {
+        ".write": "auth != null && !data.exists() && newData.child('from').val() === auth.uid"
+      }
     },
     "queue": {
       "$mode": {
         ".read": "auth != null",
-        "$uid": { ".write": "auth != null && auth.uid === $uid" }
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid"
+        }
       }
     },
     "rooms": {
@@ -60,6 +84,33 @@
       "$code": {
         ".read": "auth != null && (root.child('rooms').child($code).child('host').val() === auth.uid || root.child('rooms').child($code).child('guest').val() === auth.uid)",
         ".write": "auth != null && (root.child('rooms').child($code).child('host').val() === auth.uid || root.child('rooms').child($code).child('guest').val() === auth.uid)"
+      }
+    },
+    "lb": {
+      "$b": {
+        ".read": "auth != null",
+        ".indexOn": [
+          "s"
+        ],
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['n','s']) && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() < 100000000 && newData.child('n').isString() && newData.child('n').val().length <= 16"
+        }
+      }
+    },
+    "saves": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "!newData.exists() || (newData.child('d').isString() && newData.child('d').val().length < 3000000)"
+      }
+    },
+    "inbox": {
+      "$to": {
+        ".read": "auth != null && auth.uid === $to",
+        "$id": {
+          ".write": "auth != null && ((!data.exists() && newData.child('f').val() === auth.uid && root.child('friends').child($to).child(auth.uid).exists() && !root.child('blocks').child($to).child(auth.uid).exists()) || (auth.uid === $to && !newData.exists()))"
+        }
       }
     }
   }
