@@ -32,3 +32,7 @@ SCR.scMenu = () => {
     '<footer class="mm-foot"><button class="mm-news" data-act="updates"><b>' + U[0] + '</b> ' + escH(U[1]) + '</button><span class="mm-keys">' + (t ? '' : (SAVE.players === 2 ? ['P1: WASD + Space', 'P2: arrows + Enter'] : ['WASD or mouse to fly', 'Space or click to fire', 'Esc to pause']).map(k => '<span>' + k + '</span>').join('')) + '</span><button class="mm-cred" data-act="credits">Made by <b>Luken Wiser</b></button></footer>' +
   '</div>';
 };
+
+// every screen picks up the pilot's accent colour
+const _show2 = UI.show.bind(UI);
+UI.show = function (id, nh) { try { const a = SAVE.pl[0].cfg.accent; if (a) document.body.style.setProperty('--pa', a); } catch (e) { } return _show2(id, nh); };

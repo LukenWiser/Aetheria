@@ -5581,8 +5581,9 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V31';
+const GAME_VER = 'V32';
 const UPDATES = [
+  ['V32', 'Every Screen Restyled', ['Every menu screen now matches the new main menu: big titles, glass panels and your ship in the background', 'Buttons, tabs, cards and toggles all follow your ship\'s accent colour', 'Cleaner layouts on phones']],
   ['V31', 'New Main Menu', ['A brand-new full-screen main menu: big title, your ship front and centre, and everything else tidied into one row', 'The menu takes its colour from your ship\'s accent', 'Pilot card with your rank, level progress, cores and worlds', 'Works with mouse, touch and controller, on any screen size']],
   ['V30', 'Online', ['Online play on the Aetheria website: sign in with Google', 'Pilot names and friend codes, friend requests, and see which friends are online', 'Online co-op and versus: quick match, private rooms with a 4-letter code, or invite a friend', 'Direct connection between players, with an automatic backup route if a network blocks it', 'Quick emotes in online matches (keys 7 8 9 0)', 'Block and report options for other pilots']],
   ['V29', 'Make It Yours', ['Creator mode: a level editor - pick a world, build waves from any enemy you have met, add an end boss', 'Boss builder: choose a body, colour, health, phases and attacks, then fight it', 'Share codes for levels (AQL1:) and bosses (AQB1:) so friends can play what you made', 'The glitch is spreading: once The Glitch opens, corrupted sectors appear in older worlds until you beat the Null Process', 'Corrupted sectors have glitched enemies and +50% cores - clear them to push the glitch back', 'Beat the Null Process and see what happens to the game itself...', 'New achievements: Maker, Antivirus, and a secret one']],
@@ -6557,6 +6558,10 @@ SCR.scMenu = () => {
     '<footer class="mm-foot"><button class="mm-news" data-act="updates"><b>' + U[0] + '</b> ' + escH(U[1]) + '</button><span class="mm-keys">' + (t ? '' : (SAVE.players === 2 ? ['P1: WASD + Space', 'P2: arrows + Enter'] : ['WASD or mouse to fly', 'Space or click to fire', 'Esc to pause']).map(k => '<span>' + k + '</span>').join('')) + '</span><button class="mm-cred" data-act="credits">Made by <b>Luken Wiser</b></button></footer>' +
   '</div>';
 };
+
+// every screen picks up the pilot's accent colour
+const _show2 = UI.show.bind(UI);
+UI.show = function (id, nh) { try { const a = SAVE.pl[0].cfg.accent; if (a) document.body.style.setProperty('--pa', a); } catch (e) { } return _show2(id, nh); };
 
 // ================= BOOT =================
 function boot() {
