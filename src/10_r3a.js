@@ -47,27 +47,77 @@ function init3D() {
     const p = WINGP[k] || WINGP.swept, sh = new THREE.Shape(); sh.moveTo(p[0][0], p[0][1]); for (let i = 1; i < p.length; i++) sh.lineTo(p[i][0], p[i][1]); sh.closePath();
     return wingGeo[k] = new THREE.ExtrudeGeometry(sh, { depth: .07, bevelEnabled: true, bevelSize: .03, bevelThickness: .03, bevelSegments: 2 });
   }
+  // ---- cosmetic ship bodies, hats and pets (looks only: stats still come from the hull) ----
+  const BODYS = {
+    shark: { prof: [[0, -1.5], [.3, -1.4], [.42, -.6], [.38, .4], [.22, 1.2], [.02, 1.95]], x: (b, h, a) => { b.add(mesh(BX(.05, .75, .9), h, [0, .5, .1], [-.35, 0, 0])); [1, -1].forEach(s => [0, .15, .3].forEach(z => b.add(mesh(BX(.02, .14, .04), a, [.38 * s, .02, -.55 + z], [0, 0, .2 * s])))); } },
+    needle: { prof: [[0, -1.2], [.2, -1.1], [.22, .4], [.12, 1.6], [.01, 2.5]], x: (b, h, a) => b.add(mesh(CY(.012, .012, 1.1, 6), a, [0, 0, -2.9], [H, 0, 0])) },
+    bulldog: { prof: [[0, -1.1], [.5, -1.0], [.64, -.3], [.62, .6], [.5, 1.0], [.32, 1.28], [0, 1.3]], x: (b, h, a) => { b.add(mesh(BX(1.15, .22, .18), dark, [0, -.28, -1.3])); [1, -1].forEach(s => b.add(mesh(SP(.09, 10), a, [.36 * s, .05, -1.32]))); } },
+    saucer: { prof: null, nw: 1, x: (b, h, a) => { b.add(mesh(lathe([[0, -.22], [.9, -.18], [1.45, 0], [1.5, .06], [.9, .2], [0, .28]], 48), h)); b.add(mesh(TO(1.46, .035, 8, 48), a, [0, .03, 0], [H, 0, 0])); for (let i = 0; i < 10; i++) { const t = i / 10 * TAU; b.add(mesh(SP(.06, 8), a, [Math.cos(t) * 1.2, -.12, Math.sin(t) * 1.2])); } } },
+    beetle: { prof: [[0, -1.0], [.45, -.9], [.6, -.2], [.56, .5], [.32, 1.0], [.05, 1.2]], x: (b, h, a) => { [1, -1].forEach(s => { b.add(mesh(SP(.5, 18), h, [.3 * s, .22, .1], null, [.8, .55, 1.6])); [-.3, .3].forEach(z => b.add(mesh(SP(.08, 8), a, [.42 * s, .44, z]))); }); [1, -1].forEach(s => b.add(mesh(CO(.05, .5, 6), dark, [.16 * s, .12, -1.35], [-H - .3, 0, .3 * s]))); } },
+    manta: { prof: [[0, -1.0], [.26, -.9], [.3, .2], [.16, 1.0], [.02, 1.3]], nw: 1, x: (b, h, a) => { [1, -1].forEach(s => { b.add(mesh(BX(1.9, .06, 1.5), h, [1.0 * s, -.02, .15], [0, .5 * s, 0])); b.add(mesh(BX(1.5, .03, .06), a, [1.0 * s, .03, -.25], [0, .5 * s, 0])); }); b.add(mesh(CY(.03, .01, 1.6, 6), dark, [0, 0, 2.0], [H, 0, 0])); } },
+    twinboom: { prof: [[0, -.7], [.24, -.6], [.28, .2], [.14, .8], [.02, 1.0]], x: (b, h, a) => { [1, -1].forEach(s => { b.add(mesh(lathe([[0, -1.4], [.18, -1.3], [.2, .6], [.1, 1.4], [0, 1.6]], 20), h, [.75 * s, 0, 0], [-H, 0, 0])); b.add(mesh(BX(.05, .5, .5), h, [.75 * s, .3, 1.1])); }); b.add(mesh(BX(1.5, .05, .3), a, [0, .1, 1.15])); } },
+    crystal: { prof: null, x: (b, h, a) => { const cm = new THREE.MeshStandardMaterial({ color: h.color, metalness: .3, roughness: .1, emissive: a.emissive, emissiveIntensity: .45, transparent: true, opacity: .92 }); b.add(mesh(OC(.6), cm, [0, 0, -.3], null, [.7, .55, 2.6])); [1, -1].forEach(s => b.add(mesh(OC(.3), cm, [.55 * s, 0, .5], null, [.6, .4, 1.4]))); b.add(mesh(OC(.18), a, [0, 0, -.3])); } },
+    arrow: { prof: [[0, -1.2], [.35, -1.15], [.3, 0], [.15, 1.2], [0, 2.1]], x: (b, h, a) => [1, -1].forEach(s => { b.add(mesh(BX(.6, .04, .25), h, [.35 * s, 0, -1.2], [0, .4 * s, 0])); b.add(mesh(BX(.5, .02, .05), a, [.35 * s, .03, -1.1], [0, .4 * s, 0])); }) },
+    rocket: { prof: [[0, -1.3], [.36, -1.2], [.42, -.2], [.36, .8], [.16, 1.5], [0, 1.95]], x: (b, h, a) => { [-.7, -.2].forEach(z => { b.add(mesh(TO(.12, .025, 6, 18), a, [.35, .12, z], [0, H, 0])); b.add(mesh(TO(.12, .025, 6, 18), a, [-.35, .12, z], [0, H, 0])); }); b.add(mesh(TO(.43, .03, 8, 28), a, [0, 0, .2])); } },
+    stingray: { prof: [[0, -.9], [.24, -.8], [.3, .3], [.12, 1.0], [.02, 1.2]], nw: 1, x: (b, h, a) => { [1, -1].forEach(s => b.add(mesh(BX(1.5, .05, 1.1), h, [.75 * s, -.03, 0], [0, .35 * s, .1 * s]))); b.add(mesh(CY(.04, .01, 2.4, 6), dark, [0, 0, 2.2], [H, 0, 0])); b.add(mesh(SP(.07, 8), a, [0, 0, 3.4])); } },
+    bubble: { prof: null, x: (b, h, a) => { b.add(mesh(SP(.62, 26), glass, [0, .1, -.3])); b.add(mesh(TO(.62, .06, 8, 32), h, [0, .1, -.3], [H, 0, 0])); b.add(mesh(CY(.3, .4, .8, 16), h, [0, 0, .6], [H, 0, 0])); b.add(mesh(SP(.12, 10), a, [0, .1, -.3])); } }
+  };
+  const HATS = {
+    tophat: (g, a) => { g.add(mesh(CY(.36, .36, .04, 20), dark), mesh(CY(.22, .24, .42, 20), dark, [0, .22, 0]), mesh(CY(.245, .245, .07, 20), a, [0, .08, 0])); },
+    crown: (g, a) => { const au = M(0xd4a64a, .9, .25); g.add(mesh(CY(.26, .24, .18, 16, 1), au, [0, .08, 0])); for (let i = 0; i < 6; i++) { const t = i / 6 * TAU; g.add(mesh(CO(.05, .16, 6), au, [Math.cos(t) * .24, .24, Math.sin(t) * .24]), mesh(SP(.035, 8), a, [Math.cos(t) * .24, .33, Math.sin(t) * .24])); } },
+    cowboy: (g, a) => { const br = M(0x8b5a2b, .1, .8); g.add(mesh(CY(.5, .5, .04, 24), br, null, null, [1, 1, 1.15]), mesh(CY(.2, .25, .26, 16), br, [0, .14, 0]), mesh(CY(.255, .255, .05, 16), a, [0, .05, 0])); },
+    party: (g, a) => { g.add(mesh(CO(.18, .5, 14), M(0xf472b6, .2, .5), [0, .25, 0]), mesh(SP(.07, 10), a, [0, .52, 0]), mesh(TO(.15, .025, 6, 16), M(0xfde047, .2, .5), [0, .12, 0], [H, 0, 0])); },
+    halo: (g, a) => { g.add(mesh(TO(.26, .035, 8, 28), E(0xfde68a, 3), [0, .32, 0], [H, 0, 0])); },
+    horns: (g, a) => { [1, -1].forEach(s => g.add(mesh(CO(.07, .38, 8), M(0xf5f5f4, .2, .5), [.2 * s, .16, 0], [0, 0, -.5 * s]))); },
+    antenna: (g, a) => { g.add(mesh(CY(.015, .015, .5, 6), dark, [0, .25, 0]), mesh(SP(.07, 10), a, [0, .52, 0])); },
+    wizard: (g, a) => { const pu = M(0x5b21b6, .2, .6); g.add(mesh(CY(.42, .42, .03, 22), pu), mesh(CO(.24, .75, 16), pu, [0, .38, 0], [-.15, 0, 0]), mesh(OC(.07), E(0xfde047, 2.6), [0, .28, -.22])); },
+    viking: (g, a) => { const st = M(0x9ca3af, .9, .3); g.add(mesh(new THREE.SphereGeometry(.26, 18, 10, 0, TAU, 0, H), st)); [1, -1].forEach(s => g.add(mesh(CO(.06, .32, 8), M(0xfef3c7, .1, .6), [.27 * s, .14, 0], [0, 0, -1.1 * s]))); },
+    propeller: (g, a, spin) => { g.add(mesh(new THREE.SphereGeometry(.22, 16, 8, 0, TAU, 0, H), M(0x2563eb, .2, .6))); const p = grp(mesh(BX(.6, .02, .07), M(0xef4444, .2, .5)), mesh(CY(.03, .03, .1, 6), dark)); p.position.y = .24; g.add(p); spin.push(p); },
+    chef: (g, a) => { const w = M(0xffffff, 0, .9); g.add(mesh(CY(.2, .2, .2, 16), w, [0, .1, 0]), mesh(SP(.27, 14), w, [0, .3, 0], null, [1, .7, 1])); },
+    bunny: (g, a) => { [1, -1].forEach(s => g.add(mesh(SP(.07, 10), M(0xfbcfe8, .1, .7), [.1 * s, .3, 0], [0, 0, -.2 * s], [1, 4, .6]))); },
+    tricorne: (g, a) => { const bk = M(0x1f2937, .1, .7); for (let i = 0; i < 3; i++) g.add(mesh(BX(.5, .12, .06), bk, [Math.sin(i * 2.094) * .18, .1, Math.cos(i * 2.094) * .18], [0, i * 2.094, .2])); g.add(mesh(SP(.18, 12), bk, [0, .12, 0], null, [1, .6, 1]), mesh(SP(.05, 8), M(0xd4a64a, .9, .3), [0, .2, -.2])); },
+    headphones: (g, a) => { g.add(mesh(new THREE.TorusGeometry(.26, .03, 8, 24, PI), dark, [0, .05, 0], [0, H, 0])); [1, -1].forEach(s => g.add(mesh(CY(.1, .1, .08, 14), a, [.27 * s, .02, 0], [0, 0, H]))); },
+    catears: (g, a) => { [1, -1].forEach(s => g.add(mesh(CO(.09, .18, 4), M(0x111827, .2, .6), [.13 * s, .1, 0], [0, H / 2, -.2 * s]), mesh(CO(.05, .1, 4), M(0xf9a8d4, .2, .6), [.13 * s, .1, -.02], [0, H / 2, -.2 * s]))); },
+    flower: (g, a) => { g.add(mesh(SP(.06, 10), M(0xfde047, .1, .6), [0, .15, 0])); for (let i = 0; i < 6; i++) { const t = i / 6 * TAU; g.add(mesh(SP(.06, 8), M(0xf9a8d4, .1, .6), [Math.cos(t) * .1, .15, Math.sin(t) * .1], null, [1.4, .5, 1])); } g.add(mesh(CY(.01, .01, .15, 4), M(0x16a34a, .1, .6), [0, .07, 0])); },
+    cone: (g, a) => { g.add(mesh(CO(.18, .5, 16), M(0xf97316, .1, .6), [0, .25, 0]), mesh(CY(.115, .135, .08, 16), M(0xffffff, .1, .6), [0, .22, 0]), mesh(BX(.42, .03, .42), M(0xf97316, .1, .6))); },
+    gradcap: (g, a) => { const bk = M(0x111827, .2, .6); g.add(mesh(CY(.18, .2, .12, 16), bk, [0, .06, 0]), mesh(BX(.5, .025, .5), bk, [0, .14, 0], [0, H / 2, 0]), mesh(CY(.008, .008, .2, 4), M(0xfde047, .3, .5), [.2, .05, .2]), mesh(SP(.03, 6), M(0xfde047, .3, .5), [.2, -.06, .2])); }
+  };
+  const PETS = {
+    cat: (g, a) => { const fur = M(0xf59e0b, .1, .8); g.add(mesh(SP(.28, 14), fur, [0, .18, 0]), mesh(SP(.36, 14), fur, [0, -.22, .1], null, [1, .85, 1.2])); [1, -1].forEach(s => g.add(mesh(CO(.08, .16, 4), fur, [.15 * s, .44, 0]), mesh(SP(.04, 6), E(0x22d3ee, 2), [.1 * s, .22, -.24]))); g.add(mesh(CY(.03, .02, .5, 6), fur, [0, -.1, .5], [.9, 0, 0])); },
+    pup: (g, a) => { const fur = M(0xd6d3d1, .1, .8), dk = M(0x57534e, .1, .8); g.add(mesh(SP(.3, 14), fur, [0, .15, 0]), mesh(SP(.34, 14), fur, [0, -.25, .1], null, [1, .85, 1.2]), mesh(SP(.06, 8), dark, [0, .12, -.3])); [1, -1].forEach(s => g.add(mesh(SP(.08, 8), dk, [.26 * s, .2, 0], null, [.6, 1.6, .8]), mesh(SP(.035, 6), dark, [.1 * s, .22, -.26]))); },
+    owl: (g, a) => { const br = M(0x92400e, .1, .8); g.add(mesh(SP(.35, 14), br, [0, 0, 0], null, [1, 1.2, 1])); [1, -1].forEach(s => g.add(mesh(SP(.1, 10), M(0xffffff, 0, .6), [.13 * s, .14, -.28]), mesh(SP(.05, 8), dark, [.13 * s, .14, -.36]), mesh(CO(.05, .14, 4), br, [.18 * s, .42, 0]))); g.add(mesh(CO(.04, .1, 4), M(0xf59e0b, .1, .5), [0, .02, -.36], [-H, 0, 0])); },
+    jelly: (g, a) => { const jm = new THREE.MeshStandardMaterial({ color: 0xf0abfc, emissive: 0xc026d3, emissiveIntensity: .8, transparent: true, opacity: .75 }); g.add(mesh(new THREE.SphereGeometry(.34, 18, 10, 0, TAU, 0, H), jm)); for (let i = 0; i < 6; i++) { const t = i / 6 * TAU; g.add(mesh(CY(.02, .005, .6, 4), jm, [Math.cos(t) * .2, -.3, Math.sin(t) * .2])); } },
+    ufo: (g, a) => { g.add(mesh(lathe([[0, -.08], [.3, -.06], [.42, 0], [.3, .07], [0, .1]], 24), M(0xcbd5e1, .9, .3)), mesh(new THREE.SphereGeometry(.16, 14, 8, 0, TAU, 0, H), glass, [0, .07, 0])); for (let i = 0; i < 6; i++) { const t = i / 6 * TAU; g.add(mesh(SP(.03, 6), a, [Math.cos(t) * .34, -.02, Math.sin(t) * .34])); } },
+    slime: (g, a) => { const sm = new THREE.MeshStandardMaterial({ color: 0x4ade80, emissive: 0x16a34a, emissiveIntensity: .4, transparent: true, opacity: .85, roughness: .1 }); g.add(mesh(SP(.36, 16), sm, null, null, [1.1, .8, 1])); [1, -1].forEach(s => g.add(mesh(SP(.05, 8), dark, [.12 * s, .1, -.3]))); },
+    dragon: (g, a) => { const sc = M(0xdc2626, .4, .4); g.add(mesh(SP(.3, 14), sc, null, null, [.9, .9, 1.4]), mesh(SP(.18, 12), sc, [0, .22, -.34]), mesh(CO(.08, .5, 6), sc, [0, 0, .55], [H, 0, 0])); [1, -1].forEach(s => g.add(mesh(BX(.5, .02, .3), M(0xfca5a5, .2, .6), [.35 * s, .18, 0], [0, 0, .5 * s]), mesh(CO(.03, .12, 4), M(0xfef3c7, .2, .5), [.08 * s, .4, -.34]))); g.add(mesh(SP(.03, 6), E(0xfde047, 3), [.08, .26, -.5]), mesh(SP(.03, 6), E(0xfde047, 3), [-.08, .26, -.5])); },
+    penguin: (g, a) => { g.add(mesh(SP(.32, 14), dark, null, null, [1, 1.3, 1]), mesh(SP(.24, 14), M(0xffffff, 0, .7), [0, -.05, -.12], null, [1, 1.3, .8]), mesh(CO(.05, .12, 6), M(0xf59e0b, .1, .5), [0, .18, -.34], [-H, 0, 0])); [1, -1].forEach(s => g.add(mesh(SP(.035, 6), M(0xffffff, 0, .5), [.09 * s, .26, -.26]))); },
+    ghost: (g, a) => { const gm = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xe0e7ff, emissiveIntensity: .6, transparent: true, opacity: .8 }); g.add(mesh(SP(.32, 16), gm, [0, .1, 0]), mesh(CY(.32, .38, .4, 16, 1, true), gm, [0, -.18, 0])); [1, -1].forEach(s => g.add(mesh(SP(.05, 8), dark, [.11 * s, .16, -.28]))); },
+    fish: (g, a) => { const fm = M(0xfb923c, .3, .4); g.add(mesh(SP(.3, 14), fm, null, null, [.7, 1, 1.3]), mesh(CO(.22, .3, 4), fm, [0, 0, .46], [H, 0, 0], [.4, 1, 1])); [1, -1].forEach(s => g.add(mesh(SP(.05, 8), dark, [.16 * s, .08, -.22]))); },
+    robot: (g, a) => { const st = M(0x94a3b8, .9, .3); g.add(mesh(BX(.42, .36, .36), st), mesh(BX(.34, .3, .3), st, [0, -.36, 0]), mesh(CY(.015, .015, .2, 6), dark, [0, .28, 0]), mesh(SP(.05, 8), E(0xef4444, 3), [0, .4, 0])); [1, -1].forEach(s => g.add(mesh(SP(.05, 8), a, [.1 * s, .04, -.19]))); },
+    star: (g, a) => { g.add(mesh(OC(.32), E(0xfde047, 2), null, null, [1, 1, .4])); [1, -1].forEach(s => g.add(mesh(SP(.04, 6), dark, [.08 * s, .05, -.14]))); },
+    duck: (g, a) => { const y = M(0xfde047, .1, .7); g.add(mesh(SP(.3, 14), y, [0, -.1, .05], null, [1, .9, 1.3]), mesh(SP(.2, 14), y, [0, .22, -.15]), mesh(BX(.16, .04, .16), M(0xf97316, .1, .5), [0, .2, -.36])); [1, -1].forEach(s => g.add(mesh(SP(.03, 6), dark, [.08 * s, .28, -.3]))); }
+  };
   function buildShip(cfg) {
     const ac = hx(cfg.accent || '#22d3ee'), fin = FIN[cfg.finish] || FIN.chrome; let pc = hx(cfg.paint || '#94a3b8'); if (cfg.finish === 'carbon') pc = shade(pc, .3);
     const hullM = M(pc, fin.m, fin.r, { side: THREE.DoubleSide, emissive: fin.e ? ac : 0x000000, emissiveIntensity: fin.e }), acc = E(ac, 1.9);
     const g = new THREE.Group(), body = new THREE.Group(); g.add(body);
     const P = { fin: grp(), wingL: grp(), wingR: grp(), engL: grp(), engR: grp(), canopy: grp() }, flames = [];
     for (const k in P) body.add(P[k]);
-    const hull = HULLP[cfg.hull] ? cfg.hull : 'falcon', prof = HULLP[hull], rm = Math.max.apply(null, prof.map(a => a[0]));
-    body.add(mesh(lathe(prof, 40), hullM, null, [-H, 0, 0]));
+    const hull = HULLP[cfg.hull] ? cfg.hull : 'falcon', BD = cfg.body && BODYS[cfg.body], prof = BD ? (BD.prof || [[.3, 0]]) : HULLP[hull], rm = Math.max.apply(null, prof.map(a => a[0]));
+    if (!BD || BD.prof) body.add(mesh(lathe(prof, 40), hullM, null, [-H, 0, 0])); if (BD) BD.x(body, hullM, acc);
     if (cfg.stripe !== false) body.add(mesh(BX(.05, .02, 1.5), acc, [0, rm + .01, .45]));
     // hull-specific details
-    if (hull === 'vanguard') [1, -1].forEach(s => body.add(mesh(BX(.12, .46, 1.5), hullM, [.52 * s, .05, .2]), mesh(BX(.06, .1, 1.1), acc, [.6 * s, .05, .2])));
-    if (hull === 'phantom') body.add(mesh(CY(.025, .05, 1.2, 8), dark, [0, 0, -2.25], [H, 0, 0]), mesh(BX(.04, .7, 1.4), hullM, [0, .45, .95], [-.25, 0, 0]));
-    if (hull === 'titan') [-.6, 0, .6].forEach(z => body.add(mesh(TO(.62, .05, 8, 28), dark, [0, 0, z])));
-    if (hull === 'nova') { body.add(mesh(TO(.46, .04, 8, 28), acc, [0, 0, -.1])); [1, -1].forEach(s => body.add(mesh(BX(.04, .38, .8), hullM, [.2 * s, .38, 1.0], [0, 0, -.4 * s]))); }
-    if (hull === 'wraith') { [1, -1].forEach(s => body.add(mesh(BX(.03, .02, 1.3), acc, [.17 * s, .06, -.3], [0, -.12 * s, 0]), mesh(BX(.5, .03, .5), dark, [.3 * s, 0, -.9], [0, .5 * s, 0]))); body.add(mesh(CY(.02, .045, 1.5, 8), dark, [0, 0, -2.5], [H, 0, 0])); }
-    if (hull === 'aegis') { [1, -1].forEach(s => body.add(mesh(BX(.34, .5, .9), hullM, [.62 * s, 0, -.2], [0, 0, .12 * s]), mesh(BX(.06, .12, .7), acc, [.8 * s, .08, -.2]))); body.add(mesh(TO(.74, .06, 8, 32), acc, [0, 0, .15])); }
-    if (hull === 'ronin') { [1, -1].forEach(s => body.add(mesh(BX(.04, .05, 2.4), acc, [.34 * s, 0, -.6], [0, .1 * s, 0]), mesh(BX(.36, .03, .14), dark, [.3 * s, 0, .55]))); body.add(mesh(BX(.03, .16, 1.1), acc, [0, 0, -2.25])); body.add(mesh(BX(.2, .05, .06), dark, [0, 0, -1.7])); }
-    if (hull === 'hive') { [1, -1].forEach(s => { [-.45, .35].forEach(z => body.add(mesh(SP(.2, 14), dark, [.66 * s, -.05, z]), mesh(TO(.2, .035, 6, 16), acc, [.66 * s, -.05, z], [H, 0, 0]))); }); body.add(mesh(BX(.5, .04, 1.8), dark, [0, .5, -.1]), mesh(BX(.06, .05, 1.7), acc, [0, .53, -.1])); }
-    if (hull === 'longbow') { body.add(mesh(CY(.05, .07, 1.9, 10), dark, [0, 0, -2.6], [H, 0, 0]), mesh(CY(.09, .09, .18, 10), acc, [0, 0, -3.5], [H, 0, 0])); body.add(mesh(CY(.06, .06, .8, 10), dark, [0, .34, -.6], [H, 0, 0]), mesh(SP(.07, 10), acc, [0, .34, -1.02])); }
+    if (!BD && hull === 'vanguard') [1, -1].forEach(s => body.add(mesh(BX(.12, .46, 1.5), hullM, [.52 * s, .05, .2]), mesh(BX(.06, .1, 1.1), acc, [.6 * s, .05, .2])));
+    if (!BD && hull === 'phantom') body.add(mesh(CY(.025, .05, 1.2, 8), dark, [0, 0, -2.25], [H, 0, 0]), mesh(BX(.04, .7, 1.4), hullM, [0, .45, .95], [-.25, 0, 0]));
+    if (!BD && hull === 'titan') [-.6, 0, .6].forEach(z => body.add(mesh(TO(.62, .05, 8, 28), dark, [0, 0, z])));
+    if (!BD && hull === 'nova') { body.add(mesh(TO(.46, .04, 8, 28), acc, [0, 0, -.1])); [1, -1].forEach(s => body.add(mesh(BX(.04, .38, .8), hullM, [.2 * s, .38, 1.0], [0, 0, -.4 * s]))); }
+    if (!BD && hull === 'wraith') { [1, -1].forEach(s => body.add(mesh(BX(.03, .02, 1.3), acc, [.17 * s, .06, -.3], [0, -.12 * s, 0]), mesh(BX(.5, .03, .5), dark, [.3 * s, 0, -.9], [0, .5 * s, 0]))); body.add(mesh(CY(.02, .045, 1.5, 8), dark, [0, 0, -2.5], [H, 0, 0])); }
+    if (!BD && hull === 'aegis') { [1, -1].forEach(s => body.add(mesh(BX(.34, .5, .9), hullM, [.62 * s, 0, -.2], [0, 0, .12 * s]), mesh(BX(.06, .12, .7), acc, [.8 * s, .08, -.2]))); body.add(mesh(TO(.74, .06, 8, 32), acc, [0, 0, .15])); }
+    if (!BD && hull === 'ronin') { [1, -1].forEach(s => body.add(mesh(BX(.04, .05, 2.4), acc, [.34 * s, 0, -.6], [0, .1 * s, 0]), mesh(BX(.36, .03, .14), dark, [.3 * s, 0, .55]))); body.add(mesh(BX(.03, .16, 1.1), acc, [0, 0, -2.25])); body.add(mesh(BX(.2, .05, .06), dark, [0, 0, -1.7])); }
+    if (!BD && hull === 'hive') { [1, -1].forEach(s => { [-.45, .35].forEach(z => body.add(mesh(SP(.2, 14), dark, [.66 * s, -.05, z]), mesh(TO(.2, .035, 6, 16), acc, [.66 * s, -.05, z], [H, 0, 0]))); }); body.add(mesh(BX(.5, .04, 1.8), dark, [0, .5, -.1]), mesh(BX(.06, .05, 1.7), acc, [0, .53, -.1])); }
+    if (!BD && hull === 'longbow') { body.add(mesh(CY(.05, .07, 1.9, 10), dark, [0, 0, -2.6], [H, 0, 0]), mesh(CY(.09, .09, .18, 10), acc, [0, 0, -3.5], [H, 0, 0])); body.add(mesh(CY(.06, .06, .8, 10), dark, [0, .34, -.6], [H, 0, 0]), mesh(SP(.07, 10), acc, [0, .34, -1.02])); }
     // tail fins (detachable)
-    if (hull === 'phantom' || hull === 'nova' || hull === 'wraith' || hull === 'longbow' || hull === 'ronin') P.fin.add(mesh(BX(.05, .62, .8), hullM, [0, .4, 1.0], [0, 0, 0]));
+    if (BD && BD.nw) { } else if (hull === 'phantom' || hull === 'nova' || hull === 'wraith' || hull === 'longbow' || hull === 'ronin') P.fin.add(mesh(BX(.05, .62, .8), hullM, [0, .4, 1.0], [0, 0, 0]));
     else [1, -1].forEach(s => P.fin.add(mesh(BX(.05, .55, .7), hullM, [.3 * s, .34, .9], [0, 0, -.35 * s])));
     P.fin.userData.c = [0, .4, .95];
     // canopy variants
@@ -79,25 +129,28 @@ function init3D() {
     P.canopy.userData.c = [0, cy, -.3];
     // wings (detachable) + cannons
     const wk = WINGP[cfg.wings] ? cfg.wings : 'swept', wx = WINGX[wk], cx = wk === 'delta' ? .9 : wk === 'broad' ? 1.2 : 1;
-    [1, -1].forEach(s => {
+    if (!(BD && BD.nw)) [1, -1].forEach(s => {
       const P2 = s > 0 ? P.wingR : P.wingL, w = mesh(wingG(wk), hullM, [0, -.04, 0], [-H, 0, 0], [s, 1, 1]);
       P2.add(w, mesh(BX(.12, .05, .3), acc, [wx * s, .02, wk === 'forward' ? -.7 : 1.02]), mesh(CY(.045, .055, 1.7, 12), dark, [cx * s, .03, -.2], [H, 0, 0]));
       P2.userData.c = [1.2 * s, 0, .1];
     });
     // engines (detachable) + flames
-    const ek = cfg.engine || 'twin', ES = { twin: { r: .2, l: .9, z: 1.0, pts: [[.36, 0]] }, quad: { r: .13, l: .8, z: 1.0, pts: [[.3, .15], [.3, -.15]] }, heavy: { r: .3, l: 1.1, z: .95, pts: [[.4, 0]] }, pods: { r: .17, l: 1.1, z: .55, pts: [[1.45, -.04]] } }[ek] || { r: .2, l: .9, z: 1, pts: [[.36, 0]] };
+    const fc = cfg.flame ? hx(cfg.flame) : ac, ek = cfg.engine || 'twin', ES = { twin: { r: .2, l: .9, z: 1.0, pts: [[.36, 0]] }, quad: { r: .13, l: .8, z: 1.0, pts: [[.3, .15], [.3, -.15]] }, heavy: { r: .3, l: 1.1, z: .95, pts: [[.4, 0]] }, pods: { r: .17, l: 1.1, z: .55, pts: [[1.45, -.04]] } }[ek] || { r: .2, l: .9, z: 1, pts: [[.36, 0]] };
     [1, -1].forEach(s => {
       const P2 = s > 0 ? P.engR : P.engL;
       ES.pts.forEach(pt => {
         const x = pt[0] * s, y = pt[1], zt = ES.z + ES.l / 2;
         P2.add(mesh(CY(ES.r, ES.r * 1.2, ES.l, 20), dark, [x, y, ES.z], [H, 0, 0]), mesh(TO(ES.r, .03, 8, 24), acc, [x, y, zt]));
-        const f = mesh(new THREE.ConeGeometry(ES.r * .75, 1.6, 14, 1, true), new THREE.MeshBasicMaterial({ color: ac, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false }), [x, y, zt + .8], [H, 0, 0]);
-        const gs = sprite(ac, 1.5, x, y, zt + .1); P2.add(f, gs); flames.push(f, gs);
+        const f = mesh(new THREE.ConeGeometry(ES.r * .75, 1.6, 14, 1, true), new THREE.MeshBasicMaterial({ color: fc, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false }), [x, y, zt + .8], [H, 0, 0]);
+        const gs = sprite(fc, 1.5, x, y, zt + .1); P2.add(f, gs); flames.push(f, gs);
       });
       P2.userData.c = [ES.pts[0][0] * s, 0, ES.z];
     });
-    const light = new THREE.PointLight(ac, 1.8, 170); light.position.set(0, 0, 2); body.add(light);
-    return { g, body, P, flames, light, k: HULLK[hull] || 1 };
+    const light = new THREE.PointLight(fc, 1.8, 170); light.position.set(0, 0, 2); body.add(light);
+    const spinL = []; let pet = null;
+    if (cfg.hat && HATS[cfg.hat]) { const hg = grp(); HATS[cfg.hat](hg, acc, spinL); hg.position.set(0, cy + (cfg.canopy === 'dome' ? .32 : .22), BD && !BD.prof ? -.3 : -.35); hg.scale.setScalar(1.25); P.canopy.add(hg); }
+    if (cfg.pet && PETS[cfg.pet]) { pet = grp(); PETS[cfg.pet](pet, acc); pet.position.set(0, 1.05, 2.1); pet.scale.setScalar(.85); pet.userData.y0 = 1.05; g.add(pet); }
+    return { g, body, P, flames, light, k: HULLK[hull] || 1, pet, spin: spinL };
   }
 
   // ================= enemy archetypes (all face -Z, about 3-4 units long) =================

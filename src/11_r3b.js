@@ -281,6 +281,7 @@
   function flicker(r, tk, thr) {
     r.s.flames.forEach((f, i) => { const k = (1 + Math.sin(tk * .7 + i * 2) * .12 + Math.random() * .08) * (1 + (thr || 0) * .35); if (f.isSprite) f.scale.setScalar(1.5 * k); else f.scale.set(1, k, 1); });
     r.s.light.intensity = 1.5 + Math.random() * .6 + (thr || 0) * .5;
+    if (r.s.pet) { r.s.pet.position.y = r.s.pet.userData.y0 + Math.sin(tk * .08) * .18; r.s.pet.position.x = Math.sin(tk * .035) * .35; r.s.pet.rotation.z = Math.sin(tk * .05) * .15; } if (r.s.spin) r.s.spin.forEach(o => { o.rotation.y += .5; });
   }
 
   // ---- debris: chips + torn-off ship parts ----
@@ -431,7 +432,7 @@
         const cfg = Gs.showCfg || SAVE.pl[0].cfg, r = rigFor('show', cfg), hang = view === 'hangar', narrow = W < 760; if (r.bad) { renderer.render(scene, camera); return; }
         R.hy += .006 * df; const yaw = hang ? R.hy : Math.sin(tk * .012) * .7;
         r.rig.visible = true; r.ship.rotation.y = -H + yaw; r.rig.rotation.x = hang ? .42 : .55;
-        const sc = (hang ? (narrow ? Hh * .1 : Hh * .19) : (narrow ? Hh * .1 : Hh * .15)) * r.k, x = hang ? (narrow ? W * .5 : W * .76) : (narrow ? W * .5 : W * .74), y = hang ? (narrow ? Hh * .3 : Hh * .46) : (narrow ? Hh * .26 : Hh * .5) + Math.sin(tk * .03) * 8;
+        const SF = Gs.showF, sc = (SF ? Hh * (narrow ? SF.k * .7 : SF.k) : hang ? (narrow ? Hh * .1 : Hh * .19) : (narrow ? Hh * .1 : Hh * .15)) * r.k, x = SF ? W * (narrow ? .5 : SF.x) : hang ? (narrow ? W * .5 : W * .76) : (narrow ? W * .5 : W * .74), y = SF ? Hh * (narrow ? SF.ny : SF.y) : hang ? (narrow ? Hh * .3 : Hh * .46) : (narrow ? Hh * .26 : Hh * .5) + Math.sin(tk * .03) * 8;
         r.rig.position.set(x - W / 2, Hh / 2 - y, 0); r.rig.scale.setScalar(sc); r.rig.rotation.z = Math.sin(tk * .02) * .08; flicker(r, tk, .5);
         const rk = 's' + cfg.accent; if (rk !== rimKey) { rimKey = rk; rimL.color.setHex(hx(cfg.accent)); }
       }

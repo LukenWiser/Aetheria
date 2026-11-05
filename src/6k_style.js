@@ -43,8 +43,8 @@ killFx = function (e) { const k = PS().cos.kfx; if (SET.reduce) return;
   else if (k === 'blackhole') { shock(e.x, e.y, '#7c3aed', e.w * 2, 22); for (let i = 0; i < 14; i++) { const a = rnd(0, TAU), r = 50; pcl({ x: e.x + Math.cos(a) * r, y: e.y + Math.sin(a) * r, vx: -Math.cos(a) * 3, vy: -Math.sin(a) * 3, l: 16, l0: 16, c: '#c4b5fd', r: 2.5, k: 0, fr: 1 }); } }
   else if (k === 'signal') { for (let i = 0; i < 3; i++) G.ent.bm.push({ k: 'arc', x: e.x, y: e.y, x2: e.x + rnd(-90, 90), y2: e.y + rnd(-90, 90), l: 12, l0: 12 }); shock(e.x, e.y, '#22d3ee', e.w * 1.4, 12); }
   else _killFx0(e); };
-function drawAura(g, x, y, id, t, s) { // shared by the game and the Locker preview
-  const A = COS.aura[id]; if (!A || id === 'none') return; s = s || 1; const c = A.c;
+function drawAura(g, x, y, id, t, s, cOver) { // shared by the game and the Locker preview
+  const A = COS.aura[id]; if (!A || id === 'none') return; s = s || 1; const c = cOver || A.c;
   g.save(); g.globalCompositeOperation = 'lighter';
   if (id === 'halo') { g.strokeStyle = c; g.globalAlpha = .7; g.lineWidth = 2.5 * s; g.beginPath(); g.ellipse(x, y - 30 * s, 22 * s, 6 * s, 0, 0, TAU); g.stroke(); drawGlow(g, x, y - 30 * s, 26 * s, c, .35); }
   else if (id === 'orbit' || id === 'signal') { for (let i = 0; i < 4; i++) { const a = t * .06 + i * H; drawGlow(g, x + Math.cos(a) * 40 * s, y + Math.sin(a) * 16 * s, 9 * s, c, .9); } if (id === 'signal' && t % 20 < 3) { g.strokeStyle = c; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x - 40 * s, y); for (let i = 1; i < 6; i++) g.lineTo(x - 40 * s + i * 16 * s, y + (Math.random() - .5) * 24 * s); g.stroke(); } }
