@@ -55,10 +55,18 @@ const RIVAL = [
     ch: [{ t: 'Fly with me instead.', k: 'res', reply: ['VEX', 'You keep saying that.'] }, { t: 'No more games.', k: 'riv', reply: ['VEX', 'Finally.'] }], lose: null }
 ];
 Object.assign(EN, { rival: { nm: 'Vex, Rival Ace', m: ['dart', { c: 0x1f1d2b, e: 0xf43f5e }], w: 118, hp: 520, sp: 2.2, ai: 'hover', f: { k: 'aim', r: 38, s: 6.2, n: 2 }, sc: 3000, cr: 60, cost: 0, elite: 1, rival: 1 } });
-const rivalIdx = R => R && R.mode === 'expedition' && !R.var && R.tier === 1 ? RIVAL.findIndex(r => r.w === R.w && r.lv === R.lv) : -1;
+// Vex finds you: each meeting happens in its home world once you are a few sectors in (any route, any tier),
+// and if you flew past a world without meeting her, the missed meeting catches up with you in the next world you play.
+const rivalCol = (w, i) => { try { const n = wg(w).N[i]; if (n && n.c !== undefined) return n.c; } catch (e) { } return i; };
+const rivalIdx = R => {
+  if (!R || R.mode !== 'expedition' || R.var || R.w >= 16 || (R.spec && R.spec.type === 'B') || R.lv === LV - 1) return -1;
+  const S = ST(), i = RIVAL.findIndex((r, k) => S.vex[k] === undefined); if (i < 0) return -1;
+  const V0 = RIVAL[i]; if (R.w < V0.w) return -1;
+  const col = rivalCol(R.w, R.lv); return col >= (R.w === V0.w ? Math.min(5, V0.lv - 1) : 2) ? i : -1;
+};
 function rivalTick(R) {
   const i = rivalIdx(R); if (i < 0) return; const V0 = RIVAL[i], S = ST();
-  if (S.vex[i] === undefined && !R.rivalOn && R.stage === 'wave' && R.wave >= 1 && R.st > 60) {
+  if (S.vex[i] === undefined && !R.rivalOn && R.stage === 'wave' && ((R.wave >= 1 && R.st > 60) || R.st > 420)) {
     R.rivalOn = 1; const panels = V0.talk.map(p => ({ kind: p[0], who: p[1], col: p[1] === 'VEX' ? VEXC : undefined, text: p[2], bi: R.w, nob: 1 }));
     panels[panels.length - 1].choices = V0.ch; panels[panels.length - 1].cid = 'vex' + i;
     const go = () => { const e = mkEnemy('rival', V.W + 80, V.H / 2, { hpm: V0.hp }); e.rv = i; e.hx = V.W * .78; banner('RIVAL: VEX', 'BEAT HER', true); };

@@ -6468,12 +6468,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V51';
+const GAME_VER = 'V52';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V52', 'Where Is Vex?', ['Fixed: Vex, the rival ace, could be skipped entirely - she was tied to one exact sector that the new random routes could fly around', 'Vex now finds you a few sectors into her world, on any route and any tier', 'Missed her? She catches up with you in the next world you play, so every save gets the whole story', 'She also shows up during the first wave of a long sector, not only after it']],
   ['V51', 'All Aboard', ['The menus now float in the air inside your own ship - every button flies you through the corridors to the right room', 'Eight rooms around a central hub: Bridge, Map Room, Star Deck, Workshop, Fab Bay, Engineering, Comms and Archive', 'The Workshop has your real ship on a lift - change your look and the robot arms repaint it', 'The Bridge window shows the planet of your newest world, the Map Room table orbits all 17 worlds, the Archive fills with a trophy for every boss you beat', 'Move the mouse to look around - the menus really hang in the room', 'Tap during a flight to skip straight there', 'Prefer the old flat menus? Settings > Graphics > Ship interior menus']],
   ['V50', 'The First Signal, Reborn', ['Aetheria Prime, the final boss, is rebuilt: a living sun-eye inside three turning halo rings, eight feathered light-wings, a crown, a storm of orbiting shards and a sunburst - and it burns hotter the closer it gets to death', 'World 17 has a new backdrop: colossal golden halo rings around the sun-world, a ring of floating Zenith Spires and a slow burst of light', 'World 17 map panel: a sunburst with turning halos and a crown of light', 'Galaxy encounters work again: FIGHT launches the ambush (scaled to the system), RUN drops your cores as promised', 'Map buttons no longer jump down and sideways when you hover them', 'Audio fix: sounds can no longer pile up and choke the mix when lots happens at once', 'Audio fix: the sound wakes back up after switching tabs, a call or sleep, and bad values can no longer silence it for good', 'Audio fix: menu music no longer stutters or gets stuck muffled when you flick between screens']],
   ['V49', 'Wild Routes', ['Every world now has its own randomly grown route tree - no two worlds share a layout', 'The main path wanders across five lanes, so there is no single obvious line any more', 'Side routes split, dead-end, cross over each other and rejoin the main path in every world', 'Sectors sit on a grid, so nodes can never overlap', 'A sector opens when any route leading into it is cleared']],
@@ -6846,10 +6847,18 @@ const RIVAL = [
     ch: [{ t: 'Fly with me instead.', k: 'res', reply: ['VEX', 'You keep saying that.'] }, { t: 'No more games.', k: 'riv', reply: ['VEX', 'Finally.'] }], lose: null }
 ];
 Object.assign(EN, { rival: { nm: 'Vex, Rival Ace', m: ['dart', { c: 0x1f1d2b, e: 0xf43f5e }], w: 118, hp: 520, sp: 2.2, ai: 'hover', f: { k: 'aim', r: 38, s: 6.2, n: 2 }, sc: 3000, cr: 60, cost: 0, elite: 1, rival: 1 } });
-const rivalIdx = R => R && R.mode === 'expedition' && !R.var && R.tier === 1 ? RIVAL.findIndex(r => r.w === R.w && r.lv === R.lv) : -1;
+// Vex finds you: each meeting happens in its home world once you are a few sectors in (any route, any tier),
+// and if you flew past a world without meeting her, the missed meeting catches up with you in the next world you play.
+const rivalCol = (w, i) => { try { const n = wg(w).N[i]; if (n && n.c !== undefined) return n.c; } catch (e) { } return i; };
+const rivalIdx = R => {
+  if (!R || R.mode !== 'expedition' || R.var || R.w >= 16 || (R.spec && R.spec.type === 'B') || R.lv === LV - 1) return -1;
+  const S = ST(), i = RIVAL.findIndex((r, k) => S.vex[k] === undefined); if (i < 0) return -1;
+  const V0 = RIVAL[i]; if (R.w < V0.w) return -1;
+  const col = rivalCol(R.w, R.lv); return col >= (R.w === V0.w ? Math.min(5, V0.lv - 1) : 2) ? i : -1;
+};
 function rivalTick(R) {
   const i = rivalIdx(R); if (i < 0) return; const V0 = RIVAL[i], S = ST();
-  if (S.vex[i] === undefined && !R.rivalOn && R.stage === 'wave' && R.wave >= 1 && R.st > 60) {
+  if (S.vex[i] === undefined && !R.rivalOn && R.stage === 'wave' && ((R.wave >= 1 && R.st > 60) || R.st > 420)) {
     R.rivalOn = 1; const panels = V0.talk.map(p => ({ kind: p[0], who: p[1], col: p[1] === 'VEX' ? VEXC : undefined, text: p[2], bi: R.w, nob: 1 }));
     panels[panels.length - 1].choices = V0.ch; panels[panels.length - 1].cid = 'vex' + i;
     const go = () => { const e = mkEnemy('rival', V.W + 80, V.H / 2, { hpm: V0.hp }); e.rv = i; e.hx = V.W * .78; banner('RIVAL: VEX', 'BEAT HER', true); };
@@ -9100,7 +9109,7 @@ const SHIP = (() => {
 
   // ---------- turning ship mode on and off ----------
   function wanted() {
-    return !!T && !!T.CatmullRomCurve3 && SET.shipMenu !== false && !!R3 && !!SET.models && !R3.lost && !R3.shipFail && G.scene !== 'play' && !G.cut && !(typeof INTRO !== 'undefined' && INTRO.on)
+    return !!T && !!T.CatmullRomCurve3 && !!T.Fog && SET.shipMenu !== false && !!R3 && !!SET.models && !R3.lost && !R3.shipFail && G.scene !== 'play' && !G.cut && !(typeof INTRO !== 'undefined' && INTRO.on)
       && !!UI.top && !!SHIPROOM[UI.top] && !document.body.classList.contains('photo');
   }
   function enable() {

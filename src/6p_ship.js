@@ -348,7 +348,7 @@ const SHIP = (() => {
 
   // ---------- turning ship mode on and off ----------
   function wanted() {
-    return !!T && !!T.CatmullRomCurve3 && SET.shipMenu !== false && !!R3 && !!SET.models && !R3.lost && !R3.shipFail && G.scene !== 'play' && !G.cut && !(typeof INTRO !== 'undefined' && INTRO.on)
+    return !!T && !!T.CatmullRomCurve3 && !!T.Fog && SET.shipMenu !== false && !!R3 && !!SET.models && !R3.lost && !R3.shipFail && G.scene !== 'play' && !G.cut && !(typeof INTRO !== 'undefined' && INTRO.on)
       && !!UI.top && !!SHIPROOM[UI.top] && !document.body.classList.contains('photo');
   }
   function enable() {
