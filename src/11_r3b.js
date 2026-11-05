@@ -417,7 +417,7 @@
         const cfg = Gs.showCfg || SAVE.pl[0].cfg, r = rigFor('show', cfg), hang = view === 'hangar', narrow = W < 760; if (r.bad) { renderer.render(scene, camera); return; }
         R.hy += .006 * df; const yaw = hang ? R.hy : Math.sin(tk * .012) * .7;
         r.rig.visible = true; r.ship.rotation.y = -H + yaw; r.rig.rotation.x = hang ? .42 : .55;
-        const sc = (hang ? (narrow ? Hh * .1 : Hh * .19) : (narrow ? Hh * .1 : Hh * .15)) * r.k, x = hang ? (narrow ? W * .5 : W * .66) : (narrow ? W * .5 : W * .74), y = hang ? (narrow ? Hh * .3 : Hh * .46) : (narrow ? Hh * .26 : Hh * .5) + Math.sin(tk * .03) * 8;
+        const sc = (hang ? (narrow ? Hh * .1 : Hh * .19) : (narrow ? Hh * .1 : Hh * .15)) * r.k, x = hang ? (narrow ? W * .5 : W * .76) : (narrow ? W * .5 : W * .74), y = hang ? (narrow ? Hh * .3 : Hh * .46) : (narrow ? Hh * .26 : Hh * .5) + Math.sin(tk * .03) * 8;
         r.rig.position.set(x - W / 2, Hh / 2 - y, 0); r.rig.scale.setScalar(sc); r.rig.rotation.z = Math.sin(tk * .02) * .08; flicker(r, tk, .5);
         const rk = 's' + cfg.accent; if (rk !== rimKey) { rimKey = rk; rimL.color.setHex(hx(cfg.accent)); }
       }

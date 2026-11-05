@@ -625,7 +625,7 @@ function init3D() {
         const cfg = Gs.showCfg || SAVE.pl[0].cfg, r = rigFor('show', cfg), hang = view === 'hangar', narrow = W < 760; if (r.bad) { renderer.render(scene, camera); return; }
         R.hy += .006 * df; const yaw = hang ? R.hy : Math.sin(tk * .012) * .7;
         r.rig.visible = true; r.ship.rotation.y = -H + yaw; r.rig.rotation.x = hang ? .42 : .55;
-        const sc = (hang ? (narrow ? Hh * .1 : Hh * .19) : (narrow ? Hh * .1 : Hh * .15)) * r.k, x = hang ? (narrow ? W * .5 : W * .66) : (narrow ? W * .5 : W * .74), y = hang ? (narrow ? Hh * .3 : Hh * .46) : (narrow ? Hh * .26 : Hh * .5) + Math.sin(tk * .03) * 8;
+        const sc = (hang ? (narrow ? Hh * .1 : Hh * .19) : (narrow ? Hh * .1 : Hh * .15)) * r.k, x = hang ? (narrow ? W * .5 : W * .76) : (narrow ? W * .5 : W * .74), y = hang ? (narrow ? Hh * .3 : Hh * .46) : (narrow ? Hh * .26 : Hh * .5) + Math.sin(tk * .03) * 8;
         r.rig.position.set(x - W / 2, Hh / 2 - y, 0); r.rig.scale.setScalar(sc); r.rig.rotation.z = Math.sin(tk * .02) * .08; flicker(r, tk, .5);
         const rk = 's' + cfg.accent; if (rk !== rimKey) { rimKey = rk; rimL.color.setHex(hx(cfg.accent)); }
       }
@@ -5581,8 +5581,9 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V32';
+const GAME_VER = 'V33';
 const UPDATES = [
+  ['V33', 'New Screen Layouts', ['Select Mode: a big list of modes on the left and a briefing for the one you pick', 'Shop: categories down the side and one clean list with level bars', 'Pause: big Resume / Restart / Settings / Photo / Quit choices with your run stats', 'Results: a huge title and rank on one side, your stats on the other', 'Settings, Hangar and Profile: side rails instead of rows of tabs', 'Expedition map: numbered world buttons and a bigger sector route']],
   ['V32', 'Every Screen Restyled', ['Every menu screen now matches the new main menu: big titles, glass panels and your ship in the background', 'Buttons, tabs, cards and toggles all follow your ship\'s accent colour', 'Cleaner layouts on phones']],
   ['V31', 'New Main Menu', ['A brand-new full-screen main menu: big title, your ship front and centre, and everything else tidied into one row', 'The menu takes its colour from your ship\'s accent', 'Pilot card with your rank, level progress, cores and worlds', 'Works with mouse, touch and controller, on any screen size']],
   ['V30', 'Online', ['Online play on the Aetheria website: sign in with Google', 'Pilot names and friend codes, friend requests, and see which friends are online', 'Online co-op and versus: quick match, private rooms with a 4-letter code, or invite a friend', 'Direct connection between players, with an automatic backup route if a network blocks it', 'Quick emotes in online matches (keys 7 8 9 0)', 'Block and report options for other pilots']],
@@ -6562,6 +6563,84 @@ SCR.scMenu = () => {
 // every screen picks up the pilot's accent colour
 const _show2 = UI.show.bind(UI);
 UI.show = function (id, nh) { try { const a = SAVE.pl[0].cfg.accent; if (a) document.body.style.setProperty('--pa', a); } catch (e) { } return _show2(id, nh); };
+
+// ================= SCREEN LAYOUTS: full-screen versions of the main screens, in the main-menu style =================
+// ---------- Select Mode: big typographic list on the left, the chosen mode's briefing on the right ----------
+const modeHi = k => { const sk = dailyStreakNow(); return k === 'endless' ? (SAVE.hi.endless.score ? 'Best ' + fmt(SAVE.hi.endless.score) + ', wave ' + SAVE.hi.endless.wave : '') : k === 'blitz' ? (SAVE.hi.blitz.score ? 'Best ' + fmt(SAVE.hi.blitz.score) : '') : k === 'rush' ? (SAVE.hi.rush.time ? 'Best time ' + SAVE.hi.rush.time + 's' : 'Every boss you have unlocked') : k === 'daily' ? 'Today: ' + dailyInfo().mod.nm + (sk ? ', ' + sk + ' day streak' : '') : k === 'defense' ? (SAVE.hi.def.wave ? 'Best wave ' + SAVE.hi.def.wave : '') : k === 'nohit' ? (Object.keys(SAVE.hi.nohit).length ? Object.keys(SAVE.hi.nohit).length + ' worlds cleared' : '') : k === 'vault' ? (SAVE.hi.vault.clears ? 'Cracked ' + SAVE.hi.vault.clears + 'x' : '') : k === 'hardcore' ? ((SAVE.hi.hc || {}).wave ? 'Best wave ' + SAVE.hi.hc.wave : '') : k === 'expedition' ? Math.min(SAVE.wu, WORLDS.length) + ' of ' + WORLDS.length + ' worlds open' : ''; };
+SCR.scModes = () => {
+  const ks = Object.keys(MODES), sel = MODES[UI.msel] ? UI.msel : 'expedition', m = MODES[sel], lock = m.secret && !SAVE.unl[sel];
+  const row = k => { const M = MODES[k], lk = M.secret && !SAVE.unl[k]; return '<button class="sm-row' + (k === sel ? ' on' : '') + (lk ? ' lk' : '') + '" data-act="msel:' + k + '"><span class="sm-ic">' + (lk ? ICO.lock : ICO[M.ic] || '') + '</span><span class="sm-nm">' + (lk ? '???' : M.nm) + '</span></button>'; };
+  return '<div class="lay lay-modes"><header class="lay-h"><h1 class="lay-t">Select mode</h1><div class="mm-seg" role="group" aria-label="Players"><button data-act="players:1" class="' + (SAVE.players === 1 ? 'on' : '') + '">1P</button><button data-act="players:2" class="' + (SAVE.players === 2 ? 'on' : '') + '">2P co-op</button></div></header>' +
+    '<div class="sm-cols"><nav class="sm-list"><div class="sm-grp">Main</div>' + ks.filter(k => !MODES[k].cat).map(row).join('') + '<div class="sm-grp">Challenges</div>' + ks.filter(k => MODES[k].cat).map(row).join('') + '</nav>' +
+    '<section class="sm-brief"><span class="sm-big">' + (lock ? ICO.lock : ICO[m.ic] || '') + '</span><h2 class="sm-bt">' + (lock ? '???' : m.nm) + '</h2><p class="sm-bd">' + (lock ? (m.hint || 'Something is hidden here. Keep flying, and keep it clean.') : m.ds) + '</p>' + (!lock && modeHi(sel) ? '<p class="sm-hi">' + modeHi(sel) + '</p>' : '') + '<button class="btn big' + (lock ? ' off' : '') + '" data-act="mode:' + sel + '">' + (sel === 'expedition' || sel === 'endless' || sel === 'training' || sel === 'nohit' ? 'Choose world' : 'Start') + '</button></section></div>' +
+    '<footer class="lay-f"><button class="btn sm" data-act="back">Back</button><span class="xs mut">' + (SAVE.players === 2 ? '2-player co-op is on' : 'Tip: switch to 2P co-op to bring a friend') + '</span></footer></div>';
+};
+ACT.msel = a => { if (UI.msel === a[0] && MODES[a[0]] && !(MODES[a[0]].secret && !SAVE.unl[a[0]])) { ACT.mode([a[0]]); return; } UI.msel = a[0]; SFX.click(); UI.refresh(); };
+
+// ---------- Pause: the run on the right, big choices on the left ----------
+SCR.scPause = () => {
+  const R = G.run, tr = R && R.mode === 'training', dev = SAVE.dev || G.god, W = R ? WORLDS[R.w] : null;
+  const it = (act, label, cls) => '<button class="mm-nav' + (cls ? ' ' + cls : '') + '" data-act="' + act + '"><span class="mm-w">' + label + '</span></button>';
+  return '<div class="lay lay-pause"><h1 class="lay-t">Paused</h1><nav class="mm-main ps-nav">' + it('resume', 'Resume', 'ps-first') + it('restart', 'Restart') + it('settings', 'Settings') + it('photo', 'Photo mode') + it('quit', 'Quit to menu', 'ps-quit') + '</nav>' +
+    '<aside class="mm-card ps-run">' + (R ? '<div class="mm-who"><span class="mm-name">' + escH(objText(R)) + '</span></div><div class="xs mut" style="margin-top:4px">' + (W ? 'World ' + (R.w + 1) + ', ' + escH(W.nm) : '') + '</div><dl class="mm-stats" style="margin-top:12px"><div><dt>Score</dt><dd>' + fmt(Math.round(R.score)) + '</dd></div><div><dt>Kills</dt><dd>' + fmt(R.kills) + '</dd></div><div><dt>Cores</dt><dd class="gold">' + fmt(R.cores) + '</dd></div></dl>' : '') +
+    '<div class="row" style="gap:6px;margin-top:12px;flex-wrap:wrap"><button class="btn sm" data-act="fs">' + (document.fullscreenElement ? 'Exit full screen' : 'Full screen') + '</button>' + (tr ? '<button class="btn sm" data-act="spawnboss">Spawn boss</button><button class="btn sm" data-act="nextworld">Next world</button>' : '') + (dev ? '<button class="btn sm gold" data-act="cheat:win">Dev: win</button><button class="btn sm gold" data-act="cheat:god">Dev: god</button>' : '') + '</div></aside></div>';
+};
+
+// ---------- Shop: categories down the left, one clean list on the right ----------
+SCR.scShop = () => {
+  const i = pi(), pl = SAVE.pl[i], cat = UI.shc === 'wpn' ? 'wpn' : 'up';
+  const tabsP = SAVE.players === 2 ? '<div class="mm-seg">' + [0, 1].map(n => '<button data-act="ptab:' + n + '" class="' + (n === i ? 'on' : '') + '">P' + (n + 1) + '</button>').join('') + '</div>' : '';
+  const rows = cat === 'up' ? Object.keys(UPG).map(k => { const U = UPG[k], lv = pl.up[k], mx = lv >= U.max, pr = upPrice(k, lv), can = SAVE.cores >= pr;
+      return '<div class="sh-row"><span class="sh-ic">' + ICO[U.ic] + '</span><div class="sh-tx"><b>' + U.nm + '</b><span>' + U.ds + '</span><div class="sh-pips">' + Array.from({ length: U.max }, (_, n) => '<i class="' + (n < lv ? 'on' : '') + '"></i>').join('') + '</div></div><button class="btn' + (mx ? ' off' : can ? ' gold' : ' off') + '" data-act="buy:' + k + '">' + (mx ? 'Maxed' : fmt(pr)) + '</button></div>'; }).join('')
+    : WORDER.map(id => { const w = WPN[id], own = pl.wown.indexOf(id) >= 0, eq = pl.wpn === id;
+      return '<div class="sh-row"><span class="sh-ic" style="color:' + w.c + '">' + ICO.dmg + '</span><div class="sh-tx"><b style="color:' + w.c + '">' + wName(pl, id) + '</b><span>' + w.ds + '</span>' + (own ? wupHtml(pl, id) : '<span class="xs mut">Damage ' + w.d + ', ' + (60 / w.r).toFixed(1) + ' shots a second</span>') + '</div>' + (own ? '<button class="btn' + (eq ? ' on' : '') + '" data-act="wpn:' + id + '">' + (eq ? 'Equipped' : 'Equip') + '</button>' : '<button class="btn gold' + (SAVE.cores < w.price ? ' off' : '') + '" data-act="wpn:' + id + '">' + fmt(w.price) + '</button>') + '</div>'; }).join('');
+  return '<div class="lay lay-shop"><header class="lay-h"><h1 class="lay-t">Shop</h1>' + tabsP + '<div class="sh-wallet"><span>Cores</span><b>' + fmt(SAVE.cores) + '</b></div></header>' +
+    '<div class="sh-cols"><nav class="sh-rail"><button class="sh-cat' + (cat === 'up' ? ' on' : '') + '" data-act="shc:up"><span>Upgrades</span><small>Hull, shields, damage, speed</small></button><button class="sh-cat' + (cat === 'wpn' ? ' on' : '') + '" data-act="shc:wpn"><span>Weapons</span><small>Buy, equip and level up guns</small></button><button class="sh-cat" data-act="hangar"><span>Hangar</span><small>Ship parts and paint</small></button><button class="sh-cat" data-act="cos"><span>Cosmetics</span><small>Skins, trails, effects</small></button></nav>' +
+    '<section class="sh-list">' + (cat === 'up' ? '<p class="xs mut" style="margin:0 0 8px">Each level costs more than the last. Prices are for the next level.</p>' : '') + rows + '</section></div>' +
+    '<footer class="lay-f"><button class="btn sm" data-act="back">Back</button></footer></div>';
+};
+ACT.shc = a => { UI.shc = a[0]; SFX.click(); UI.refresh(); };
+
+// ---------- screens rebuilt after they draw (their content logic stays where it is) ----------
+const LAYOUTS = {
+  scResult(el) {
+    const c = el.querySelector('.card'); if (!c || c.classList.contains('rs')) return; c.classList.add('rs'); c.style.width = '';
+    const tc = c.querySelector('.tc'), rowsBox = c.querySelector('.setrow') && c.querySelector('.setrow').parentElement, stack = c.querySelector('.stack');
+    const hero = document.createElement('div'); hero.className = 'rs-hero'; const side = document.createElement('div'); side.className = 'rs-side';
+    if (tc) { while (tc.firstChild) { const n = tc.firstChild; if (n === rowsBox || (n.querySelector && n.querySelector('.setrow'))) { side.appendChild(n); continue; } hero.appendChild(n); } tc.remove(); }
+    if (rowsBox && !side.contains(rowsBox)) side.appendChild(rowsBox);
+    c.querySelectorAll('.tipbox').forEach(t => hero.appendChild(t));
+    c.prepend(side); c.prepend(hero); if (stack) { stack.classList.add('rs-act'); c.appendChild(stack); }
+    const t = hero.querySelector('.title'); if (t) t.removeAttribute('style');
+    if (UI.res) c.classList.add(UI.res.win ? 'rs-win' : 'rs-lose');
+  },
+  scSettings(el) {
+    const c = el.querySelector('.card'); if (!c || c.classList.contains('st2')) return; c.classList.add('st2');
+    const h = c.querySelector('h2'), tabs = c.querySelector('.tabs'), foot = c.lastElementChild; const rail = document.createElement('nav'), body = document.createElement('div'); rail.className = 'st-rail'; body.className = 'st-body';
+    Array.from(c.children).forEach(n => { if (n === h || n === tabs) rail.appendChild(n); else if (n !== foot) body.appendChild(n); });
+    if (tabs) tabs.classList.remove('wrap'); c.prepend(body); c.prepend(rail); if (foot) c.appendChild(foot);
+  },
+  scProfile(el) {
+    const c = el.querySelector('.card'); if (!c || c.classList.contains('pf2')) return; c.classList.add('pf2');
+    const ag = c.querySelector('.agrid'); if (!ag) return; const head = ag.previousElementSibling, foot = c.lastElementChild;
+    const left = document.createElement('div'), right = document.createElement('div'); left.className = 'pf-left'; right.className = 'pf-right';
+    Array.from(c.children).forEach(n => { if (n === ag || n === head) right.appendChild(n); else if (n !== foot) left.appendChild(n); });
+    c.prepend(right); c.prepend(left); if (foot) c.appendChild(foot);
+  },
+  scHangar(el) {
+    const c = el.querySelector('.hg>.card'); if (!c || c.classList.contains('hg2')) return; c.classList.add('hg2'); c.removeAttribute('style');
+    const head = c.firstElementChild, tabs = c.querySelector('.tabs'), foot = c.lastElementChild; const rail = document.createElement('nav'), body = document.createElement('div'); rail.className = 'st-rail hg-rail'; body.className = 'st-body hg-body';
+    Array.from(c.children).forEach(n => { if (n === head || n === tabs) rail.appendChild(n); else if (n !== foot) body.appendChild(n); });
+    if (tabs) tabs.classList.remove('wrap'); c.prepend(body); c.prepend(rail); if (foot) c.appendChild(foot);
+  },
+  scMap(el) {
+    const c = el.querySelector('.card'); if (!c || c.classList.contains('mp2')) return; c.classList.add('mp2');
+    c.querySelectorAll('.tabs.wf .tab').forEach((t, i) => { t.title = t.textContent; t.innerHTML = '<b>' + (i + 1) + '</b>' + (t.classList.contains('lk') ? ICO.lock : ''); });
+    const h = c.querySelector('h2'); if (h && WORLDS[UI.w]) c.style.setProperty('--wc', WORLDS[UI.w].ac);
+  }
+};
+const _show3 = UI.show.bind(UI);
+UI.show = function (id, nh) { const r = _show3(id, nh); try { if (LAYOUTS[id]) LAYOUTS[id](this.el(id)); } catch (e) { console.warn('layout', id, e); } return r; };
 
 // ================= BOOT =================
 function boot() {
