@@ -423,8 +423,8 @@ body.reduce .mm-logo,body.reduce .mm-nav,body.nofx .mm-logo,body.nofx .mm-nav{an
 #intro{position:fixed;inset:0;z-index:9999;background:#000;overflow:hidden;transition:background .35s;cursor:pointer}
 #intro.clear{background:transparent}
 #intro canvas{position:absolute;inset:0;width:100%;height:100%}
-.in-pre{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:#dbe7f7;text-transform:uppercase;letter-spacing:.55em;font:700 clamp(12px,1.7vw,17px) system-ui,sans-serif;opacity:0;animation:inPre 2.3s .35s ease forwards;text-shadow:0 0 18px rgba(0,0,0,.9)}
-@keyframes inPre{0%{opacity:0;letter-spacing:1em}30%,72%{opacity:1}100%{opacity:0;letter-spacing:.35em}}
+.in-pre{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;animation:inPre 3.45s .1s ease forwards}
+@keyframes inPre{0%,86%{opacity:1;transform:translateY(-50%) scale(1)}100%{opacity:0;transform:translateY(-50%) scale(1.12)}}
 .in-t{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
 .in-l1{display:flex;font-family:"Big Shoulders Display",Impact,"Arial Narrow",sans-serif;font-weight:900;font-size:clamp(60px,14vw,200px);line-height:.88;letter-spacing:.03em;color:#fff;text-transform:uppercase;text-shadow:0 0 26px var(--pa),0 0 90px var(--pa),0 4px 0 rgba(0,0,0,.4)}
 .in-l1 span{display:inline-block;opacity:0}
@@ -440,5 +440,26 @@ body.introfade #ui .scr.on{transition:opacity 1s ease}
 /* flying menu: keep the left side readable over the 3D world */
 .mm{background:linear-gradient(90deg,rgba(3,6,14,.82) 0%,rgba(3,6,14,.55) 34%,rgba(3,6,14,.08) 62%,transparent 80%),linear-gradient(0deg,rgba(3,6,14,.7) 0%,transparent 26%)}
 @media (max-width:760px){.mm{background:linear-gradient(0deg,rgba(3,6,14,.9) 0%,rgba(3,6,14,.6) 55%,rgba(3,6,14,.1) 80%,transparent 100%)}}
+
+/* Driftwire Games logo */
+.dw{display:inline-flex;align-items:center;gap:.28em;font-size:40px;line-height:1}
+.dw-e{width:1.9em;height:1.9em;flex:none;overflow:visible}
+.dw-t{text-align:left}
+.dw-1{font-family:"Big Shoulders Display",Impact,"Arial Narrow",sans-serif;font-weight:900;font-style:italic;font-size:1em;letter-spacing:.04em;color:#fff;line-height:.9}
+.dw-2{font:700 .26em system-ui,sans-serif;letter-spacing:.78em;color:#7dd3fc;margin-top:.35em}
+.dw-cr{font-size:34px}
+.mm-cred{display:inline-flex!important;align-items:center;gap:6px}
+.mm-cred b{color:#fff!important}
+.dw-e.dw-sm{width:20px;height:20px}
+.dw-in{font-size:clamp(34px,6vw,64px)}
+.in-pres{margin-top:16px;font:600 clamp(11px,1.4vw,14px) system-ui,sans-serif;letter-spacing:.6em;text-transform:uppercase;color:#94a3b8;opacity:0;animation:dwFade .6s 1.25s forwards}
+#intro .dw-w{stroke-dasharray:1;stroke-dashoffset:1;animation:dwDraw .95s .35s cubic-bezier(.6,0,.3,1) forwards}
+#intro .dw-w2{stroke-dasharray:1;stroke-dashoffset:1;animation:dwDraw .5s .9s ease-out forwards}
+#intro .dw-n{opacity:0;transform-origin:19px 40px;transform-box:view-box;animation:dwPop .45s 1.2s cubic-bezier(.2,1.8,.4,1) forwards}
+#intro .dw-t{opacity:0;transform:translateX(-14px);animation:dwSlide .6s 1s ease-out forwards}
+@keyframes dwDraw{to{stroke-dashoffset:0}}
+@keyframes dwPop{0%{opacity:0;transform:scale(0)}100%{opacity:1;transform:scale(1)}}
+@keyframes dwSlide{to{opacity:1;transform:none}}
+@keyframes dwFade{to{opacity:1}}
 </style>
 </head>

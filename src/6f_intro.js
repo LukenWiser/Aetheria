@@ -43,13 +43,13 @@ const INTRO = { on: false };
 function introPlay() {
   if (INTRO.on) return; INTRO.on = true;
   const ac = SAVE.pl[0].cfg.accent || '#22d3ee', d = document.createElement('div'); d.id = 'intro'; d.style.setProperty('--pa', ac);
-  d.innerHTML = '<canvas></canvas><div class="in-pre">A Luken Wiser game</div><div class="in-t"><div class="in-l1">' + 'AETHERIA'.split('').map((c, i) => '<span style="--i:' + i + '">' + c + '</span>').join('') + '</div><div class="in-l2">Quantum Strike</div></div><div class="in-skip">Press any key to skip</div>';
+  d.innerHTML = '<canvas></canvas><div class="in-pre">' + dwLogo('dw-in') + '<div class="in-pres">presents</div></div><div class="in-t"><div class="in-l1">' + 'AETHERIA'.split('').map((c, i) => '<span style="--i:' + i + '">' + c + '</span>').join('') + '</div><div class="in-l2">Quantum Strike</div></div><div class="in-skip">Press any key to skip</div>';
   document.body.appendChild(d); document.body.classList.add('intro');
   const cv = d.querySelector('canvas'), g = cv.getContext('2d'), S = [];
   for (let i = 0; i < 520; i++) S.push({ a: Math.random() * Math.PI * 2, z: Math.random(), c: Math.random() < .25 });
   let t0 = performance.now(), last = 0, done = false, cls = {}, shockT = -1;
   MENU3.hide = true; MENU3.ix = 0;
-  const T_FLASH = 2700, T_TITLE = 3300, T_SUB = 4150, T_OUT = 6900, T_END = 7900;
+  const T_FLASH = 3600, T_TITLE = 4200, T_SUB = 5050, T_OUT = 7800, T_END = 8800;
   const add = c => { if (!cls[c]) { cls[c] = 1; d.classList.add(c); } };
   const skip = e => { if (e) { e.preventDefault(); e.stopPropagation(); } const t = performance.now() - t0; if (t < T_OUT) t0 = performance.now() - T_OUT; };
   const kd = e => skip(e); window.addEventListener('keydown', kd, true); d.addEventListener('pointerdown', skip);

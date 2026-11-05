@@ -5596,8 +5596,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V35';
+const GAME_VER = 'V36';
+const STUDIO = 'Driftwire Games';
+let dwN = 0;
+function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
+const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V36', 'Driftwire Games', ['Aetheria now has a studio: Driftwire Games', 'New animated Driftwire logo in the intro movie', 'The logo also appears in the credits and on the main menu']],
   ['V35', 'Lights, Camera', ['A new intro movie when the game loads: a warp jump, a drop into your world and the title slamming in (press any key to skip)', 'Flying main menu: your ship now cruises through the furthest world you have reached', 'The menu warps between your unlocked worlds every so often, and your ship does the odd barrel roll', 'Both can be turned off in Settings > Graphics']],
   ['V34', 'Difficulty Rebalance', ['Early worlds are tougher: enemies have more health, hit harder and come in bigger waves from World 1', 'Late bosses are fairer: World 15-17 bosses have about 60% less health than before', 'Enemy damage now rises more smoothly from world to world', 'Regular enemies in the last worlds are slightly less tanky']],
   ['V33', 'New Screen Layouts', ['Select Mode: a big list of modes on the left and a briefing for the one you pick', 'Shop: categories down the side and one clean list with level bars', 'Pause: big Resume / Restart / Settings / Photo / Quit choices with your run stats', 'Results: a huge title and rank on one side, your stats on the other', 'Settings, Hangar and Profile: side rails instead of rows of tabs', 'Expedition map: numbered world buttons and a bigger sector route']],
@@ -5633,7 +5638,7 @@ Object.assign(SCR, {
   scUpdates: () => '<div class="card mid"><div class="row sp wrap"><h2>Updates</h2><span class="gold b">CURRENT VERSION ' + GAME_VER + '</span></div><div class="upd">' +
     UPDATES.map((u, i) => '<div class="updi' + (i ? '' : ' cur') + '"><div class="row sp"><b class="acc">' + u[0] + ' <span style="color:var(--txt,#fff)">' + u[1] + '</span></b>' + (i ? '' : '<span class="xs gold b">NEW</span>') + '</div><ul>' + u[2].map(t => '<li>' + t + '</li>').join('') + '</ul></div>').join('') +
     '</div><div class="row sp" style="margin-top:12px"><button class="btn sm" data-act="back">BACK</button><button class="btn sm" data-act="credits">CREDITS</button></div></div>',
-  scCredits: () => '<div class="card" style="width:min(440px,100%)"><div class="title" style="font-size:clamp(22px,6vw,32px)">CREDITS</div><div class="subt">AETHERIA: QUANTUM STRIKE ' + GAME_VER + '</div><div class="stack tc" style="gap:14px;margin:6px 0 14px"><div><div class="xs mut b" style="letter-spacing:.2em">MADE BY</div><div class="gold b" style="font-size:22px;letter-spacing:.06em">LUKEN WISER</div></div><div><div class="xs mut b" style="letter-spacing:.2em">GAME DESIGN AND DIRECTION</div><div class="b">Luken Wiser</div></div><div><div class="xs mut b" style="letter-spacing:.2em">3D ENGINE</div><div class="b">three.js</div></div><div class="xs mut">Thanks for playing!</div></div><button class="btn" data-act="back" style="width:100%">BACK</button></div>'
+  scCredits: () => '<div class="card" style="width:min(440px,100%)"><div class="title" style="font-size:clamp(22px,6vw,32px)">CREDITS</div><div class="subt">AETHERIA: QUANTUM STRIKE ' + GAME_VER + '</div><div class="stack tc" style="gap:14px;margin:6px 0 14px"><div style="display:flex;justify-content:center;margin:4px 0 2px">' + dwLogo('dw-cr') + '</div><div><div class="xs mut b" style="letter-spacing:.2em">CREATED BY</div><div class="gold b" style="font-size:20px;letter-spacing:.06em">LUKEN WISER</div></div><div><div class="xs mut b" style="letter-spacing:.2em">GAME DESIGN AND DIRECTION</div><div class="b">Luken Wiser</div></div><div><div class="xs mut b" style="letter-spacing:.2em">3D ENGINE</div><div class="b">three.js</div></div><div class="xs mut">Thanks for playing!</div></div><button class="btn" data-act="back" style="width:100%">BACK</button></div>'
 });
 Object.assign(ACT, { updates() { UI.show('scUpdates'); }, credits() { UI.show('scCredits'); } });
 
@@ -6573,7 +6578,7 @@ SCR.scMenu = () => {
     '<div class="mm-row">' + ic('profile', 'profile', 'Profile') + ic('missions', 'missions', 'Missions', ms ? ms : '') + ic('daily', 'daily', 'Daily', dNew ? 'new' : '') + ic('cos', 'cos', 'Cosmetics') + ic('settings', 'settings', 'Settings') + ic('tutorial', 'tutorial', 'Flight school') + ic('updates', 'updates', 'Updates') + ic('fs', fsOn ? 'fsx' : 'fs', fsOn ? 'Exit full screen' : 'Full screen') + '</div>' +
     '<aside class="mm-card"><div class="mm-who"><span class="mm-name">' + escH(online || 'Pilot') + '</span><span class="mm-rank">' + 'Level ' + X.lv + ' ' + rankName(X.lv) + '</span></div><div class="mm-xp"><i style="width:' + Math.round(X.xp / xpNeed(X.lv) * 100) + '%"></i></div>' +
       '<dl class="mm-stats"><div><dt>Cores</dt><dd class="gold">' + fmt(SAVE.cores) + '</dd></div><div><dt>Worlds</dt><dd>' + Math.min(SAVE.wu, WORLDS.length) + '/' + WORLDS.length + '</dd></div><div><dt>Kills</dt><dd>' + fmt(SAVE.st.kills) + '</dd></div></dl></aside>' +
-    '<footer class="mm-foot"><button class="mm-news" data-act="updates"><b>' + U[0] + '</b> ' + escH(U[1]) + '</button><span class="mm-keys">' + (t ? '' : (SAVE.players === 2 ? ['P1: WASD + Space', 'P2: arrows + Enter'] : ['WASD or mouse to fly', 'Space or click to fire', 'Esc to pause']).map(k => '<span>' + k + '</span>').join('')) + '</span><button class="mm-cred" data-act="credits">Made by <b>Luken Wiser</b></button></footer>' +
+    '<footer class="mm-foot"><button class="mm-news" data-act="updates"><b>' + U[0] + '</b> ' + escH(U[1]) + '</button><span class="mm-keys">' + (t ? '' : (SAVE.players === 2 ? ['P1: WASD + Space', 'P2: arrows + Enter'] : ['WASD or mouse to fly', 'Space or click to fire', 'Esc to pause']).map(k => '<span>' + k + '</span>').join('')) + '</span><button class="mm-cred" data-act="credits">' + dwEmblem('dw-sm') + '<b>Driftwire</b> Games</button></footer>' +
   '</div>';
 };
 
@@ -6704,13 +6709,13 @@ const INTRO = { on: false };
 function introPlay() {
   if (INTRO.on) return; INTRO.on = true;
   const ac = SAVE.pl[0].cfg.accent || '#22d3ee', d = document.createElement('div'); d.id = 'intro'; d.style.setProperty('--pa', ac);
-  d.innerHTML = '<canvas></canvas><div class="in-pre">A Luken Wiser game</div><div class="in-t"><div class="in-l1">' + 'AETHERIA'.split('').map((c, i) => '<span style="--i:' + i + '">' + c + '</span>').join('') + '</div><div class="in-l2">Quantum Strike</div></div><div class="in-skip">Press any key to skip</div>';
+  d.innerHTML = '<canvas></canvas><div class="in-pre">' + dwLogo('dw-in') + '<div class="in-pres">presents</div></div><div class="in-t"><div class="in-l1">' + 'AETHERIA'.split('').map((c, i) => '<span style="--i:' + i + '">' + c + '</span>').join('') + '</div><div class="in-l2">Quantum Strike</div></div><div class="in-skip">Press any key to skip</div>';
   document.body.appendChild(d); document.body.classList.add('intro');
   const cv = d.querySelector('canvas'), g = cv.getContext('2d'), S = [];
   for (let i = 0; i < 520; i++) S.push({ a: Math.random() * Math.PI * 2, z: Math.random(), c: Math.random() < .25 });
   let t0 = performance.now(), last = 0, done = false, cls = {}, shockT = -1;
   MENU3.hide = true; MENU3.ix = 0;
-  const T_FLASH = 2700, T_TITLE = 3300, T_SUB = 4150, T_OUT = 6900, T_END = 7900;
+  const T_FLASH = 3600, T_TITLE = 4200, T_SUB = 5050, T_OUT = 7800, T_END = 8800;
   const add = c => { if (!cls[c]) { cls[c] = 1; d.classList.add(c); } };
   const skip = e => { if (e) { e.preventDefault(); e.stopPropagation(); } const t = performance.now() - t0; if (t < T_OUT) t0 = performance.now() - T_OUT; };
   const kd = e => skip(e); window.addEventListener('keydown', kd, true); d.addEventListener('pointerdown', skip);
