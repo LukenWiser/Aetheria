@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none"><defs><linearGradient id="dwg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="dwf" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
+<path class="dw-w" d="M3 47 C9 47 10 54 17 54 H30 C45 54 54 44 54 32 C54 20 45 10 30 10 H19 V36" stroke="url(#dwg)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M27 21 H30 C38 21 43 26 43 32 C43 38 38 43 30 43 H27" stroke="url(#dwg)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/>
+<circle class="dw-n" cx="19" cy="40" r="5.5" fill="#fff" filter="url(#dwf)" opacity=".9"/><circle class="dw-n" cx="19" cy="40" r="3.2" fill="#fff"/>
+</svg>
