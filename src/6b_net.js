@@ -28,7 +28,7 @@ async function netSignIn() {
 function netSignOut() { netLeaveRoom(); NET.subs.forEach(f => f()); NET.subs = []; try { firebase.auth().signOut(); } catch (e) { } }
 function netSignedOut() { NET.me = null; NET.friends = {}; NET.reqs = {}; NET.invites = {}; }
 async function netSignedIn(u) {
-  const snap = await R_('users/' + u.uid).once('value'); NET.me = snap.val();
+  let snap; try { snap = await R_('users/' + u.uid).once('value'); } catch (e) { NET.msg = '!Database error: ' + (e.code || e.message) + ' - check the security rules in Firebase.'; UI.refresh(); return; } NET.me = snap.val();
   if (!NET.me || !NET.me.name) { if (UI.top !== 'scName') UI.show('scName'); return; }
   netStartLive();
 }

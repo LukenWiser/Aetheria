@@ -39,7 +39,7 @@ Object.assign(ACT, {
   nsignout() { netSignOut(); NET.msg = 'Signed out.'; UI.refresh(); },
   nrename() { UI.nErr = ''; UI.show('scName'); },
   nback() { UI.show('scOnline'); },
-  nsetname() { const v = ($('nName') || {}).value || ''; UI.nName = v; netSetName(v).then(err => { UI.nErr = err; if (!err) { NET.msg = 'Welcome, ' + v + '!'; UI.show('scOnline'); } else UI.refresh(); }); },
+  nsetname() { const v = ($('nName') || {}).value || ''; UI.nName = v; UI.nErr = 'Saving...'; UI.refresh(); const to = new Promise((_, rej) => setTimeout(() => rej({ code: 'timeout' }), 9000)); Promise.race([netSetName(v), to]).then(err => { UI.nErr = err; if (!err) { NET.msg = 'Welcome, ' + v + '!'; UI.show('scOnline'); } else UI.refresh(); }).catch(e => { const c = (e && (e.code || e.message)) || 'unknown'; UI.nErr = /PERMISSION|permission/.test(c) ? 'The database said no (permission denied). Make sure the security rules are published in Firebase > Realtime Database > Rules.' : c === 'timeout' ? 'Could not reach the database. Make sure the Realtime Database is created, and check its link.' : 'Error: ' + c; UI.refresh(); }); },
   nadd() { nAsync(netAddFriend(($('nFriend') || {}).value)); },
   nacc(a) { nAsync(netAccept(a[0]), 'Friend added!'); },
   ndec(a) { nAsync(netDecline(a[0])); },
