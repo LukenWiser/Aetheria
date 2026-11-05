@@ -146,7 +146,8 @@ function buildArena(kind, X) {
     o = o || {}; const tile = o.tile || 300, map = srgb(new T.CanvasTexture(canv(256, 256, fn))), em = o.emi ? srgb(new T.CanvasTexture(canv(256, 256, o.emi))) : null, W = 20000, D = Math.abs(z1 - z0);
     map.repeat.set(W / tile, (o.ty || 1)); if (em) em.repeat.copy(map.repeat);
     const m = SET.toon ? new T.MeshToonMaterial({ map, color: lc(c), gradientMap: toonGrad(), emissive: em ? lc(o.emiCol || '#ffffff') : lc('#000000'), emissiveMap: em, emissiveIntensity: o.ei || 1 }) : new T.MeshStandardMaterial({ map, color: lc(c), roughness: o.rough || .85, emissive: em ? lc(o.emiCol || '#ffffff') : lc('#000000'), emissiveMap: em, emissiveIntensity: o.ei || 1 });
-    track(m); const gm = new T.Mesh(track(new T.PlaneGeometry(W, D)), m); gm.rotation.x = -Math.PI / 2; gm.position.set(0, y, (z0 + z1) / 2); scene.add(gm);
+    m.polygonOffset = true; m.polygonOffsetFactor = -2 - Math.min(6, Math.max(0, Math.round(y - A.gy))); m.polygonOffsetUnits = m.polygonOffsetFactor * 2; // strips sit a hair above the ground: pull them forward in the depth test so they never flicker
+    track(m); const gm = new T.Mesh(track(new T.PlaneGeometry(W, D)), m); gm.rotation.x = -Math.PI / 2; gm.position.set(0, y, (z0 + z1) / 2); gm.renderOrder = 1; scene.add(gm);
     A.upd.push((df, S) => { const off = (S / tile) % 1; map.offset.x = off; if (em) em.offset.x = off; });
     return gm;
   }
@@ -228,7 +229,7 @@ function buildArena(kind, X) {
       const block = layer(-1720, lenFor(-1720), put => { const L = lenFor(-1720); let x = 0, k = 0;
         while (x < L - 120) { const w = 140 + rs() * 160, h = rs() < .65 ? 110 + rs() * 110 : 260 + rs() * 260, mt = bm[(k + 1) % bm.length];
           put(mt, G.box, x + w / 2, gy() + h / 2, 0, w - 8, h, 160, 0, 0, 0, w / 70, h / 70, tint(1, .3));
-          if (h < 260) { put(awn[k % awn.length], G.box, x + w / 2, gy() + 52, 86, w - 20, 8, 26, -.35, 0, 0); put(SIGNS[k % SIGNS.length], G.box, x + w / 2, gy() + 84, 81, w * .7, 26, 2); }
+          if (h < 260) { put(awn[k % awn.length], G.box, x + w / 2, gy() + 52, 86, w - 20, 8, 26, -.35, 0, 0); put(SIGNS[k % SIGNS.length], G.box, x + w / 2, gy() + 84, 85, w * .7, 26, 3); }
           else { for (let f = 1; f < h / 70; f++) put(concrete, G.box, x + w / 2, gy() + f * 70, 84, w - 14, 4, 10); }
           x += w; k++; } });
       // street furniture on both curbs
@@ -236,7 +237,11 @@ function buildArena(kind, X) {
       layer(-1480, lenFor(-1480), put => { const L = lenFor(-1480); for (let x = 130; x < L; x += 260) { put(metal, G.cyl6, x, gy() + 60, 0, 4, 120, 4); put(metal, G.box, x - 14, gy() + 118, 0, 30, 3, 4); put(lamp, G.box, x - 26, gy() + 114, 0, 10, 4, 8); }
         for (let x = 400; x < L; x += 900) { put(metal, G.box, x, gy() + 34, -10, 70, 4, 18); put(metal, G.box, x - 32, gy() + 17, -10, 3, 34, 3); put(metal, G.box, x + 32, gy() + 17, -10, 3, 34, 3); put(SIGNS[3], G.box, x, gy() + 50, -10, 60, 16, 2); } });
       // billboards high on the far blocks
-      const bb = layer(-2300, lenFor(-2300), put => { const L = lenFor(-2300); for (let i = 0; i < 6; i++) { const x = (i + .5) / 6 * L, y = gy() + 300 + rs() * 300; put(metal, G.box, x, y - 40, -20, 8, 80, 8); put(SIGNS[i % SIGNS.length], G.box, x, y + 30, 0, 230, 70, 4); } });
+      const bb = layer(-2300, lenFor(-2300), put => { const L = lenFor(-2300); for (let i = 0; i < 6; i++) { // billboard towers: two legs planted in the ground, a catwalk, then the board
+        const x = (i + .5) / 6 * L, y = gy() + 300 + rs() * 300, legH = y - 5 - gy();
+        for (const lx of [-70, 70]) put(metal, G.box, x + lx, gy() + legH / 2, -14, 9, legH, 9);
+        for (let k = 1; k * 120 < legH - 40; k++) put(metal, G.box, x, gy() + k * 120, -14, 150, 5, 5);
+        put(metal, G.box, x, y - 4, -2, 250, 6, 26); put(SIGNS[i % SIGNS.length], G.box, x, y + 36, 0, 230, 70, 4); } });
       // traffic: cars, taxis, buses, police with light bars; a military convoy pushes the other way
       const span = 7000, pick = () => { const r = rs(); return r < .5 ? 'car' : r < .63 ? 'suv' : r < .73 ? 'taxi' : r < .8 ? 'bus' : r < .9 ? 'police' : r < .96 ? 'truck' : 'tank'; };
       const ry = A.gy + 1; fleet(KIT, traffic([[-1175, 3.4, ry], [-1222, 2.6, ry], [-1270, 2, ry]], 9, pick, span).concat(traffic([[-1320, -2, ry], [-1368, -2.8, ry], [-1415, -3.6, ry]], 9, pick, span)).concat(traffic([[-1068, 0, A.gy + 1]], 14, () => rs() < .7 ? 'car' : 'suv', span)), { span });

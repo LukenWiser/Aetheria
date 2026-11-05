@@ -22,7 +22,7 @@ window.AET = {
   PS, missions, addXP, LOGS, mastery, COS, progAfter, medalAt,
   IN2, SECW, EVENTS, ALT_NODE, RIFTS, GMODS, GAL, startGallery, riftsFound, bossBeaten, retroOff, startEvent, superGo, tryParry, chargeShot, fireSec, goldRoll, combatTick,
   photoSnap, photoExit, GLITCH_W, glitchCtx, MAPS, levelSpec, enemyThumb, INTEL, BOSS_INTEL, worldEnemies, bstCount, BG3D_W, bgPlanetTex, audio, playCut, endCut, cutNext, cutSkip, STORY, ENDING, bossPanels, endingPanels, storyDue, CUT, music, mTheme, mv, drawBossArt,
-  get SLOT() { return SLOT; }, N2, lbSubmit, lbLoad, cloudUp, cloudDown, cloudPeek, chSend, inboxCount, chPlayInbox, netOn,
+  get SLOT() { return SLOT; }, GXS, GXV, gxMissions, gxPlay, gxJump, N2, lbSubmit, lbLoad, cloudUp, cloudDown, cloudPeek, chSend, inboxCount, chPlayInbox, netOn,
   defs: { WORLDS, EN, BOSSES, WPN, PARTS, UPG }
 };
 boot();

@@ -144,7 +144,7 @@ function bgTexFor(wi) {
 }
 function bgPrewarm(wi) { if (!window.THREE || !SET.models || SET.bg3d === false || BGTEX.has(wi)) return; setTimeout(() => { try { bgTexFor(wi); } catch (e) { } }, 60); }
 function makeBG3D(renderer) {
-  const T = THREE, scene = new T.Scene(), cam = new T.PerspectiveCamera(50, 16 / 9, 1, 12000);
+  const T = THREE, scene = new T.Scene(), cam = new T.PerspectiveCamera(50, 16 / 9, 8, 12000);
   const lc = h => new T.Color(h).convertSRGBToLinear();
   const sunL = new T.DirectionalLight(0xfff4e0, 2.4), amb = new T.AmbientLight(0x8090b0, .32); scene.add(sunL, amb);
   const sunU = { value: new T.Vector3(-.75, .32, .58).normalize() }, timeU = { value: 0 }, sun0 = new T.Vector3(), yAx = new T.Vector3(0, 1, 0);
