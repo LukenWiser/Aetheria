@@ -33,15 +33,22 @@ async function netSignedIn(u) {
   netStartLive();
 }
 // ---------- pilot names + friend codes ----------
-const BADW = ['fuck', 'shit', 'bitch', 'cunt', 'dick', 'cock', 'pussy', 'whore', 'slut', 'nazi', 'hitler', 'rape', 'porn', 'sex', 'nigg', 'fag', 'retard', 'kys', 'penis', 'vagina', 'boob', 'anal', 'cum'];
-function nameOk(n) { if (!/^[A-Za-z0-9_]{3,16}$/.test(n)) return 'Use 3-16 letters, numbers or _'; const l = n.toLowerCase().replace(/[_0-9]/g, m => ({ '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '_': '' })[m] || ''); if (BADW.some(w => l.indexOf(w) >= 0)) return 'Pick a different name'; return ''; }
+const BADW = ['fuck', 'shit', 'bitch', 'cunt', 'nigg', 'whore', 'slut', 'porn', 'penis', 'vagina', 'retard', 'hitler', 'nazi', 'pussy', 'faggot'], BADX = ['cum', 'sex', 'anal', 'rape', 'cock', 'dick', 'fag', 'kys', 'ass', 'tits', 'boob'];
+const nameKey = n => n.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+function nameOk(n) {
+  if (n.length < 3 || n.length > 16) return 'Names need 3 to 16 characters (you have ' + n.length + ').';
+  const bad = n.replace(/[A-Za-z0-9 _-]/g, ''); if (bad) return 'These characters are not allowed: ' + Array.from(new Set(bad)).join(' ') + ' - use letters, numbers, spaces, - or _';
+  if (!/[A-Za-z0-9]/.test(n)) return 'Use at least one letter or number.';
+  const l = n.toLowerCase().replace(/[0-9]/g, m => ({ '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't' })[m] || m), flat = l.replace(/[^a-z]/g, ''), words = l.split(/[^a-z]+/);
+  if (BADW.some(w => flat.indexOf(w) >= 0) || BADX.some(w => words.indexOf(w) >= 0)) return 'Pick a friendlier name.'; return '';
+}
 async function netSetName(n) {
   const u = NET.user; n = String(n || '').trim(); const bad = nameOk(n); if (bad) return bad;
-  const lk = n.toLowerCase(); const taken = await R_('names/' + lk).once('value'); if (taken.exists() && taken.val() !== u.uid) return 'That name is taken';
+  n = n.replace(/\s+/g, ' '); const lk = nameKey(n); const taken = await R_('names/' + lk).once('value'); if (taken.exists() && taken.val() !== u.uid) return 'That name is taken';
   try { await R_('names/' + lk).set(u.uid); } catch (e) { return 'That name is taken'; }
   let code = NET.me && NET.me.code;
   for (let i = 0; !code && i < 8; i++) { const c = 'ACE-' + String(1000 + Math.floor(Math.random() * 9000)); try { const ex = await R_('codes/' + c).once('value'); if (ex.exists()) continue; await R_('codes/' + c).set(u.uid); code = c; } catch (e) { } }
-  if (NET.me && NET.me.name && NET.me.name.toLowerCase() !== lk) { try { await R_('names/' + NET.me.name.toLowerCase()).remove(); } catch (e) { } }
+  if (NET.me && NET.me.name && nameKey(NET.me.name) !== lk) { try { await R_('names/' + nameKey(NET.me.name)).remove(); } catch (e) { } }
   NET.me = Object.assign(NET.me || {}, { name: n, code }); await netPushProfile(); netStartLive(); return '';
 }
 function netProfile() { const X = PS().xp; return { name: NET.me.name, code: NET.me.code, lv: X.lv, rk: rankName(X.lv), hull: SAVE.pl[0].cfg.hull, paint: SAVE.pl[0].cfg.paint, acc: SAVE.pl[0].cfg.accent, wu: SAVE.wu, hi: Math.round(SAVE.hi.endless.score || 0), hc: (SAVE.hi.hc || {}).wave | 0, at: TS() }; }
