@@ -1,42 +1,58 @@
-// ================= EXPEDITION 2: themed world maps, branching routes and 7 extra sectors per world =================
-// Branch sectors use indices 13-19 so every save, medal, ghost and star keeps working.
-const BR = [ // i: sector index, p: parent sector, t: kind, j: spine sector it rejoins (-1 = dead end), lane: -2/-1 above the main path, 1/2 below, k: step along the branch
-  { i: 13, p: 1, t: 'n', j: -1, lane: -2, k: 1 }, { i: 14, p: 13, t: 'g', j: -1, lane: -2, k: 2 },
-  { i: 15, p: 2, t: 'q', j: 5, lane: 2, k: 1 }, { i: 16, p: 15, t: 'e', j: 5, lane: 2, k: 2 },
-  { i: 17, p: 4, t: 'e', j: -1, lane: -1, k: 1 }, { i: 18, p: 17, t: 'x', j: -1, lane: -1, k: 2 }, { i: 19, p: 18, t: 'v', j: -1, lane: -1, k: 3 },
-  { i: 20, p: 6, t: 'n', j: -1, lane: 1, k: 1 }, { i: 21, p: 20, t: 'g', j: -1, lane: 1, k: 2 },
-  { i: 22, p: 7, t: 'q', j: 10, lane: -2, k: 1 }, { i: 23, p: 22, t: 'n', j: 10, lane: -2, k: 2 },
-  { i: 24, p: 9, t: 'e', j: -1, lane: 2, k: 1 }, { i: 25, p: 24, t: 'x', j: -1, lane: 2, k: 2 }, { i: 26, p: 25, t: 'v', j: -1, lane: 2, k: 3 },
-  { i: 27, p: 16, t: 'g', j: -1, lane: 1, k: 3 }, { i: 28, p: 23, t: 'e', j: -1, lane: -1, k: 3 }
-];
-const BRLAB = { 13: 'DEAD END', 15: 'SHORTCUT', 17: 'DEEP ROUTE', 20: 'DEAD END', 22: 'SHORTCUT', 24: 'DEEP ROUTE', 27: 'HIDDEN', 28: 'HIDDEN' };
-const brOf = i => BR.find(b => b.i === i);
+// ================= EXPEDITION 2: themed world maps with a random route tree per world =================
+// Every world gets its own seeded map: the main path wanders between five lanes, side routes split off, dead-end,
+// cross over and rejoin. Nodes sit on a grid (one per cell) so nothing can ever overlap. Branch sectors use indices 13-28.
 const BRT = {
   n: { nm: 'SWARM NEST', ds: 'A nest has hatched: far more enemies, each one weaker.', ic: 'multi' },
   g: { nm: 'TREASURE RUN', ds: 'A golden elite is guaranteed and loot is doubled.', ic: 'coin' },
   e: { nm: 'ACE DUEL', ds: 'Elite squadrons only. Hard, but they drop more.', ic: 'target' },
   x: { nm: 'THE GAUNTLET', ds: 'Elites and hazards together, wave after wave.', ic: 'x' },
-  v: { nm: 'SECTOR CACHE', ds: 'The end of the deep route: a fortified cache with a huge one-time reward.', ic: 'star' },
+  v: { nm: 'SECTOR CACHE', ds: 'A fortified cache at the end of a long route, with a huge one-time reward.', ic: 'star' },
   q: { nm: 'STORM RUN', ds: 'A short, fast run straight through a hazard storm.', ic: 'bolt' }
 };
-const BRN = ['Hideout', 'Hollow', 'Backroad', 'Outpost', 'Nest', 'Cache', 'Rift', 'Undercroft', 'Overlook', 'Drift'];
-const brName = (w, b) => { const W = WORLDS[w]; return (W.A ? W.A[(b.i * 3 + w) % W.A.length] : 'Lost') + ' ' + BRN[(b.i + w * 2) % BRN.length]; };
+const BRN = ['Hideout', 'Hollow', 'Backroad', 'Outpost', 'Nest', 'Cache', 'Rift', 'Undercroft', 'Overlook', 'Drift', 'Spur', 'Sidetrack'];
+const MNBR = 16, MCOLS = LV, MROWS = 5, GXSP = 118, GYSP = 68, MPX0 = 70, MPY0 = 46;
+const MGRAPH = {};
+function wg(w) { // build (once) the route tree for world w
+  if (MGRAPH[w]) return MGRAPH[w];
+  for (let seed = 0; seed < 20; seed++) {
+    const rs = seeded(w * 7331 + 97 + seed * 101), cell = {}, N = {}, E = [], key = (c, r) => c + ',' + r;
+    const put = (i, c, r, o) => { cell[key(c, r)] = i; N[i] = Object.assign({ i, c, r }, o || {}); }, link = (a, b, k) => { if (!E.some(e => e[0] === a && e[1] === b)) E.push([a, b, k]); };
+    let r = Math.floor(rs() * MROWS);
+    for (let i = 0; i < LV; i++) { if (i) { const st = rs(); r = Math.max(0, Math.min(MROWS - 1, r + (st < .34 ? -1 : st < .68 ? 1 : 0))); } put(i, i, r, { spine: 1 }); if (i) link(i - 1, i, 's'); }
+    let idx = LV, caches = 0, tries = 0;
+    while (idx < LV + MNBR && tries++ < 400) {
+      const pool = Object.values(N).filter(n => n.c < MCOLS - 2 && n.i !== LV - 1), from = rs() < .6 ? pool.filter(n => n.spine)[Math.floor(rs() * pool.filter(n => n.spine).length)] : pool[Math.floor(rs() * pool.length)];
+      if (!from) continue; const L = Math.min(LV + MNBR - idx, 1 + Math.floor(rs() * 3)), path = []; let c = from.c, rr = from.r, ok = true;
+      for (let k = 0; k < L; k++) { c++; const opts = [-1, 0, 1].map(d => rr + d).filter(y => y >= 0 && y < MROWS && cell[key(c, y)] === undefined && !path.some(p => p.c === c && p.r === y)); if (!opts.length || c > MCOLS - 2) { ok = false; break; } rr = opts[Math.floor(rs() * opts.length)]; path.push({ c, r: rr }); }
+      if (!ok || !path.length) continue;
+      const end = path[path.length - 1], back = rs() < .55, targets = back ? [-1, 0, 1].map(d => cell[key(end.c + 1, end.r + d)]).filter(t => t !== undefined && t !== LV - 1) : [];
+      const dead = !targets.length, kinds = ['n', 'g', 'e', 'q', 'x'];
+      let prev = from.i; path.forEach((p, k) => { const last = k === path.length - 1, t = last && dead && path.length >= 2 && caches < 2 && rs() < .7 ? (caches++, 'v') : kinds[Math.floor(rs() * kinds.length)]; put(idx, p.c, p.r, { t, dead: last && dead }); link(prev, idx, 'b'); prev = idx; idx++; });
+      if (!dead) link(prev, targets[Math.floor(rs() * targets.length)], 'j');
+    }
+    if (idx < LV + MNBR || E.filter(e => e[2] === 'j').length < 2 || Object.values(N).filter(n => n.dead).length > 8) continue;
+    // a few extra cross-links between neighbouring side sectors so routes weave together
+    let extra = 0; Object.values(N).forEach(n => { if (n.i < LV || extra >= 3) return; [-1, 0, 1].forEach(d => { const t = cell[key(n.c + 1, n.r + d)]; if (t !== undefined && t >= LV && !E.some(e => (e[0] === n.i && e[1] === t) || (e[0] === t && e[1] === n.i)) && rs() < .3 && extra < 3) { link(n.i, t, 'x'); extra++; } }); });
+    return MGRAPH[w] = { N, E };
+  }
+  return MGRAPH[w] = { N: {}, E: [] };
+}
+const brOf = (w, i) => { const n = wg(w).N[i]; return i >= LV && n ? n : null; };
+const brName = (w, b) => { const W = WORLDS[w]; return (W.A ? W.A[(b.i * 3 + w) % W.A.length] : 'Lost') + ' ' + BRN[(b.i * 5 + w * 2) % BRN.length]; };
 const _lsBr = levelSpec;
 levelSpec = function (w, i, tier, alt) {
-  const b = brOf(i); if (!b) return _lsBr(w, i, tier, alt);
-  const depth = Math.min(LV - 2, b.p + b.k), base = _lsBr(w, depth, tier), T = b.t, u = T === 'n' ? 'c' : T === 'q' ? 'h' : T === 'v' ? 'x' : T;
+  const b = brOf(w, i); if (!b) return _lsBr(w, i, tier, alt);
+  const depth = Math.max(1, Math.min(LV - 2, b.c)), base = _lsBr(w, depth, tier), T = b.t, u = T === 'n' ? 'c' : T === 'q' ? 'h' : T === 'v' ? 'x' : T;
   return Object.assign(base, { i, type: u, bt: T, br: 1, name: brName(w, b), seed: w * 977 + i * 131 + tier, rs: seeded(w * 977 + i * 131 + tier * 7919 + 13), waves: T === 'q' ? 3 : T === 'v' ? 6 : T === 'x' ? 5 + Math.floor(depth / 4) : 4 + Math.floor(depth / 4), diff: base.diff + (T === 'v' ? .3 : T === 'x' || T === 'e' ? .15 : 0) });
 };
 const _beginBr = beginRun;
 beginRun = function (o) { const r = _beginBr.apply(this, arguments); try { const R = G.run, sp = R && R.spec; if (sp && sp.br) { if (sp.bt === 'n') { R.hpm *= .65; R.swarm = 1.6; } if (sp.bt === 'v') R.lootM = (R.lootM || 1) * 2.5; if (sp.bt === 'e') R.lootM = (R.lootM || 1) * 1.4; } } catch (e) { } return r; };
-const brOpen = (arr, i) => { const b = brOf(i); return b ? !!arr[b.p] : true; };
-function brNextOf(i) { if (i < LV) return i + 1 < LV ? i + 1 : null; const c = BR.find(b => b.p === i); return c ? c.i : null; }
-// first clears of side routes pay a bonus; the Sector Cache pays a lot
+// a sector opens when any route leading into it has been cleared
+function nodeOpen(w, arr, i) { if (i === 0 || SAVE.devAll) return true; return wg(w).E.some(e => e[1] === i && arr[e[0]]); }
+function brNextOf(w, i) { const outs = wg(w).E.filter(e => e[0] === i).map(e => e[1]); if (i < LV - 1 && outs.indexOf(i + 1) >= 0 && i < LV) return i + 1; const arr = prog(w).done[0] || []; return outs.find(t => !arr[t]) ?? outs[0] ?? null; }
 const _resBr = UI.result;
-UI.result = function (d) { try { const R = G.run; if (d && R && d.mode === 'expedition' && d.win && R.lv >= LV && !d.brDone) { d.brDone = 1; const k = R.w + ':' + R.lv + ':' + (R.tier || 1), F = SAVE.flags.br || (SAVE.flags.br = {}); d.next = brNextOf(R.lv); d.w = R.w; d.tier = R.tier; if (!F[k]) { F[k] = 1; const b = brOf(R.lv), n = Math.round((b.t === 'v' ? 600 + 150 * R.w : 120 + 40 * R.w) * (R.tier || 1)); SAVE.cores += n; d.brBonus = n; saveGame(); } } } catch (e) { } return _resBr.apply(this, arguments); };
-const _lvlBr = ACT.lvl;
-ACT.lvl = function (a) { const i = +a[0]; if (i >= LV) { const arr = prog(UI.w).done[UI.tier - 1] || []; if (!brOpen(arr, i) && !SAVE.devAll) { SFX.no(); alertMsg('CLEAR THE SECTOR THIS ROUTE BRANCHES FROM FIRST'); return; } UI.alt = null; UI.sel = i; SFX.click(); UI.refresh(); return; } return _lvlBr.apply(this, arguments); };
-
+UI.result = function (d) { try { const R = G.run; if (d && R && d.mode === 'expedition' && d.win && R.lv >= LV && !d.brDone) { d.brDone = 1; const k = R.w + ':' + R.lv + ':' + (R.tier || 1), F = SAVE.flags.br || (SAVE.flags.br = {}); d.next = brNextOf(R.w, R.lv); d.w = R.w; d.tier = R.tier; if (!F[k]) { F[k] = 1; const b = brOf(R.w, R.lv), n = Math.round((b && b.t === 'v' ? 600 + 150 * R.w : 120 + 40 * R.w) * (R.tier || 1)); SAVE.cores += n; d.brBonus = n; saveGame(); } } } catch (e) { } return _resBr.apply(this, arguments); };
+ACT.lvl = function (a) { const i = +a[0], arr = prog(UI.w).done[UI.tier - 1] || []; if (!wg(UI.w).N[i]) return; if (!nodeOpen(UI.w, arr, i) && !arr[i]) { SFX.no(); alertMsg('CLEAR A SECTOR THAT LEADS HERE FIRST'); return; } UI.alt = null; UI.sel = i; SFX.click(); UI.refresh(); };
 // ---------- themed world maps ----------
 const WTH = ['skyline', 'vines', 'dunes', 'rings', 'vortex', 'peaks', 'gears', 'bubbles', 'grid', 'clock', 'orbit', 'islands', 'bolts', 'craters', 'pillars', 'glitch', 'rays'];
 function wmDeco(type, W, H, c, rs) { // a few hundred bytes of SVG art per world, drawn behind the route
@@ -61,37 +77,35 @@ function wmDeco(type, W, H, c, rs) { // a few hundred bytes of SVG art per world
   }
   return s;
 }
-const MPW = 1640, MPH = 384, LANEY = { '-2': 50, '-1': 116, '1': 268, '2': 334 }, sxy = i => [80 + i * 122, MPH / 2 + Math.sin(i * .85) * 30];
-function nodeXY(i) { if (i < LV) return sxy(i); const b = brOf(i); let rt = b; while (rt.p >= LV) rt = brOf(rt.p); const [px] = sxy(rt.p), y = LANEY[b.lane]; if (b.j >= 0) { const [jx] = sxy(b.j), n = BR.filter(q => q.j === b.j && q.lane === b.lane).length; return [px + (jx - px) * b.k / (n + 1), y]; } return [px + b.k * 112, y]; }
+const MPW = MPX0 * 2 + (MCOLS - 1) * GXSP, MPH = MPY0 * 2 + (MROWS - 1) * GYSP;
+const nodeXY = (w, i) => { const n = wg(w).N[i]; return n ? [MPX0 + n.c * GXSP, MPY0 + n.r * GYSP] : [0, 0]; };
 const _scMapBr = SCR.scMap;
 SCR.scMap = () => {
   if (UI.mode !== 'expedition') return _scMapBr();
-  const w = UI.w; bgPrewarm(w); const W = WORLDS[w], pr = prog(w), tier = Math.min(UI.tier, pr.t), arr = pr.done[tier - 1] || [], B = BOSSES[w], ac = W.ac || '#22d3ee';
-  let first = 0; while (first < LV && arr[first]) first++; if (SAVE.devAll) first = LV - 1;
-  if (UI.sel === undefined || UI.sel === null || (UI.sel >= LV && !brOf(UI.sel))) UI.sel = Math.min(first, LV - 1);
-  const avail = i => i < LV ? i <= first : (brOpen(arr, i) || SAVE.devAll), sel = UI.sel;
-  const curve = (a, b, dash, on) => { const [x1, y1] = nodeXY(a), [x2, y2] = nodeXY(b), mx = (x1 + x2) / 2; return '<path d="M' + x1 + ' ' + y1 + ' C ' + mx + ' ' + y1 + ', ' + mx + ' ' + y2 + ', ' + x2 + ' ' + y2 + '" class="wm-p' + (on ? ' on' : '') + (dash ? ' br' : '') + '"/>'; };
-  let paths = ''; for (let i = 0; i < LV - 1; i++) paths += curve(i, i + 1, 0, !!arr[i]);
-  BR.forEach(b => { paths += curve(b.p, b.i, 1, !!arr[b.p]); const nx = BR.find(q => q.p === b.i); if (!nx && b.j >= 0) paths += curve(b.i, b.j, 1, !!arr[b.i]); });
-  const node = i => { const [x, y] = nodeXY(i), b = brOf(i), t = b ? b.t : NODE_PAT[i], done = arr[i] | 0, av = avail(i), boss = t === 'B', md = medalAt(w, i, tier), cor = !b && glitchSpreading() && isCorrupt(w, i) && !(SAVE.flags.clean || {})[corruptKey(w, i)];
+  const w = UI.w; bgPrewarm(w); const W = WORLDS[w], pr = prog(w), tier = Math.min(UI.tier, pr.t), arr = pr.done[tier - 1] || [], B = BOSSES[w], ac = W.ac || '#22d3ee', GW = wg(w);
+  let first = 0; while (first < LV && arr[first]) first++;
+  if (UI.sel === undefined || UI.sel === null || !GW.N[UI.sel]) UI.sel = Math.min(first, LV - 1);
+  const avail = i => nodeOpen(w, arr, i) || !!arr[i], sel = UI.sel;
+  const curve = (a, b, on) => { const [x1, y1] = nodeXY(w, a), [x2, y2] = nodeXY(w, b), mx = (x1 + x2) / 2; return '<path d="M' + x1 + ' ' + y1 + ' C ' + mx + ' ' + y1 + ', ' + mx + ' ' + y2 + ', ' + x2 + ' ' + y2 + '" class="wm-p' + (on ? ' on' : '') + '"/>'; };
+  const paths = GW.E.map(e => curve(e[0], e[1], !!arr[e[0]])).join('');
+  const node = i => { const [x, y] = nodeXY(w, i), b = brOf(w, i), t = b ? b.t : NODE_PAT[i], done = arr[i] | 0, av = avail(i), boss = t === 'B', md = medalAt(w, i, tier), cor = !b && glitchSpreading() && isCorrupt(w, i) && !(SAVE.flags.clean || {})[corruptKey(w, i)];
     const ic = b ? (ICO[BRT[t].ic] || ICO.star) : ICO[t] || ICO.c;
-    return '<button class="node wm-n' + (boss ? ' bs' : '') + (b ? ' brn' : '') + (done ? ' dn' : av ? ' av' : ' lk') + (i === sel ? ' sel' : '') + (cor ? ' cor' : '') + '" style="left:' + x + 'px;top:' + y + 'px" data-act="lvl:' + i + '" title="' + (b ? BRT[t].nm : NODE_NAME[t]) + '">' + (av || done ? ic : ICO.lock) + '<span>' + (done ? '★'.repeat(done) : b ? '' : (i + 1)) + '</span>' + (md ? '<i class="mdl" style="background:' + MEDALS[md][1] + '"></i>' : '') + '</button>'; };
-  let nodes = ''; for (let i = 0; i < LV; i++) nodes += node(i); BR.forEach(b => { nodes += node(b.i); });
+    return '<button class="node wm-n' + (boss ? ' bs' : '') + (b && t === 'v' ? ' cache' : '') + (done ? ' dn' : av ? ' av' : ' lk') + (i === sel ? ' sel' : '') + (cor ? ' cor' : '') + '" style="left:' + x + 'px;top:' + y + 'px" data-act="lvl:' + i + '" title="' + (b ? BRT[t].nm : NODE_NAME[t]) + '">' + (av || done ? ic : ICO.lock) + '<span>' + (done ? '★'.repeat(done) : '') + '</span>' + (md ? '<i class="mdl" style="background:' + MEDALS[md][1] + '"></i>' : '') + (b && b.dead && !boss ? '<i class="wm-end"></i>' : '') + '</button>'; };
+  const nodes = Object.keys(GW.N).map(Number).map(node).join('');
   const rs = seeded(w * 101 + 7), deco = wmDeco(WTH[w] || 'rings', MPW, MPH, ac, rs);
-  const b = brOf(sel), t = b ? b.t : NODE_PAT[sel], sp = levelSpec(w, sel, tier), ro = t === 'B' ? [] : rosterFor(w, Math.min(sel, LV - 2)).map(id => EN[id].nm), done = arr[sel] | 0, av = avail(sel), bonusK = w + ':' + sel + ':' + tier;
-  const info = '<div class="wm-i"><div class="fl"><div class="wm-k" style="color:' + (b ? '#fbbf24' : ac) + '">' + (b ? 'SIDE ROUTE - ' + BRT[t].nm : 'SECTOR ' + (sel + 1) + ' - ' + NODE_NAME[t]) + '</div><h3 class="wm-nm">' + escH(sp.name) + '</h3>' +
-    '<div class="xs mut wm-d">' + (t === 'B' ? 'BOSS: <b class="bad">' + B.nm + '</b> - ' + fmt(B.hp * (1 + (tier - 1) * .35)) + '+ HP, ' + B.ph.length + ' phases' : (b ? BRT[t].ds + '<br>' : '') + sp.waves + ' waves - ' + ro.join(', ') + (t === 'e' && !b ? ' - <b class="bad">ELITE: ' + EN[W.el].nm + '</b>' : '') + (t === 'h' ? ' - asteroid storm' : '') + (t === 's' ? ' - lighter waves, extra loot' : '')) +
+  const b = brOf(w, sel), t = b ? b.t : NODE_PAT[sel], sp = levelSpec(w, sel, tier), ro = t === 'B' ? [] : rosterFor(w, Math.min(b ? b.c : sel, LV - 2)).map(id => EN[id].nm), done = arr[sel] | 0, av = avail(sel), bonusK = w + ':' + sel + ':' + tier;
+  const outs = GW.E.filter(e => e[0] === sel).length, ins = GW.E.filter(e => e[1] === sel).length;
+  const info = '<div class="wm-i"><div class="fl"><div class="wm-k" style="color:' + (b ? '#fbbf24' : ac) + '">' + (t === 'B' ? 'WORLD BOSS' : b ? BRT[t].nm : NODE_NAME[t]) + (t === 'B' ? '' : ' - ' + (outs > 1 ? 'THE ROUTE SPLITS HERE' : !outs ? 'DEAD END' : ins > 1 ? 'ROUTES MEET HERE' : b ? 'SIDE ROUTE' : 'MAIN ROUTE')) + '</div><h3 class="wm-nm">' + escH(sp.name) + '</h3>' +
+    '<div class="xs mut wm-d">' + (t === 'B' ? 'BOSS: <b class="bad">' + B.nm + '</b> - ' + fmt(B.hp * (1 + (tier - 1) * .35)) + '+ HP, ' + B.ph.length + ' phases - beat it to unlock the next world' : (b ? BRT[t].ds + '<br>' : '') + sp.waves + ' waves - ' + ro.join(', ') + (t === 'e' && !b ? ' - <b class="bad">ELITE: ' + EN[W.el].nm + '</b>' : '') + (t === 'h' ? ' - asteroid storm' : '') + (t === 's' ? ' - lighter waves, extra loot' : '')) +
     (b && !(SAVE.flags.br || {})[bonusK] ? '<br><b class="gold">First clear bonus: +' + fmt(Math.round((t === 'v' ? 600 + 150 * w : 120 + 40 * w) * tier)) + ' cores</b>' : '') + '</div></div>' +
-    '<div class="wm-go">' + (done ? '<span class="wm-st">' + '★'.repeat(done) + '<span class="mut">' + '★'.repeat(3 - done) + '</span></span>' : '') + '<button class="btn big' + (av ? ' gold' : ' off') + '" data-act="start">' + (done ? 'REPLAY' : 'LAUNCH') + '</button></div></div>';
+    '<div class="wm-go">' + (done ? '<span class="wm-st">' + '★'.repeat(done) + '<span class="mut">' + '★'.repeat(3 - done) + '</span></span>' : '') + '<button class="btn big' + (av ? ' gold' : ' off') + '" data-act="start">' + (done ? 'REPLAY' : av ? 'LAUNCH' : 'LOCKED') + '</button></div></div>';
   const pills = WORLDS.map((x, i) => '<button class="wm-w' + (i === w ? ' on' : '') + (i >= SAVE.wu ? ' lk' : '') + '" style="--pc:' + (x.ac || '#22d3ee') + '" data-act="world:' + i + '" title="' + escH(x.nm) + '">' + (i >= SAVE.wu ? ICO.lock : '<b>' + (i + 1) + '</b>') + '</button>').join('');
   const tierSeg = pr.t > 1 ? '<div class="seg wm-tier">' + [1, 2, 3].map(n => '<button data-act="tier:' + n + '" class="' + (n === tier ? 'on' : '') + '"' + (n > pr.t ? ' disabled style="opacity:.35"' : '') + '>TIER ' + n + '</button>').join('') + '</div>' : '';
-  const nDone = arr.filter(Boolean).length, nAll = LV + BR.length;
+  const nDone = Object.keys(GW.N).filter(i => arr[i]).length, nAll = Object.keys(GW.N).length;
   return '<div class="wm" style="--wc:' + ac + ';--wb1:' + (W.col ? W.col[0] : '#030712') + ';--wb2:' + (W.col ? W.col[1] : '#0f172a') + '"><header class="wm-h"><span class="wm-num">' + String(w + 1).padStart(2, '0') + '</span><div class="fl"><div class="wm-k">WORLD ' + (w + 1) + ' OF ' + WORLDS.length + (tier > 1 ? ' - TIER ' + tier + ' REMIX' : '') + '</div><h2 class="wm-t">' + escH(W.nm) + '</h2><div class="xs wm-sub">' + escH(W.sub) + '</div></div>' +
     '<div class="wm-side">' + tierSeg + '<div class="wm-bs"><span class="xs mut">WORLD BOSS</span><b>' + escH(B.nm) + '</b></div><div class="xs mut">' + nDone + ' / ' + nAll + ' sectors cleared</div></div></header>' +
     '<nav class="wm-ws">' + pills + '</nav>' +
-    '<div class="wm-map" id="mapScroll"><div class="wm-in" style="width:' + MPW + 'px;height:' + MPH + 'px"><svg class="wm-deco" viewBox="0 0 ' + MPW + ' ' + MPH + '" width="' + MPW + '" height="' + MPH + '" aria-hidden="true">' + deco + '</svg><svg class="wm-paths" viewBox="0 0 ' + MPW + ' ' + MPH + '" width="' + MPW + '" height="' + MPH + '" aria-hidden="true">' + paths + '</svg>' + nodes +
-    Object.keys(BRLAB).map(k => { const [x, y] = nodeXY(+k); return '<span class="wm-lab" style="left:' + x + 'px;top:' + (y < MPH / 2 ? y - 44 : y + 30) + 'px">' + BRLAB[k] + '</span>'; }).join('') + '</div></div>' + info +
-    '<footer class="wm-f"><button class="btn sm" data-act="back">Back</button><span class="xs mut">Main path to the boss unlocks the next world. Side routes branch off for extra rewards - dashed lines show where they rejoin.</span></footer></div>';
+    '<div class="wm-map" id="mapScroll"><div class="wm-in" style="width:' + MPW + 'px;height:' + MPH + 'px"><svg class="wm-deco" viewBox="0 0 ' + MPW + ' ' + MPH + '" width="' + MPW + '" height="' + MPH + '" aria-hidden="true">' + deco + '</svg><svg class="wm-paths" viewBox="0 0 ' + MPW + ' ' + MPH + '" width="' + MPW + '" height="' + MPH + '" aria-hidden="true">' + paths + '</svg>' + nodes + '</div></div>' + info +
+    '<footer class="wm-f"><button class="btn sm" data-act="back">Back</button><span class="xs mut">Every world\'s routes are different. Clear any sector to open the ones it connects to - only the boss unlocks the next world.</span></footer></div>';
 };
-const _startBr = ACT.start;
-ACT.start = function () { if (UI.mode === 'expedition' && UI.sel >= LV) { const arr = prog(UI.w).done[UI.tier - 1] || []; if (!brOpen(arr, UI.sel) && !SAVE.devAll) { SFX.no(); return; } startLevel(UI.w, UI.sel, UI.tier, false); return; } if (UI.mode === 'expedition') { const arr = prog(UI.w).done[UI.tier - 1] || []; let f = 0; while (f < LV && arr[f]) f++; if (UI.sel > f && !SAVE.devAll) { SFX.no(); return; } } return _startBr.apply(this, arguments); };
+ACT.start = (function (orig) { return function () { if (UI.mode !== 'expedition') return orig.apply(this, arguments); const arr = prog(UI.w).done[UI.tier - 1] || []; if (!nodeOpen(UI.w, arr, UI.sel) && !arr[UI.sel]) { SFX.no(); return; } startLevel(UI.w, UI.sel, UI.tier, false); }; })(ACT.start);
