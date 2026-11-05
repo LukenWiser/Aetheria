@@ -38,7 +38,7 @@ function versusTick(R) {
   for (const p of G.players) if (!p.alive && p.rest > 0 && --p.rest <= 0) { revive(p); p.score = Math.max(0, p.score - 400); ftext(p.x, p.y - 30, '-400', '#fb7185', 14); }
   if (V2.time <= 0) { R.stage = 'clear'; R.st = 200; finishRun(true); }
 }
-function versusFinish(R, win, d) { const a = G.players[0] ? G.players[0].score : 0, b = G.players[1] ? G.players[1].score : 0; d.name = 'Versus'; d.vs = [Math.round(a), Math.round(b)]; d.win = true; d.bonus = 150; d.vsWin = a === b ? 0 : a > b ? 1 : 2; SAVE.st.vs = (SAVE.st.vs | 0) + 1; }
+function versusFinish(R, win, d) { const sc = G.players.map(p => Math.round(p.score)), top = Math.max(...sc), ti = sc.indexOf(top); d.name = 'Versus'; d.vs = sc; d.win = true; d.bonus = 150; d.vsWin = sc.filter(s => s === top).length > 1 ? 0 : ti + 1; if (G.netNames) d.vsNm = G.netNames.slice(); SAVE.st.vs = (SAVE.st.vs | 0) + 1; }
 
 // ---- ghost replays: your best run of each sector flies alongside you ----
 const ghostKey = R => R.w + ':' + R.lv + ':' + R.tier + (R.alt ? 'b' : '');

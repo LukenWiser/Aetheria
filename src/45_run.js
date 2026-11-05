@@ -16,8 +16,8 @@ function hudPanel(p) {
   return '<div class="nm"><span>PILOT ' + (p.id + 1) + '</span><em id="hw' + p.id + '"></em></div>' + row('h', '#fb7185', '', IC.hull) + row('s', '#38bdf8', '', IC.sh) + row('a', '#2dd4bf', '', IC.am) + row('b', '#fde047', '', IC.ab) + row('u', '#e879f9', '', IC.ab);
 }
 function buildHud() {
-  const h = $('hud'); h.classList.add('on'); h.classList.toggle('coop', G.players.length > 1);
-  G.players.forEach((p, i) => { $('hp' + i).innerHTML = hudPanel(p); p._hc = {}; });
+  const h = $('hud'); h.classList.add('on'); h.classList.toggle('coop', G.players.length > 1); h.classList.toggle('p4', G.players.length > 2); for (let i = 2; i < 4; i++) { const e = $('hp' + i); if (e) { e.innerHTML = ''; e.style.display = 'none'; } }
+  G.players.forEach((p, i) => { const e = $('hp' + i); if (e) { e.innerHTML = hudPanel(p); if (i > 1) e.style.display = 'block'; } p._hc = {}; });
   $('boss').classList.remove('on'); $('stn').style.display = G.run && G.run.stn ? 'block' : 'none';
 }
 function setW(id, v, txt) {
@@ -62,7 +62,7 @@ function beginRun(o) {
   audio(); if (UI.hideAll) UI.hideAll(); clearMsgs();
   const co = !!o.co && o.mode !== 'tutorial'; G.coop = co; G.mode = o.mode; G.world = (o.w | 0) % WORLDS.length;
   const R = G.run = { mode: o.mode, w: G.world, lv: o.lv | 0, tier: o.tier || 1, diff: 1, hpm: 1, edm: 1, stage: 'intro', st: 0, wave: 0, waves: 4, q: [], kills: 0, score: 0, cores: 0, hurt: 0, combo: 0, comboT: 0, boss: null, time: 0, hazMode: false, nodmg: false, freeAmmo: false, blitz: false, tut: null, over: false, bossDown: 0, spec: null, gap: 0, t0: G.t, rush: null, ri: 0, graze: 0, maxCombo: 0, esc: 0, gzT: 0, var: o.var || null, assist: !!o.assist, rng: null, swarm: 1, ammoDrop: 1, bmul: 1, stn: null, lastSrc: null, low: undefined, dinfo: null };
-  G.players = [mkPlayer(0)]; if (co) G.players.push(mkPlayer(1));
+  G.players = [mkPlayer(0)]; if (co) G.players.push(mkPlayer(1)); for (let i = 2; i < (G.net ? G.netN | 0 : 0); i++) G.players.push(mkPlayer(i));
   G.players.forEach(p => { p.x = 150; p.y = V.H / 2 + (co ? (p.id ? 80 : -80) : 0); });
   G.ent = { en: [], pb: [], eb: [], pk: [], pa: [], fl: [], bm: [], hz: [] }; G.freeze = 0; G.shake = 0; G.hitT = 0; G.ts = 1; G.paused = false; G.god = false; G.pick = null; G.abTs = 0; G.slowUntil = 0; IN.ab = [0, 0];
   if (o.mode === 'expedition') { const sp = R.spec = levelSpec(R.w, R.lv, R.tier, o.alt); R.diff = sp.diff; R.waves = sp.waves; R.hazMode = sp.type === 'h'; R.hpm = sp.diff; R.edm = 1.15 + R.w * .055 + R.lv * .012 + (R.tier - 1) * .18; R.bhm = 1.6 + R.w * .02; R.alt = sp.alt; applyRoute(R); }

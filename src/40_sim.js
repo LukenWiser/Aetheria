@@ -18,7 +18,7 @@ const DIFFM = [{ hp: .8, dm: .7 }, { hp: 1, dm: 1 }, { hp: 1.25, dm: 1.35 }];
 
 function mkPlayer(i) {
   const pl = (G.netPl && G.netPl[i]) || SAVE.pl[i], st = shipStats(pl);
-  return { id: i, pl, cfg: pl.cfg, x: 140, y: V.H / 2 + (i ? 70 : -70) * (G.coop ? 1 : 0), vx: 0, vy: 0, st, hp: st.hp, mhp: st.hp, sh: st.sh, msh: st.sh, am: st.am, mam: st.am, wpn: WPN[pl.wpn] && pl.wown.indexOf(pl.wpn) >= 0 ? pl.wpn : 'twin', alive: true, inv: 100, blink: false, fcd: 0, od: 0, slow: 0, rest: 0, shT: 0, score: 0, kills: 0, lastHit: 0, gx: 0, mod: newMod(), cards: {}, abCd: 0, abMax: 1, wallT: 0, ovl: 0, dashT: 0, dvx: 0, dvy: 0, lmx: 0, lmy: 0, gzc: 0, bcd: 0, dr: [], oa: 0, orbP: [], phaseT: 0, reflT: 0, sup: 0, supT: 0, chg: 0, secCd: 0, pcd: 0, parT: 0, secH: false };
+  return { id: i, pl, cfg: pl.cfg, x: 140, y: V.H / 2 + [-70, 70, -150, 150][i & 3] * (G.coop || i > 1 ? 1 : 0), vx: 0, vy: 0, st, hp: st.hp, mhp: st.hp, sh: st.sh, msh: st.sh, am: st.am, mam: st.am, wpn: WPN[pl.wpn] && pl.wown.indexOf(pl.wpn) >= 0 ? pl.wpn : 'twin', alive: true, inv: 100, blink: false, fcd: 0, od: 0, slow: 0, rest: 0, shT: 0, score: 0, kills: 0, lastHit: 0, gx: 0, mod: newMod(), cards: {}, abCd: 0, abMax: 1, wallT: 0, ovl: 0, dashT: 0, dvx: 0, dvy: 0, lmx: 0, lmy: 0, gzc: 0, bcd: 0, dr: [], oa: 0, orbP: [], phaseT: 0, reflT: 0, sup: 0, supT: 0, chg: 0, secCd: 0, pcd: 0, parT: 0, secH: false };
 }
 function setWeapon(p, id) { if (p.pl.wown.indexOf(id) >= 0 && p.wpn !== id) { p.wpn = id; p.pl.wpn = id; SFX.click(); alertMsg(WPN[id].nm.toUpperCase()); } }
 function cycleWeapon(p, dir) { const own = WORDER.filter(w => p.pl.wown.indexOf(w) >= 0); if (own.length < 2) { alertMsg('ONLY ONE WEAPON OWNED'); return; } setWeapon(p, own[(own.indexOf(p.wpn) + dir + own.length) % own.length]); }
@@ -130,7 +130,7 @@ function killPlayer(p) {
 }
 
 // ---------- enemies ----------
-function runMul() { const R = G.run, dm = DIFFM[SET.diff] || DIFFM[1]; return { hp: R.hpm * dm.hp * (G.players.length > 1 ? 1.6 : 1), ed: R.edm }; }
+function runMul() { const R = G.run, dm = DIFFM[SET.diff] || DIFFM[1]; return { hp: R.hpm * dm.hp * (G.players.length > 1 ? 1 + .6 * (G.players.length - 1) : 1), ed: R.edm }; }
 function mkEnemy(id, x, y, o) {
   const d = EN[id], mu = runMul();
   const e = { id, d, boss: false, dfT: G.run && G.run.stn ? rint(500, 900) : 1e9, x, y, y0: y, vx: 0, vy: 0, w: d.w, r: d.w * .34, hp: 1, mhp: 1, t: 0, ph: Math.random() * TAU, st: 0, fcd: rint(30, Math.max(31, d.f ? d.f.r : 60)), hf: 0, ram: d.ram || 20, dead: false, hx: V.W * rnd(.6, .86), sa: 0, bq: 0, bcd: 0, bang: 0, hide: false, minion: !!(o && o.minion), tx: 0, ty: 0, ux: 0 };

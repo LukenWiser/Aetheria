@@ -474,5 +474,22 @@ body.introfade #ui .scr.on{transition:opacity 1s ease}
 .cl-box{align-items:flex-start}.cl-st{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 4px;font-size:14px}.cl-st b{font:800 22px var(--disp,Impact,sans-serif)}
 .mm-ib{margin-left:6px;background:#f43f5e;color:#fff;border-radius:9px;padding:0 6px;font-size:11px;line-height:17px}
 .lb2 .sm-brief{align-self:center}
+
+/* 4-player HUD + room slots */
+.pn.l2,.pn.r2{top:calc(150px + env(safe-area-inset-top))}
+.p4 .pn{width:min(200px,24vw);padding:6px 8px}
+.p4 .pn.l2,.p4 .pn.r2{top:calc(128px + env(safe-area-inset-top))}
+.p4 .pn .rw:nth-child(n+5){display:none}
+.rslot{border-left:3px solid transparent}.rslot.on{border-left-color:var(--pc)}
+
+/* ranked */
+.rkb{display:inline-flex;width:18px;height:18px;vertical-align:-4px;font-style:normal;border:0!important;background:none!important;box-shadow:none!important;padding:0!important}.rkb svg{width:100%;height:100%;fill:color-mix(in srgb,var(--rc) 30%,transparent);stroke:var(--rc);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.rkb.big{width:92px;height:92px;filter:drop-shadow(0 0 18px var(--rc))}
+.rk-hero{display:flex;gap:18px;align-items:center;margin:12px 0;padding:14px;border-radius:14px;background:linear-gradient(110deg,color-mix(in srgb,var(--rc) 18%,transparent),rgba(255,255,255,.02));border:1px solid color-mix(in srgb,var(--rc) 40%,transparent)}
+.rk-hero>div{flex:1;min-width:0}
+.rk-tier{font:900 clamp(30px,5vw,46px) var(--disp,Impact,sans-serif);text-transform:uppercase;font-style:italic;color:var(--rc);line-height:1}
+.rk-r{font:800 22px var(--disp,Impact,sans-serif);margin:2px 0 6px}
+.rk-bar{height:8px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:6px}.rk-bar i{display:block;height:100%;background:var(--rc);box-shadow:0 0 12px var(--rc)}
+.rk-tiers{display:flex;flex-wrap:wrap;gap:6px}.rk-tiers .rkt{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:8px;font-size:12px;font-weight:700;color:#94a3b8;background:rgba(255,255,255,.03)}.rk-tiers .rkt.on{color:var(--rc);background:color-mix(in srgb,var(--rc) 16%,transparent)}
 </style>
 </head>

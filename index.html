@@ -474,6 +474,23 @@ body.introfade #ui .scr.on{transition:opacity 1s ease}
 .cl-box{align-items:flex-start}.cl-st{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 4px;font-size:14px}.cl-st b{font:800 22px var(--disp,Impact,sans-serif)}
 .mm-ib{margin-left:6px;background:#f43f5e;color:#fff;border-radius:9px;padding:0 6px;font-size:11px;line-height:17px}
 .lb2 .sm-brief{align-self:center}
+
+/* 4-player HUD + room slots */
+.pn.l2,.pn.r2{top:calc(150px + env(safe-area-inset-top))}
+.p4 .pn{width:min(200px,24vw);padding:6px 8px}
+.p4 .pn.l2,.p4 .pn.r2{top:calc(128px + env(safe-area-inset-top))}
+.p4 .pn .rw:nth-child(n+5){display:none}
+.rslot{border-left:3px solid transparent}.rslot.on{border-left-color:var(--pc)}
+
+/* ranked */
+.rkb{display:inline-flex;width:18px;height:18px;vertical-align:-4px;font-style:normal;border:0!important;background:none!important;box-shadow:none!important;padding:0!important}.rkb svg{width:100%;height:100%;fill:color-mix(in srgb,var(--rc) 30%,transparent);stroke:var(--rc);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.rkb.big{width:92px;height:92px;filter:drop-shadow(0 0 18px var(--rc))}
+.rk-hero{display:flex;gap:18px;align-items:center;margin:12px 0;padding:14px;border-radius:14px;background:linear-gradient(110deg,color-mix(in srgb,var(--rc) 18%,transparent),rgba(255,255,255,.02));border:1px solid color-mix(in srgb,var(--rc) 40%,transparent)}
+.rk-hero>div{flex:1;min-width:0}
+.rk-tier{font:900 clamp(30px,5vw,46px) var(--disp,Impact,sans-serif);text-transform:uppercase;font-style:italic;color:var(--rc);line-height:1}
+.rk-r{font:800 22px var(--disp,Impact,sans-serif);margin:2px 0 6px}
+.rk-bar{height:8px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:6px}.rk-bar i{display:block;height:100%;background:var(--rc);box-shadow:0 0 12px var(--rc)}
+.rk-tiers{display:flex;flex-wrap:wrap;gap:6px}.rk-tiers .rkt{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:8px;font-size:12px;font-weight:700;color:#94a3b8;background:rgba(255,255,255,.03)}.rk-tiers .rkt.on{color:var(--rc);background:color-mix(in srgb,var(--rc) 16%,transparent)}
 </style>
 </head>
 <body>
@@ -485,6 +502,8 @@ body.introfade #ui .scr.on{transition:opacity 1s ease}
   <div id="hud">
     <div id="hp0" class="pn l"></div>
     <div id="hp1" class="pn r"></div>
+    <div id="hp2" class="pn l l2" style="display:none"></div>
+    <div id="hp3" class="pn r r2" style="display:none"></div>
     <div id="top">
       <div class="ob" id="obj">-</div>
       <div class="sc"><span>SCORE <b id="score">0</b></span><span class="cb" id="combo"></span><span class="gz" id="graze"></span><span>CORES <b id="cores">0</b></span></div>
@@ -3221,7 +3240,7 @@ const DIFFM = [{ hp: .8, dm: .7 }, { hp: 1, dm: 1 }, { hp: 1.25, dm: 1.35 }];
 
 function mkPlayer(i) {
   const pl = (G.netPl && G.netPl[i]) || SAVE.pl[i], st = shipStats(pl);
-  return { id: i, pl, cfg: pl.cfg, x: 140, y: V.H / 2 + (i ? 70 : -70) * (G.coop ? 1 : 0), vx: 0, vy: 0, st, hp: st.hp, mhp: st.hp, sh: st.sh, msh: st.sh, am: st.am, mam: st.am, wpn: WPN[pl.wpn] && pl.wown.indexOf(pl.wpn) >= 0 ? pl.wpn : 'twin', alive: true, inv: 100, blink: false, fcd: 0, od: 0, slow: 0, rest: 0, shT: 0, score: 0, kills: 0, lastHit: 0, gx: 0, mod: newMod(), cards: {}, abCd: 0, abMax: 1, wallT: 0, ovl: 0, dashT: 0, dvx: 0, dvy: 0, lmx: 0, lmy: 0, gzc: 0, bcd: 0, dr: [], oa: 0, orbP: [], phaseT: 0, reflT: 0, sup: 0, supT: 0, chg: 0, secCd: 0, pcd: 0, parT: 0, secH: false };
+  return { id: i, pl, cfg: pl.cfg, x: 140, y: V.H / 2 + [-70, 70, -150, 150][i & 3] * (G.coop || i > 1 ? 1 : 0), vx: 0, vy: 0, st, hp: st.hp, mhp: st.hp, sh: st.sh, msh: st.sh, am: st.am, mam: st.am, wpn: WPN[pl.wpn] && pl.wown.indexOf(pl.wpn) >= 0 ? pl.wpn : 'twin', alive: true, inv: 100, blink: false, fcd: 0, od: 0, slow: 0, rest: 0, shT: 0, score: 0, kills: 0, lastHit: 0, gx: 0, mod: newMod(), cards: {}, abCd: 0, abMax: 1, wallT: 0, ovl: 0, dashT: 0, dvx: 0, dvy: 0, lmx: 0, lmy: 0, gzc: 0, bcd: 0, dr: [], oa: 0, orbP: [], phaseT: 0, reflT: 0, sup: 0, supT: 0, chg: 0, secCd: 0, pcd: 0, parT: 0, secH: false };
 }
 function setWeapon(p, id) { if (p.pl.wown.indexOf(id) >= 0 && p.wpn !== id) { p.wpn = id; p.pl.wpn = id; SFX.click(); alertMsg(WPN[id].nm.toUpperCase()); } }
 function cycleWeapon(p, dir) { const own = WORDER.filter(w => p.pl.wown.indexOf(w) >= 0); if (own.length < 2) { alertMsg('ONLY ONE WEAPON OWNED'); return; } setWeapon(p, own[(own.indexOf(p.wpn) + dir + own.length) % own.length]); }
@@ -3333,7 +3352,7 @@ function killPlayer(p) {
 }
 
 // ---------- enemies ----------
-function runMul() { const R = G.run, dm = DIFFM[SET.diff] || DIFFM[1]; return { hp: R.hpm * dm.hp * (G.players.length > 1 ? 1.6 : 1), ed: R.edm }; }
+function runMul() { const R = G.run, dm = DIFFM[SET.diff] || DIFFM[1]; return { hp: R.hpm * dm.hp * (G.players.length > 1 ? 1 + .6 * (G.players.length - 1) : 1), ed: R.edm }; }
 function mkEnemy(id, x, y, o) {
   const d = EN[id], mu = runMul();
   const e = { id, d, boss: false, dfT: G.run && G.run.stn ? rint(500, 900) : 1e9, x, y, y0: y, vx: 0, vy: 0, w: d.w, r: d.w * .34, hp: 1, mhp: 1, t: 0, ph: Math.random() * TAU, st: 0, fcd: rint(30, Math.max(31, d.f ? d.f.r : 60)), hf: 0, ram: d.ram || 20, dead: false, hx: V.W * rnd(.6, .86), sa: 0, bq: 0, bcd: 0, bang: 0, hide: false, minion: !!(o && o.minion), tx: 0, ty: 0, ux: 0 };
@@ -3889,8 +3908,8 @@ function hudPanel(p) {
   return '<div class="nm"><span>PILOT ' + (p.id + 1) + '</span><em id="hw' + p.id + '"></em></div>' + row('h', '#fb7185', '', IC.hull) + row('s', '#38bdf8', '', IC.sh) + row('a', '#2dd4bf', '', IC.am) + row('b', '#fde047', '', IC.ab) + row('u', '#e879f9', '', IC.ab);
 }
 function buildHud() {
-  const h = $('hud'); h.classList.add('on'); h.classList.toggle('coop', G.players.length > 1);
-  G.players.forEach((p, i) => { $('hp' + i).innerHTML = hudPanel(p); p._hc = {}; });
+  const h = $('hud'); h.classList.add('on'); h.classList.toggle('coop', G.players.length > 1); h.classList.toggle('p4', G.players.length > 2); for (let i = 2; i < 4; i++) { const e = $('hp' + i); if (e) { e.innerHTML = ''; e.style.display = 'none'; } }
+  G.players.forEach((p, i) => { const e = $('hp' + i); if (e) { e.innerHTML = hudPanel(p); if (i > 1) e.style.display = 'block'; } p._hc = {}; });
   $('boss').classList.remove('on'); $('stn').style.display = G.run && G.run.stn ? 'block' : 'none';
 }
 function setW(id, v, txt) {
@@ -3935,7 +3954,7 @@ function beginRun(o) {
   audio(); if (UI.hideAll) UI.hideAll(); clearMsgs();
   const co = !!o.co && o.mode !== 'tutorial'; G.coop = co; G.mode = o.mode; G.world = (o.w | 0) % WORLDS.length;
   const R = G.run = { mode: o.mode, w: G.world, lv: o.lv | 0, tier: o.tier || 1, diff: 1, hpm: 1, edm: 1, stage: 'intro', st: 0, wave: 0, waves: 4, q: [], kills: 0, score: 0, cores: 0, hurt: 0, combo: 0, comboT: 0, boss: null, time: 0, hazMode: false, nodmg: false, freeAmmo: false, blitz: false, tut: null, over: false, bossDown: 0, spec: null, gap: 0, t0: G.t, rush: null, ri: 0, graze: 0, maxCombo: 0, esc: 0, gzT: 0, var: o.var || null, assist: !!o.assist, rng: null, swarm: 1, ammoDrop: 1, bmul: 1, stn: null, lastSrc: null, low: undefined, dinfo: null };
-  G.players = [mkPlayer(0)]; if (co) G.players.push(mkPlayer(1));
+  G.players = [mkPlayer(0)]; if (co) G.players.push(mkPlayer(1)); for (let i = 2; i < (G.net ? G.netN | 0 : 0); i++) G.players.push(mkPlayer(i));
   G.players.forEach(p => { p.x = 150; p.y = V.H / 2 + (co ? (p.id ? 80 : -80) : 0); });
   G.ent = { en: [], pb: [], eb: [], pk: [], pa: [], fl: [], bm: [], hz: [] }; G.freeze = 0; G.shake = 0; G.hitT = 0; G.ts = 1; G.paused = false; G.god = false; G.pick = null; G.abTs = 0; G.slowUntil = 0; IN.ab = [0, 0];
   if (o.mode === 'expedition') { const sp = R.spec = levelSpec(R.w, R.lv, R.tier, o.alt); R.diff = sp.diff; R.waves = sp.waves; R.hazMode = sp.type === 'h'; R.hpm = sp.diff; R.edm = 1.15 + R.w * .055 + R.lv * .012 + (R.tier - 1) * .18; R.bhm = 1.6 + R.w * .02; R.alt = sp.alt; applyRoute(R); }
@@ -4411,7 +4430,7 @@ function versusTick(R) {
   for (const p of G.players) if (!p.alive && p.rest > 0 && --p.rest <= 0) { revive(p); p.score = Math.max(0, p.score - 400); ftext(p.x, p.y - 30, '-400', '#fb7185', 14); }
   if (V2.time <= 0) { R.stage = 'clear'; R.st = 200; finishRun(true); }
 }
-function versusFinish(R, win, d) { const a = G.players[0] ? G.players[0].score : 0, b = G.players[1] ? G.players[1].score : 0; d.name = 'Versus'; d.vs = [Math.round(a), Math.round(b)]; d.win = true; d.bonus = 150; d.vsWin = a === b ? 0 : a > b ? 1 : 2; SAVE.st.vs = (SAVE.st.vs | 0) + 1; }
+function versusFinish(R, win, d) { const sc = G.players.map(p => Math.round(p.score)), top = Math.max(...sc), ti = sc.indexOf(top); d.name = 'Versus'; d.vs = sc; d.win = true; d.bonus = 150; d.vsWin = sc.filter(s => s === top).length > 1 ? 0 : ti + 1; if (G.netNames) d.vsNm = G.netNames.slice(); SAVE.st.vs = (SAVE.st.vs | 0) + 1; }
 
 // ---- ghost replays: your best run of each sector flies alongside you ----
 const ghostKey = R => R.w + ':' + R.lv + ':' + R.tier + (R.alt ? 'b' : '');
@@ -4878,7 +4897,7 @@ function setupVariant(R, o) {
   else if (o.var === 'vault') { sp.type = 'B'; sp.waves = R.waves = 6; sp.name = 'The Vault'; R.hazMode = false; R.bmul = 1.1; R.hpm = Math.max(R.hpm, 1.15 + R.w * .08); }
 }
 function applyAssist() { G.players.forEach(p => { p.mhp = Math.round(p.mhp * 1.4); p.hp = p.mhp; p.msh = Math.round(p.msh * 1.4); p.sh = p.msh; }); }
-function varObj(R) { if (R.var === 'custom' || R.var === 'crash') return (R.var === 'crash' ? 'AETHEROS' : (R.cust.nm || 'CUSTOM').toUpperCase()) + (R.stage === 'boss' ? ' - BOSS' : ' - WAVE ' + Math.min(R.wave + 1, R.waves) + '/' + R.waves); if (R.var === 'versus') { const a = G.players[0], b = G.players[1], s = Math.max(0, Math.ceil(R.vs.time / 60)); return 'VERSUS ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + ' - P1 ' + fmt(Math.round(a ? a.score : 0)) + ' vs P2 ' + fmt(Math.round(b ? b.score : 0)); } if (R.var === 'chal') return 'CHALLENGE ' + R.chal.code + ' - WAVE ' + Math.min(R.wave + 1, R.waves) + '/' + R.waves + ' - BEAT ' + fmt(R.chal.target); if (R.var === 'hardcore') return 'HARDCORE - SECTOR ' + R.hc.sect + ' - WAVE ' + (R.wave + 1) + ' - ' + WORLDS[R.w].nm.toUpperCase(); if (R.var === 'gallery') return 'REMATCH' + (R.gmods.length ? ' - ' + R.gmods.map(k => GMODS[k].nm).join(' + ') : ''); const w = Math.min(R.wave + 1, R.waves), tag = R.var === 'daily' ? 'DAILY' : R.var === 'nohit' ? 'NO-HIT' : R.var === 'retro' ? '1-UP' : 'VAULT'; return tag + (R.stage === 'boss' ? ' - BOSS' : ' - WAVE ' + w + '/' + R.waves) + (R.var === 'daily' && R.dinfo ? ' - ' + R.dinfo.mod.nm : '') + (R.assist ? ' - ASSIST' : ''); }
+function varObj(R) { if (R.var === 'custom' || R.var === 'crash') return (R.var === 'crash' ? 'AETHEROS' : (R.cust.nm || 'CUSTOM').toUpperCase()) + (R.stage === 'boss' ? ' - BOSS' : ' - WAVE ' + Math.min(R.wave + 1, R.waves) + '/' + R.waves); if (R.var === 'versus') { const s = Math.max(0, Math.ceil(R.vs.time / 60)); return 'VERSUS ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + ' - ' + G.players.map((p, i) => 'P' + (i + 1) + ' ' + fmt(Math.round(p.score))).join(' vs '); } if (R.var === 'chal') return 'CHALLENGE ' + R.chal.code + ' - WAVE ' + Math.min(R.wave + 1, R.waves) + '/' + R.waves + ' - BEAT ' + fmt(R.chal.target); if (R.var === 'hardcore') return 'HARDCORE - SECTOR ' + R.hc.sect + ' - WAVE ' + (R.wave + 1) + ' - ' + WORLDS[R.w].nm.toUpperCase(); if (R.var === 'gallery') return 'REMATCH' + (R.gmods.length ? ' - ' + R.gmods.map(k => GMODS[k].nm).join(' + ') : ''); const w = Math.min(R.wave + 1, R.waves), tag = R.var === 'daily' ? 'DAILY' : R.var === 'nohit' ? 'NO-HIT' : R.var === 'retro' ? '1-UP' : 'VAULT'; return tag + (R.stage === 'boss' ? ' - BOSS' : ' - WAVE ' + w + '/' + R.waves) + (R.var === 'daily' && R.dinfo ? ' - ' + R.dinfo.mod.nm : '') + (R.assist ? ' - ASSIST' : ''); }
 function varBanner(R) { if (R.var === 'daily') banner('DAILY CHALLENGE', R.dinfo ? R.dinfo.mod.nm : ''); else if (R.var === 'nohit') banner('NO-HIT RUN', 'ONE HIT ENDS IT'); else if (R.var === 'crash') banner('AETHEROS', 'THE GAME CRASHED. YOU DID NOT.', false); else if (R.var === 'custom') banner((R.cust.nm || 'CUSTOM LEVEL').toUpperCase(), 'CUSTOM LEVEL', false); else if (R.var === 'versus') banner('VERSUS', 'MOST POINTS IN 2 MINUTES WINS', false); else if (R.var === 'chal') banner('CHALLENGE', R.chal.target ? 'SCORE TO BEAT: ' + fmt(R.chal.target) : R.chal.code, false); else if (R.var === 'hardcore') banner('HARDCORE', 'ONE LIFE. NO SECOND CHANCES.'); else if (R.var === 'gallery') banner('REMATCH', BOSSES[R.w].nm.toUpperCase() + (R.gmods.length ? ' - x' + galleryMult(R.gmods).toFixed(1) + ' REWARDS' : ''), true); else if (R.var === 'retro') banner('1-UP', 'PRESS START', false); else banner('THE VAULT', 'GOLD EVERYWHERE. STAY SHARP.'); }
 
 function variantFinish(R, win, d) {
@@ -5772,8 +5791,8 @@ const SCR = {
     return '<div class="card" style="width:min(400px,100%)"><h2 class="tc" style="font-size:20px">Paused</h2><div class="stack" style="margin-top:14px"><button class="btn big" data-act="resume">RESUME</button><button class="btn sm" data-act="photo">PHOTO MODE</button><button class="btn sm" data-act="fs">' + (document.fullscreenElement ? 'EXIT FULL SCREEN' : 'FULL SCREEN') + '</button>' + (tr ? '<div class="grid2"><button class="btn" data-act="spawnboss">SPAWN BOSS</button><button class="btn" data-act="nextworld">NEXT WORLD</button></div>' : '') + '<div class="grid2"><button class="btn" data-act="restart">RESTART</button><button class="btn" data-act="settings">SETTINGS</button></div><button class="btn warn" data-act="quit">QUIT TO MENU</button>' + (dev ? '<div class="grid2"><button class="btn sm gold" data-act="cheat:win">DEV: WIN</button><button class="btn sm gold" data-act="cheat:god">DEV: GOD</button></div>' : '') + '</div></div>';
   },
   scResult: () => {
-    const d = UI.res, win = d.win, m = d.mode, titles = { expedition: win ? 'SECTOR CLEARED' : 'STARFIGHTER DESTROYED', endless: 'RUN OVER', blitz: 'TIME!', rush: win ? 'BOSS RUSH COMPLETE' : 'DEFEATED', training: 'SESSION OVER', daily: win ? 'DAILY COMPLETE' : 'DAILY FAILED', nohit: win ? 'FLAWLESS' : 'YOU WERE HIT', vault: win ? 'VAULT CRACKED' : 'VAULT LOCKED', defense: win ? 'STATION SAVED' : d.lost ? 'STATION LOST' : 'SHIP LOST', hardcore: 'HARDCORE OVER', versus: d.vsWin === 1 ? 'PLAYER 1 WINS' : d.vsWin === 2 ? 'PLAYER 2 WINS' : 'DRAW', chal: d.beat ? 'CHALLENGE BEATEN' : win ? 'CHALLENGE DONE' : 'CHALLENGE FAILED', gallery: win ? 'REMATCH WON' : 'REMATCH LOST', retro: win ? 'GAME CLEAR!' : 'GAME OVER' };
-    const rows = [['SCORE', fmt(d.score)], ['KILLS', d.kills], ['CORES PICKED UP', '+' + fmt(d.cores)], d.bonus ? ['MISSION BONUS', '+' + fmt(d.bonus)] : null, d.remix ? ['REMIX FIRST-CLEAR (INCLUDED)', '+' + fmt(d.remix)] : null, m === 'endless' || m === 'hardcore' ? ['WAVE REACHED', d.wave + 1] : null, d.alt ? ['SIDE ROUTE BONUS', '+30%'] : null, d.secret ? ['SECRET EXIT', 'FOUND!'] : null, m === 'defense' ? ['WAVES HELD', d.wave] : null, d.stn !== undefined ? ['STATION INTEGRITY', d.stn + '%'] : null, d.streak ? ['DAILY STREAK', d.streak + (d.streak === 1 ? ' day' : ' days')] : null, ['GRAZES', d.graze], ['LONGEST CHAIN', d.maxCombo + ' kills'], ['TIME', d.time + 's'], d.xp ? ['PILOT XP', '+' + fmt(d.xp)] : null, d.lvUp ? ['LEVEL UP!', 'LV ' + d.lv + ' ' + rankName(d.lv).toUpperCase() + ' (+' + fmt(d.lvCores | 0) + ')'] : null, d.medal ? [MEDALS[d.medal][0] + ' MEDAL', '+' + fmt(d.medalCores | 0)] : null, d.missions ? ['MISSIONS DONE', d.missions.length + ' - claim in Missions'] : null, d.mastery ? ['MASTERY', d.mastery.join(', ')] : null, d.vs ? ['PLAYER 1', fmt(d.vs[0])] : null, d.vs ? ['PLAYER 2', fmt(d.vs[1])] : null, d.chal && d.chal.target ? ['SCORE TO BEAT', fmt(d.chal.target)] : null].filter(Boolean);
+    const d = UI.res, win = d.win, m = d.mode, titles = { expedition: win ? 'SECTOR CLEARED' : 'STARFIGHTER DESTROYED', endless: 'RUN OVER', blitz: 'TIME!', rush: win ? 'BOSS RUSH COMPLETE' : 'DEFEATED', training: 'SESSION OVER', daily: win ? 'DAILY COMPLETE' : 'DAILY FAILED', nohit: win ? 'FLAWLESS' : 'YOU WERE HIT', vault: win ? 'VAULT CRACKED' : 'VAULT LOCKED', defense: win ? 'STATION SAVED' : d.lost ? 'STATION LOST' : 'SHIP LOST', hardcore: 'HARDCORE OVER', versus: d.vsWin ? ((d.vsNm && d.vsNm[d.vsWin - 1]) || 'PLAYER ' + d.vsWin).toUpperCase() + ' WINS' : 'DRAW', chal: d.beat ? 'CHALLENGE BEATEN' : win ? 'CHALLENGE DONE' : 'CHALLENGE FAILED', gallery: win ? 'REMATCH WON' : 'REMATCH LOST', retro: win ? 'GAME CLEAR!' : 'GAME OVER' };
+    const rows = [['SCORE', fmt(d.score)], ['KILLS', d.kills], ['CORES PICKED UP', '+' + fmt(d.cores)], d.bonus ? ['MISSION BONUS', '+' + fmt(d.bonus)] : null, d.remix ? ['REMIX FIRST-CLEAR (INCLUDED)', '+' + fmt(d.remix)] : null, m === 'endless' || m === 'hardcore' ? ['WAVE REACHED', d.wave + 1] : null, d.alt ? ['SIDE ROUTE BONUS', '+30%'] : null, d.secret ? ['SECRET EXIT', 'FOUND!'] : null, m === 'defense' ? ['WAVES HELD', d.wave] : null, d.stn !== undefined ? ['STATION INTEGRITY', d.stn + '%'] : null, d.streak ? ['DAILY STREAK', d.streak + (d.streak === 1 ? ' day' : ' days')] : null, ['GRAZES', d.graze], ['LONGEST CHAIN', d.maxCombo + ' kills'], ['TIME', d.time + 's'], d.xp ? ['PILOT XP', '+' + fmt(d.xp)] : null, d.lvUp ? ['LEVEL UP!', 'LV ' + d.lv + ' ' + rankName(d.lv).toUpperCase() + ' (+' + fmt(d.lvCores | 0) + ')'] : null, d.medal ? [MEDALS[d.medal][0] + ' MEDAL', '+' + fmt(d.medalCores | 0)] : null, d.missions ? ['MISSIONS DONE', d.missions.length + ' - claim in Missions'] : null, d.mastery ? ['MASTERY', d.mastery.join(', ')] : null, ...(d.vs ? d.vs.map((s, i) => [((d.vsNm && d.vsNm[i]) || 'PLAYER ' + (i + 1)).toUpperCase(), fmt(s)]) : []), d.rk ? ['RANKED RATING', d.rk.r1 + ' (' + (d.rk.r1 >= d.rk.r0 ? '+' : '') + (d.rk.r1 - d.rk.r0) + ') ' + rkTier(d.rk.r1).nm.toUpperCase()] : null, d.chal && d.chal.target ? ['SCORE TO BEAT', fmt(d.chal.target)] : null].filter(Boolean);
     return '<div class="card" style="width:min(460px,100%)"><div class="tc"><div class="title" style="font-size:clamp(22px,6vw,34px);background:linear-gradient(180deg,#fff,' + (win ? '#34d399' : '#fb7185') + ');-webkit-background-clip:text;background-clip:text">' + (titles[m] || (win ? 'MISSION COMPLETE' : 'MISSION FAILED')) + '</div>' + (m === 'expedition' && win ? '<div style="font-size:30px;margin:10px 0">' + stars(d.stars) + '</div>' : '') + rankHtml(d) + (titles[m] === undefined ? '' : '') + (d.best ? '<div class="gold b" style="margin-top:8px">★ NEW PERSONAL BEST ★</div>' : '') + (d.unlockW >= 0 ? '<div class="good b" style="margin-top:8px">WORLD ' + (d.unlockW + 1) + ' UNLOCKED: ' + WORLDS[d.unlockW].nm.toUpperCase() + '</div>' : '') + (d.unlock ? '<div class="gold b" style="margin-top:8px">NEW SHIP UNLOCKED: ' + d.unlock + '</div>' : '') + (d.ending ? '<div class="gold b" style="margin-top:8px">CAMPAIGN COMPLETE - THANK YOU FOR FLYING</div>' : '') + (d.assist ? '<div class="mut xs" style="margin-top:6px;letter-spacing:.1em">ASSIST RUN - REDUCED REWARDS</div>' : '') + '</div><div style="margin:14px 0">' + rows.map(r => '<div class="setrow"><span class="mut">' + r[0] + '</span><b>' + r[1] + '</b></div>').join('') + '</div>' + (!win && m !== 'training' && m !== 'blitz' ? '<div class="tipbox"><b class="gold xs" style="letter-spacing:.2em">TIP</b><div class="xs" style="line-height:1.6;margin-top:3px">' + hintFor(d) + '</div></div>' : '') + '<div class="stack">' + (!win && !d.assist && (d.fails | 0) >= 2 && (m === 'expedition' || m === 'daily') ? '<button class="btn gold" data-act="assist">TRY WITH ASSIST: +40% HULL, 35% LESS DAMAGE</button>' : '') +
       (d.newCode ? '<div class="item" style="flex-direction:column;align-items:stretch;gap:6px"><div class="xs mut b" style="letter-spacing:.12em">CHALLENGE A FRIEND - THEY MUST BEAT ' + fmt(Math.max(d.score, d.chal ? d.chal.target : 0)) + '</div><div class="row sp"><b class="acc" style="letter-spacing:.14em">' + d.newCode + '</b><span class="row" style="gap:6px">' + (netOn() ? '<button class="btn sm gold" data-act="chsendto:' + d.newCode + ':' + Math.max(d.score, d.chal ? d.chal.target : 0) + '">SEND</button>' : '') + '<button class="btn sm" data-act="copycode:' + d.newCode + '">COPY</button></span></div></div>' : '') + (m === 'expedition' && win && d.next !== null ? '<button class="btn big" data-act="nextlv">NEXT SECTOR</button>' : '') + (m === 'expedition' ? '<button class="btn" data-act="retry">' + (win ? 'REPLAY' : 'RETRY SECTOR') + '</button><button class="btn" data-act="tomap">EXPEDITION MAP</button>' : '<button class="btn big" data-act="retry">PLAY AGAIN</button>') + '<div class="grid2"><button class="btn sm" data-act="shop">SHOP</button><button class="btn sm" data-act="menu">MAIN MENU</button></div></div></div>';
   }
@@ -6102,12 +6121,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V37';
+const GAME_VER = 'V38';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V38', 'Squad Up', ['Online co-op for up to 4 pilots: quick match or a private room', 'Online versus for up to 4 pilots - most points wins', 'Enemies get tougher with every extra pilot', 'Ranked versus: one-on-one matches with a rating, six tiers from Bronze to Ace, and monthly seasons', 'Placement matches, promotions and demotions, plus a season leaderboard', 'End-of-season rewards: cores for the tier you reached', 'Four-pilot HUD and colour-coded pilots in the lobby']],
   ['V37', 'Online Records', ['Leaderboards: global top 50 and friends-only boards for Pilot XP, Endless, Blitz, Boss Rush, Hardcore, Station Defense and today\'s Daily', 'Cloud saves: back up your progress to your account and load it on any computer', 'Auto-backup to the cloud after each run (can be turned off)', 'Challenge inbox: send a challenge code straight to a friend, and find out when they beat (or fail to beat) your score', 'REVENGE button when a friend beats your challenge', 'New Leaderboards button on the main menu']],
   ['V36', 'Driftwire Games', ['Aetheria now has a studio: Driftwire Games', 'New animated Driftwire logo in the intro movie', 'The logo also appears in the credits and on the main menu']],
   ['V35', 'Lights, Camera', ['A new intro movie when the game loads: a warp jump, a drop into your world and the title slamming in (press any key to skip)', 'Flying main menu: your ship now cruises through the furthest world you have reached', 'The menu warps between your unlocked worlds every so often, and your ship does the odd barrel roll', 'Both can be turned off in Settings > Graphics']],
@@ -6759,10 +6779,13 @@ async function netUnfriend(uid) { const me = NET.user.uid; await R_('friends/' +
 async function netBlock(uid) { await R_('blocks/' + NET.user.uid + '/' + uid).set(true); await netUnfriend(uid).catch(() => { }); await netDecline(uid).catch(() => { }); }
 function netReport(uid, why) { return R_('reports').push({ from: NET.user.uid, who: uid, why: why || 'name', at: TS() }); }
 
-// ---------- rooms ----------
+// ---------- rooms (up to 4 pilots: the host plus 3 guests) ----------
 const RC = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 const mkCode = () => Array.from({ length: 4 }, () => RC[Math.floor(Math.random() * RC.length)]).join('');
 function netPlData() { const p = JSON.parse(JSON.stringify(SAVE.pl[0])); return p; }
+const roomMax = r => r && r.mode === 'rk' ? 2 : 4;
+const isVs = m => m === 'vs' || m === 'rk';
+const roomGuests = r => Object.keys((r && r.pl) || {}).filter(u => r.pl[u] && u !== r.host).sort((a, z) => (r.pl[a].at || 0) - (r.pl[z].at || 0) || (a < z ? -1 : 1));
 async function netCreateRoom(quick, mode) {
   netLeaveRoom(); const me = NET.user.uid;
   for (let i = 0; i < 6; i++) { const c = mkCode(); const ex = await R_('rooms/' + c).once('value'); if (ex.exists()) continue;
@@ -6771,15 +6794,20 @@ async function netCreateRoom(quick, mode) {
   throw new Error('no room');
 }
 async function netJoinRoom(c) {
-  c = String(c || '').toUpperCase().trim(); const s = await R_('rooms/' + c).once('value'), r = s.val();
-  if (!r) return '!No room with that code.'; if (r.guest) return '!That room is full.'; if (r.host === NET.user.uid) return '!That is your own room.';
-  try { await R_('rooms/' + c + '/guest').set(NET.user.uid); await R_('rooms/' + c + '/gn').set(NET.me.name); } catch (e) { return '!Could not join (someone else got there first).'; }
-  netLeaveRoom(true); NET.code = c; NET.role = 'guest'; R_('rooms/' + c + '/guest').onDisconnect().remove(); R_('rooms/' + c + '/gn').onDisconnect().remove(); netWatchRoom(c); R_('presence/' + NET.user.uid + '/room').set(c).catch(() => { }); return '';
+  c = String(c || '').toUpperCase().trim(); const s = await R_('rooms/' + c).once('value'), r = s.val(); const me = NET.user.uid;
+  if (!r) return '!No room with that code.'; if (r.host === me) return '!That is your own room.'; if (r.st !== 'open') return '!That match has already started.';
+  if (roomGuests(r).length >= roomMax(r) - 1) return '!That room is full.';
+  try { await R_('rooms/' + c + '/pl/' + me).set({ n: NET.me.name, at: TS() }); } catch (e) { return '!Could not join that room.'; }
+  netLeaveRoom(true); NET.code = c; NET.role = 'guest'; R_('rooms/' + c + '/pl/' + me).onDisconnect().remove(); netWatchRoom(c); R_('presence/' + me + '/room').set(c).catch(() => { }); return '';
 }
 function netWatchRoom(c) {
-  const ref = R_('rooms/' + c), fn = s => { const r = s.val(); const was = NET.room; NET.room = r;
-    if (!r) { if (NET.code === c) { const inMatch = G.net; NET.code = null; NET.role = null; if (inMatch) netConnLost('The other pilot left.'); else if (UI.top === 'scRoom') { NET.msg = '!The room was closed.'; UI.show('scOnline'); } } return; }
-    if (NET.role === 'host' && r.guest && (!was || !was.guest) && r.quick) R_('queue/' + r.mode + '/' + NET.user.uid).remove().catch(() => { });
+  const ref = R_('rooms/' + c), fn = s => { const r = s.val(); const was = NET.room; NET.room = r; const me = NET.user && NET.user.uid;
+    if (!r) { if (NET.code === c) { const inMatch = G.net; NET.code = null; NET.role = null; if (inMatch && !G.netHost) netConnLost('The host left.'); else if (UI.top === 'scRoom') { NET.msg = '!The room was closed.'; UI.show('scOnline'); } } return; }
+    const gs = roomGuests(r);
+    if (NET.role === 'guest' && NET.code === c && !(r.pl && r.pl[me]) && r.st === 'open' && was && was.pl && was.pl[me]) { NET.code = null; NET.role = null; if (NET.roomOff) { NET.roomOff(); NET.roomOff = null; } NET.msg = '!You left the room (or it was full).'; if (UI.top === 'scRoom') UI.show('scOnline'); return; }
+    if (NET.role === 'host') { if (gs.length > roomMax(r) - 1 && r.st === 'open') gs.slice(roomMax(r) - 1).forEach(u => R_('rooms/' + c + '/pl/' + u).remove().catch(() => { }));
+      if (r.quick && gs.length >= roomMax(r) - 1) R_('queue/' + r.mode + '/' + me).remove().catch(() => { });
+      if (r.quick && r.mode === 'rk' && gs.length === 1 && r.st === 'open' && !NET.autoGo) { NET.autoGo = 1; setTimeout(() => { NET.autoGo = 0; if (NET.room && NET.room.st === 'open' && roomGuests(NET.room).length) netStart(); }, 1500); } }
     if (r.st === 'go' && (!was || was.st !== 'go')) netGo(r);
     if (r.st === 'open' && was && was.st === 'go' && !G.net && UI.top !== 'scRoom') UI.show('scRoom');
     netRefresh(); };
@@ -6788,29 +6816,55 @@ function netWatchRoom(c) {
 }
 function netLeaveRoom(keepUI) {
   const c = NET.code; if (NET.roomOff) { NET.roomOff(); NET.roomOff = null; } netCloseConn();
-  if (c && NET.user) { if (NET.role === 'host') { R_('rooms/' + c).remove().catch(() => { }); R_('signal/' + c).remove().catch(() => { }); R_('relay/' + c).remove().catch(() => { }); } else { R_('rooms/' + c + '/guest').remove().catch(() => { }); R_('rooms/' + c + '/gn').remove().catch(() => { }); } R_('queue/coop/' + NET.user.uid).remove().catch(() => { }); R_('queue/vs/' + NET.user.uid).remove().catch(() => { }); R_('presence/' + NET.user.uid + '/room').remove().catch(() => { }); }
+  if (c && NET.user) { const me = NET.user.uid; if (NET.role === 'host') { R_('rooms/' + c).remove().catch(() => { }); R_('signal/' + c).remove().catch(() => { }); R_('relay/' + c).remove().catch(() => { }); } else { R_('rooms/' + c + '/pl/' + me).remove().catch(() => { }); } ['coop', 'vs', 'rk'].forEach(m => R_('queue/' + m + '/' + me).remove().catch(() => { })); R_('presence/' + me + '/room').remove().catch(() => { }); }
   NET.code = null; NET.role = null; NET.room = null;
 }
 async function netQuick(mode) {
   const me = NET.user.uid, s = await R_('queue/' + mode).once('value'), q = s.val() || {};
   const now = Date.now(); const ks = Object.keys(q).filter(k => k !== me && !NET.blocked[k] && now - (q[k].at || 0) < 90000).sort((a, b) => q[a].at - q[b].at);
   for (const k of ks) { const e = await netJoinRoom(q[k].code); if (!e) return ''; }
-  const c = await netCreateRoom(true, mode); const qr = R_('queue/' + mode + '/' + me); await qr.set({ code: c, name: NET.me.name, at: TS() }); qr.onDisconnect().remove(); NET.msg = 'Searching for a pilot...'; return '';
+  const c = await netCreateRoom(true, mode); const qr = R_('queue/' + mode + '/' + me); await qr.set({ code: c, name: NET.me.name, at: TS() }); qr.onDisconnect().remove(); NET.msg = mode === 'rk' ? 'Searching for a ranked opponent...' : 'Searching for pilots...'; return '';
 }
 function netInvite(uid) { const r = NET.room; return R_('invites/' + uid + '/' + NET.user.uid).set({ code: NET.code, name: NET.me.name, mode: r ? r.mode : 'coop', at: TS() }); }
 async function netAcceptInvite(uid) { const v = NET.invites[uid]; await R_('invites/' + NET.user.uid + '/' + uid).remove().catch(() => { }); if (!v) return '!Invite expired.'; return netJoinRoom(v.code); }
 function netRoomSet(k, v) { if (NET.role === 'host' && NET.code) R_('rooms/' + NET.code + '/' + k).set(v).catch(() => { }); }
 async function netStart() { // host presses START
-  const r = NET.room; if (!r || !r.guest) return '!Wait for a second pilot.'; if (r.mode === 'coop' && (r.w | 0) >= SAVE.wu) return '!Pick a world you have unlocked.';
+  const r = NET.room, gs = roomGuests(r); if (!r || !gs.length) return '!Wait for another pilot.'; if (r.mode === 'coop' && (r.w | 0) >= SAVE.wu) return '!Pick a world you have unlocked.';
+  if (r.mode === 'rk' && gs.length !== 1) return '!Ranked is one versus one.';
+  const ord = gs.slice(0, roomMax(r) - 1);
   await R_('signal/' + NET.code).remove().catch(() => { }); await R_('relay/' + NET.code).remove().catch(() => { }); await R_('rooms/' + NET.code + '/gpl').remove().catch(() => { });
-  await R_('rooms/' + NET.code + '/hpl').set(JSON.stringify(netPlData())); await R_('rooms/' + NET.code + '/st').set('go'); return '';
+  await R_('rooms/' + NET.code + '/ord').set(ord); await R_('rooms/' + NET.code + '/hpl').set(JSON.stringify(netPlData())); await R_('rooms/' + NET.code + '/st').set('go'); return '';
 }
-async function netGo(r) { // both sides: connect, then the host starts the match
-  if (NET.role === 'guest') await R_('rooms/' + NET.code + '/gpl').set(JSON.stringify(netPlData())).catch(() => { });
+// the host keeps one link per guest; NET.conn is a stand-in that talks to all of them at once
+function netHub(conns) {
+  const H = { hub: true, conns, onMsg: null, onClose: null, closed: false,
+    get mode() { const a = Object.values(conns); return a.some(c => c.mode === 'relay') ? 'relay' : 'rtc'; },
+    get ping() { return Math.max(0, ...Object.values(conns).map(c => c.ping | 0)); },
+    get last() { const a = Object.values(conns).filter(c => !c.closed); return a.length ? Math.min(...a.map(c => c.last)) : Date.now(); },
+    send(ch, m) { for (const u in conns) if (!conns[u].closed) conns[u].send(ch, m); },
+    sendTo(u, ch, m) { if (conns[u] && !conns[u].closed) conns[u].send(ch, m); },
+    close() { if (H.closed) return; H.closed = true; for (const u in conns) conns[u].close(); } };
+  return H;
+}
+async function netGo(r) { // everyone: connect, then the host starts the match
+  const me = NET.user.uid, ord = r.ord || roomGuests(r).slice(0, 3);
+  if (NET.role === 'guest') { if (ord.indexOf(me) < 0) { NET.msg = '!The match started without you (room was full).'; netLeaveRoom(); UI.show('scOnline'); return; } await R_('rooms/' + NET.code + '/gpl/' + me).set(JSON.stringify(netPlData())).catch(() => { }); }
   NET.msg = 'Connecting...'; NET.warned = 0; netRefresh();
-  try { NET.conn = await netConnect(NET.code, NET.role); } catch (e) { NET.msg = '!Could not connect: ' + e.message; netRoomSet('st', 'open'); netRefresh(); return; }
-  NET.conn.onMsg = netOnMsg; NET.conn.onClose = () => netConnLost('Connection lost.');
-  if (NET.role === 'host') { let gpl = null; for (let i = 0; i < 40 && !gpl; i++) { const s = await R_('rooms/' + NET.code + '/gpl').once('value'); gpl = s.val(); if (!gpl) await new Promise(r2 => setTimeout(r2, 250)); } netHostStart(r, gpl ? JSON.parse(gpl) : SAVE.pl[0]); }
+  if (NET.role === 'guest') {
+    try { NET.conn = await netConnect(NET.code + '/' + me, 'guest'); } catch (e) { NET.msg = '!Could not connect: ' + e.message; netRefresh(); return; }
+    NET.conn.onMsg = netOnMsg; NET.conn.onClose = () => netConnLost('Connection lost.'); return;
+  }
+  const conns = {}; await Promise.all(ord.map(u => netConnect(NET.code + '/' + u, 'host').then(c => { conns[u] = c; }).catch(() => { })));
+  if (!Object.keys(conns).length) { NET.msg = '!Could not connect to anyone.'; netRoomSet('st', 'open'); netRefresh(); return; }
+  const H = NET.conn = netHub(conns), live = ord.filter(u => conns[u]);
+  live.forEach((u, k) => { conns[u].onMsg = m => netOnMsg(m, k + 1); conns[u].onClose = () => netGuestLost(u, k + 1); });
+  const gpl = []; for (const u of live) { let v = null; for (let i = 0; i < 40 && !v; i++) { const s = await R_('rooms/' + NET.code + '/gpl/' + u).once('value'); v = s.val(); if (!v) await new Promise(r2 => setTimeout(r2, 250)); } gpl.push(v ? JSON.parse(v) : SAVE.pl[0]); }
+  NET.order = live; netHostStart(r, gpl, live.map(u => (r.pl && r.pl[u] && r.pl[u].n) || 'Pilot'));
+}
+function netGuestLost(uid, i) { // one guest dropped: their ship goes down, everyone else keeps flying
+  const H = NET.conn; if (H && H.conns && H.conns[uid]) { H.conns[uid].close(); delete H.conns[uid]; }
+  const p = G.players[i]; if (p && G.run && !G.run.over) { p.remote = false; p.alive = false; p.hp = 0; p.rest = 0; alertMsg(((G.netNames || [])[i] || 'A PILOT').toUpperCase() + ' DISCONNECTED'); }
+  if (H && H.conns && !Object.keys(H.conns).length) netConnLost('Everyone left.');
 }
 
 // ---------- transport: WebRTC data channels (direct), with a relay through the database as backup ----------
@@ -6869,12 +6923,14 @@ function netWrapHost() { // copy the host's eye candy and sounds to the guest
   const ft = ftext; ftext = function (x, y, t, c, s) { if ((s | 0) >= 13) netEv('ft', r1(x), r1(y), t, c, s); return ft.apply(this, arguments); };
   Object.keys(SFX).forEach(k => { const f = SFX[k]; SFX[k] = function (a) { netEv('sx', k, a); return f.apply(this, arguments); }; });
 }
-function netHostStart(r, gpl) {
-  netWrapHost(); NET.inMatch = 1;
-  const o = r.mode === 'vs' ? { mode: 'endless', var: 'versus', w: Math.min(r.w | 0, Math.max(0, SAVE.wu - 1)), lv: 0, tier: 1, co: true } : { mode: 'expedition', w: r.w | 0, lv: r.lv | 0, tier: 1, co: true };
-  G.net = 1; G.netHost = 1; G.netGuest = 0; G.netPl = [SAVE.pl[0], gpl]; G.last = o; netEvQ = [];
-  beginRun(o); G.players[0].local = true; G.players[1].remote = true; G.players[1].netIn = { x: G.players[1].x / V.W, y: G.players[1].y / V.H }; NET.uidC = 0;
-  NET.conn.send('rel', { t: 'start', o, W: V.W, H: V.H, hpl: SAVE.pl[0] });
+function netHostStart(r, gpls, names) {
+  netWrapHost(); NET.inMatch = 1; NET.rkMode = r.mode === 'rk';
+  const o = isVs(r.mode) ? { mode: 'endless', var: 'versus', w: Math.min(r.w | 0, Math.max(0, SAVE.wu - 1)), lv: 0, tier: 1, co: true } : { mode: 'expedition', w: r.w | 0, lv: r.lv | 0, tier: 1, co: true };
+  const pls = [SAVE.pl[0]].concat(gpls); G.netNames = [NET.me.name].concat(names); G.netUids = [NET.user.uid].concat(NET.order || []);
+  G.net = 1; G.netHost = 1; G.netGuest = 0; G.netMe = 0; G.netN = pls.length; G.netPl = pls; G.last = o; netEvQ = [];
+  beginRun(o); G.players[0].local = true; for (let i = 1; i < G.players.length; i++) { const p = G.players[i]; p.remote = true; p.netIn = { x: p.x / V.W, y: p.y / V.H }; } NET.uidC = 0;
+  (NET.order || []).forEach((u, k) => NET.conn.sendTo(u, 'rel', { t: 'start', o, W: V.W, H: V.H, pls, names: G.netNames, uids: G.netUids, me: k + 1, rk: NET.rkMode ? 1 : 0 }));
+  if (NET.rkMode && typeof rkMatchStart === 'function') rkMatchStart();
 }
 function netSnap(R) {
   const en = [], eb = [], pb = [], pk = [], bm = [];
@@ -6890,23 +6946,25 @@ function netHostTick(R) {
   const C = NET.conn; if (!C) return;
   if (G.t % 3 === 0) C.send('fast', netSnap(R));
   if (netEvQ.length) { C.send('rel', { t: 'ev', e: netEvQ }); netEvQ = []; }
-  const p = G.players[1]; if (p && p.remote && Date.now() - C.last > 6000 && !NET.warned) { NET.warned = 1; alertMsg('THE OTHER PILOT IS LAGGING...'); }
+  if (G.players.some(p => p.remote) && Date.now() - C.last > 6000 && !NET.warned) { NET.warned = 1; alertMsg('A PILOT IS LAGGING...'); }
 }
 function netRemoteInput(p) { const n = p.netIn || {}; p.lmx = n.mx || 0; p.lmy = n.my || 0; return { mx: n.mx || 0, my: n.my || 0, tx: null, ty: null, fire: !!n.fire, x: (n.x || 0) * V.W, y: (n.y || 0) * V.H }; }
-function netSendEnd(R, win) { if (!NET.conn) return; NET.conn.send('rel', { t: 'end', win: !!win, score: Math.round(R.score), kills: R.kills, wave: R.wave, rc: R.rCores | 0, vs: G.players.map(p => Math.round(p.score)), time: Math.round((G.t - R.t0) / 60), maxCombo: R.maxCombo | 0, graze: R.graze | 0, w: R.w, lv: R.lv, bossDown: R.bossDown | 0 }); }
-function netOnMsg(m) {
+function netSendEnd(R, win) { if (!NET.conn) return; NET.conn.send('rel', { t: 'end', win: !!win, score: Math.round(R.score), kills: R.kills, wave: R.wave, rc: R.rCores | 0, vs: G.players.map(p => Math.round(p.score)), names: G.netNames, time: Math.round((G.t - R.t0) / 60), maxCombo: R.maxCombo | 0, graze: R.graze | 0, w: R.w, lv: R.lv, bossDown: R.bossDown | 0 }); }
+function netOnMsg(m, from) {
+  from = from | 0 || 1;
   if (m.t === 'start' && NET.role === 'guest') netGuestStart(m);
   else if (m.t === 's' && G.netGuest) NET.snap = m;
   else if (m.t === 'ev' && G.netGuest) netPlayEv(m.e);
-  else if (m.t === 'in' && G.netHost) { const p = G.players[1]; if (!p) return; p.netIn = m; if (m.ab) p.netAb = 1; if (m.sup) p.netSup = 1; if (m.sw) cycleWeapon(p, m.sw); if (m.ws) { const id = WORDER[m.ws - 1]; if (id) setWeapon(p, id); } if (m.emo) netEmote(1, m.emo); }
+  else if (m.t === 'in' && G.netHost) { const p = G.players[from]; if (!p || !p.remote) return; p.netIn = m; if (m.ab) p.netAb = 1; if (m.sup) p.netSup = 1; if (m.sw) cycleWeapon(p, m.sw); if (m.ws) { const id = WORDER[m.ws - 1]; if (id) setWeapon(p, id); } if (m.emo) { netEmote(from, m.emo); NET.conn.send('rel', { t: 'emo', p: from, e: m.emo }); } }
   else if (m.t === 'end' && G.netGuest) netGuestEnd(m);
-  else if (m.t === 'emo') netEmote(m.p, m.e);
-  else if (m.t === 'bye') netConnLost('The other pilot left the match.');
+  else if (m.t === 'emo') { if (!(G.netGuest && m.p === G.netMe)) netEmote(m.p, m.e); }
+  else if (m.t === 'bye') { if (G.netHost && NET.order) netGuestLost(NET.order[from - 1], from); else netConnLost('The host left the match.'); }
 }
 // ---------- guest side ----------
 function netGuestStart(m) {
-  NET.inMatch = 1; NET.hW = m.W; NET.hH = m.H; G.net = 1; G.netGuest = 1; G.netHost = 0; G.netPl = [m.hpl, SAVE.pl[0]]; G.last = m.o; NET.ents = new Map(); NET.snap = null; NET.gc0 = 0;
-  beginRun(m.o); G.players[1].local = true; G.players[0].remote = true; G.ent.en.length = 0;
+  NET.inMatch = 1; NET.hW = m.W; NET.hH = m.H; G.net = 1; G.netGuest = 1; G.netHost = 0; const pls = m.pls || [m.hpl, SAVE.pl[0]]; G.netMe = m.me || 1; pls[G.netMe] = SAVE.pl[0]; G.netPl = pls; G.netN = pls.length; G.netNames = m.names || null; G.netUids = m.uids || null; NET.rkMode = !!m.rk; G.last = m.o; NET.ents = new Map(); NET.snap = null; NET.gc0 = 0;
+  beginRun(m.o); G.players.forEach((p, i) => { if (i === G.netMe) p.local = true; else p.remote = true; }); G.ent.en.length = 0;
+  if (NET.rkMode && typeof rkMatchStart === 'function') rkMatchStart();
 }
 const mx_ = x => x * V.W / (NET.hW || V.W), my_ = y => y * V.H / (NET.hH || V.H);
 function netPlayEv(E) {
@@ -6922,7 +6980,7 @@ function netPlayEv(E) {
 function b2Local(x, y, s, c) { boom2D(x, y, s, c); if (R3 && R3.boom) try { R3.boom(x, y, Math.min(14, 4 + (s / 12 | 0)), hx(c || '#f97316'), 4 + s / 40, 6 + s / 12); } catch (e) { } }
 const NETIN = { t: 0 };
 function netGuestUpdate(R) {
-  const S = NET.snap, me = G.players[1];
+  const S = NET.snap, me = G.players[G.netMe | 0 || 1];
   // 1) fly our own ship locally (no waiting for the host)
   if (me && me.alive && !R.over) {
     const sw = IN.swap[0]; IN.swap[0] = 0; const ab = IN.ab[0]; IN.ab[0] = 0; const sup = IN2.sup[0]; IN2.sup[0] = 0;
@@ -6940,14 +6998,14 @@ function netGuestUpdate(R) {
   // 3) move everything a little between pictures so it stays smooth
   for (const e of G.ent.en) { if (e.tx !== undefined) { e.x += (e.tx - e.x) * .3; e.y += (e.ty - e.y) * .3; } e.t = (e.t || 0) + 1; if (e.hf > 0) e.hf--; }
   for (const b of G.ent.eb) { b.x += b.vx; b.y += b.vy; } for (const b of G.ent.pb) { b.x += b.vx; b.y += b.vy; }
-  const rp = G.players[0]; if (rp && rp.tx !== undefined) { rp.x += (rp.tx - rp.x) * .35; rp.y += (rp.ty - rp.y) * .35; }
+  for (const rp of G.players) if (rp !== me && rp.tx !== undefined) { rp.x += (rp.tx - rp.x) * .35; rp.y += (rp.ty - rp.y) * .35; }
   updParticles(); if (R3) R3.tick(); if (G.shake > 0) G.shake--; if (G.flashT > 0) G.flashT--; if (G.hitT > 0) G.hitT--; if (G.t % 3 === 0) hudTick();
   if (NET.conn && Date.now() - NET.conn.last > 6000 && !NET.warned) { NET.warned = 1; alertMsg('THE HOST IS LAGGING...'); }
 }
 function netApply(S, R) {
   const sx = V.W / (NET.hW || V.W), sy = V.H / (NET.hH || V.H);
   const r = S.R; R.score = r[0]; R.combo = r[1]; R.comboT = r[1] > 0 ? 60 : 0; R.wave = r[2]; R.waves = r[3]; R.stage = r[4]; R.kills = r[5]; R.rCores = r[6]; if (R.vs) R.vs.time = r[7]; R.graze = r[8]; R.maxCombo = r[9];
-  S.P.forEach((a, i) => { const p = G.players[i]; if (!p) return; const loc = i === 1;
+  S.P.forEach((a, i) => { const p = G.players[i]; if (!p) return; const loc = i === G.netMe;
     if (!loc) { p.tx = a[0] * sx; p.ty = a[1] * sy; if (p.x === undefined || Math.abs(p.x - p.tx) > 200) { p.x = p.tx; p.y = p.ty; } }
     else if (!a[8] || !p.alive) { p.x = a[0] * sx; p.y = a[1] * sy; }
     p.hp = a[2]; p.mhp = a[3]; p.sh = a[4]; p.msh = a[5]; p.am = a[6]; p.mam = a[7]; const wasA = p.alive; p.alive = !!a[8]; if (wasA && !p.alive && R3) try { R3.die(p); } catch (e) { } if (!wasA && p.alive && R3) try { R3.repair(p); } catch (e) { }
@@ -6968,13 +7026,13 @@ function netGuestEnd(m) {
   const R = G.run; if (!R || R.over) return; R.over = true; G.inCombat = false; $('touch').classList.remove('on'); music.stop();
   const rc = m.rc | 0; SAVE.cores += rc; const bonus = m.win ? 80 + (m.wave | 0) * 10 : 20; SAVE.cores += bonus; SAVE.st.runs++; saveGame();
   const d = { rank: m.win ? 'B' : 'C', win: m.win, mode: R.var || R.mode, base: R.mode, score: m.score, kills: m.kills, cores: rc, stars: m.win ? 2 : 0, bonus, w: m.w, lv: m.lv, tier: 1, wave: m.wave, time: m.time, maxCombo: m.maxCombo, graze: m.graze, next: null, unlockW: -1, name: 'Online match', online: 1 };
-  if (m.vs) { d.vs = m.vs; d.vsWin = m.vs[0] === m.vs[1] ? 0 : m.vs[0] > m.vs[1] ? 1 : 2; }
+  if (m.vs) { const top = Math.max(...m.vs); d.vs = m.vs; d.vsNm = m.names || null; d.vsWin = m.vs.filter(s => s === top).length > 1 ? 0 : m.vs.indexOf(top) + 1; }
   setTimeout(() => UI.result(d), 300);
 }
 // ---------- leaving, disconnects, emotes ----------
 function netConnLost(why) {
   if (!G.net || (G.run && G.run.over)) { netCloseConn(); return; } const host = G.netHost; NET.warned = 0;
-  if (host && G.run && !G.run.over) { const p = G.players[1]; if (p) { p.remote = false; p.alive = false; p.hp = 0; p.rest = 0; } alertMsg('PARTNER DISCONNECTED - FLYING SOLO'); netEndNet(true); return; }
+  if (host && G.run && !G.run.over) { G.players.forEach(p => { if (p.remote) { p.remote = false; p.alive = false; p.hp = 0; p.rest = 0; } }); alertMsg('EVERYONE DISCONNECTED - FLYING SOLO'); netEndNet(true); return; }
   netEndNet(); if (G.run && !G.run.over) { exitToMenu('scOnline'); } NET.msg = '!' + why; if (UI.top === 'scOnline') UI.refresh();
 }
 function netEndNet(keepRun) { netCloseConn(); if (!keepRun) { G.net = 0; G.netHost = 0; G.netGuest = 0; G.netPl = null; } else { G.netHost = 0; G.net = 0; } NET.inMatch = 0; }
@@ -6982,8 +7040,9 @@ let netPauseT = 0;
 function netPauseKey() { const now = Date.now(); if (now - netPauseT < 2000) { netLeaveMatch(); return; } netPauseT = now; alertMsg('ONLINE MATCH - PRESS AGAIN TO LEAVE'); }
 function netLeaveMatch() { if (NET.conn) NET.conn.send('rel', { t: 'bye' }); netEndNet(); netLeaveRoom(); exitToMenu('scOnline'); }
 const EMOS = ['GG!', 'HELP!', 'NICE!', 'BOSS!', 'THANKS!', 'WAIT'];
-function netEmote(pi, e) { const p = G.players[pi], t = EMOS[(e | 0) - 1]; if (!p || !t) return; ftext(p.x, p.y - 44, t, pi ? '#fb923c' : '#22d3ee', 16); SFX.click(); }
-function netSendEmote(e) { if (!NET.conn || !G.net) return; const pi = G.netHost ? 0 : 1; netEmote(pi, e); if (G.netHost) NET.conn.send('rel', { t: 'emo', p: 0, e }); else NET.conn.send('rel', { t: 'in', emo: e, x: G.players[1].x / V.W, y: G.players[1].y / V.H }); }
+const PCOL = ['#22d3ee', '#fb923c', '#a3e635', '#e879f9'];
+function netEmote(pi, e) { const p = G.players[pi], t = EMOS[(e | 0) - 1]; if (!p || !t) return; ftext(p.x, p.y - 44, t, PCOL[pi & 3], 16); SFX.click(); }
+function netSendEmote(e) { if (!NET.conn || !G.net) return; const pi = G.netHost ? 0 : G.netMe | 0 || 1, me = G.players[pi]; netEmote(pi, e); if (G.netHost) NET.conn.send('rel', { t: 'emo', p: 0, e }); else NET.conn.send('rel', { t: 'in', emo: e, x: me.x / V.W, y: me.y / V.H }); }
 addEventListener('keydown', e => { if (!G.net || !G.inCombat) return; const k = '7890'.indexOf(e.key); if (k >= 0 && !e.repeat) netSendEmote(k + 1); });
 
 // ================= UI: Online hub, pilot name, room lobby =================
@@ -6997,9 +7056,9 @@ Object.assign(SCR, {
     if (!NET.me || !NET.me.name) return SCR.scName();
     const me = NET.me, fr = Object.keys(NET.friends), rq = Object.keys(NET.reqs).filter(k => !NET.blocked[k]), inv = Object.keys(NET.invites).filter(k => !NET.blocked[k] && Date.now() - (NET.invites[k].at || 0) < 600000);
     const fl = fr.length ? fr.map(uid => { const f = NET.fdata[uid] || {}, pr = NET.pres[uid], on = !!(pr && pr.on); return '<div class="item frow"><div class="fl"><div class="b sm">' + dot(on) + escH(f.name || '...') + ' <span class="xs mut">' + escH(f.rk || '') + ' LV ' + (f.lv || 1) + '</span></div><div class="xs mut">' + (on ? (pr.room ? 'In a room' : 'Online') : 'Offline') + ' - best endless ' + fmt(f.hi || 0) + ' - ' + (f.wu || 1) + ' worlds</div></div><span class="row" style="gap:6px">' + (NET.code && on ? '<button class="btn sm gold" data-act="ninv:' + uid + '">INVITE</button>' : '') + '<button class="btn sm" data-act="nmore:' + uid + '">...</button></span></div>' + (UI.nmore === uid ? '<div class="row" style="gap:6px;margin:-4px 0 6px 10px"><button class="btn sm warn" data-act="nunf:' + uid + '">REMOVE FRIEND</button><button class="btn sm warn" data-act="nblock:' + uid + '">BLOCK</button><button class="btn sm warn" data-act="nrep:' + uid + '">REPORT NAME</button></div>' : ''); }).join('') : '<div class="xs mut">No friends yet. Share your friend code, or add someone else\'s below.</div>';
-    return '<div class="card wide"><div class="row sp wrap"><div><h2>Online</h2><div class="xs mut">Signed in as <b class="acc">' + escH(me.name) + '</b> - friend code <b class="gold" style="letter-spacing:.1em">' + escH(me.code || '-') + '</b> <button class="btn sm" data-act="copycode:' + escH(me.code || '') + '" style="padding:3px 8px">COPY</button></div></div><span class="row wrap" style="gap:6px"><button class="btn sm gold" data-act="boards">LEADERBOARDS</button><button class="btn sm' + (inboxCount() ? ' gold' : '') + '" data-act="inbox">INBOX' + (inboxCount() ? ' (' + inboxCount() + ')' : '') + '</button><button class="btn sm" data-act="cloud">CLOUD SAVE</button><button class="btn sm" data-act="nrename">CHANGE NAME</button><button class="btn sm" data-act="nsignout">SIGN OUT</button></span></div>' + msg +
+    return '<div class="card wide"><div class="row sp wrap"><div><h2>Online</h2><div class="xs mut">Signed in as <b class="acc">' + escH(me.name) + '</b> - friend code <b class="gold" style="letter-spacing:.1em">' + escH(me.code || '-') + '</b> <button class="btn sm" data-act="copycode:' + escH(me.code || '') + '" style="padding:3px 8px">COPY</button></div></div><span class="row wrap" style="gap:6px"><button class="btn sm gold" data-act="ranked">RANKED</button><button class="btn sm gold" data-act="boards">LEADERBOARDS</button><button class="btn sm' + (inboxCount() ? ' gold' : '') + '" data-act="inbox">INBOX' + (inboxCount() ? ' (' + inboxCount() + ')' : '') + '</button><button class="btn sm" data-act="cloud">CLOUD SAVE</button><button class="btn sm" data-act="nrename">CHANGE NAME</button><button class="btn sm" data-act="nsignout">SIGN OUT</button></span></div>' + msg +
       (inv.length ? '<div class="xs mut b nh">INVITES</div>' + inv.map(k => '<div class="item"><div class="fl b sm">' + escH(NET.invites[k].name) + ' invited you to ' + (NET.invites[k].mode === 'vs' ? 'VERSUS' : 'CO-OP') + '</div><span class="row" style="gap:6px"><button class="btn sm gold" data-act="njoininv:' + k + '">JOIN</button><button class="btn sm" data-act="ndelinv:' + k + '">NO</button></span></div>').join('') : '') +
-      '<div class="grid2" style="margin-top:10px"><div><div class="xs mut b nh">PLAY</div><div class="stack" style="gap:8px"><div class="grid2"><button class="btn gold" data-act="nquick:coop">QUICK CO-OP</button><button class="btn gold" data-act="nquick:vs">QUICK VERSUS</button></div><button class="btn" data-act="ncreate">CREATE PRIVATE ROOM</button><div class="row" style="gap:6px"><input id="nRoom" class="code" maxlength="4" placeholder="CODE" style="flex:1;text-transform:uppercase;letter-spacing:.3em;font-size:16px"><button class="btn" data-act="njoin">JOIN ROOM</button></div></div>' +
+      '<div class="grid2" style="margin-top:10px"><div><div class="xs mut b nh">PLAY</div><div class="stack" style="gap:8px"><div class="grid2"><button class="btn gold" data-act="nquick:coop">QUICK CO-OP (UP TO 4)</button><button class="btn gold" data-act="nquick:vs">QUICK VERSUS</button></div><button class="btn" data-act="ranked">RANKED VERSUS</button><button class="btn" data-act="ncreate">CREATE PRIVATE ROOM</button><div class="row" style="gap:6px"><input id="nRoom" class="code" maxlength="4" placeholder="CODE" style="flex:1;text-transform:uppercase;letter-spacing:.3em;font-size:16px"><button class="btn" data-act="njoin">JOIN ROOM</button></div></div>' +
       (rq.length ? '<div class="xs mut b nh">FRIEND REQUESTS</div>' + rq.map(k => '<div class="item"><div class="fl b sm">' + escH(NET.reqs[k].name || '?') + '</div><span class="row" style="gap:6px"><button class="btn sm gold" data-act="nacc:' + k + '">ACCEPT</button><button class="btn sm" data-act="ndec:' + k + '">NO</button><button class="btn sm warn" data-act="nblock:' + k + '">BLOCK</button></span></div>').join('') : '') +
       '<div class="xs mut b nh">ADD A FRIEND</div><div class="row" style="gap:6px"><input id="nFriend" class="code" placeholder="ACE-1234" style="flex:1;text-transform:uppercase"><button class="btn" data-act="nadd">SEND REQUEST</button></div></div>' +
       '<div><div class="xs mut b nh">FRIENDS (' + fr.length + ')</div><div class="stack flist" style="gap:6px">' + fl + '</div></div></div>' +
@@ -7007,17 +7066,19 @@ Object.assign(SCR, {
   },
   scName: () => '<div class="card mid"><h2>Pick your pilot name</h2><p class="mut sm" style="margin:8px 0">This is what friends and other players see. 3-16 characters: letters, numbers, spaces, - or _. Keep it friendly.</p><div class="row" style="gap:8px"><input id="nName" class="code" maxlength="16" value="' + escH((NET.me && NET.me.name) || UI.nName || '') + '" style="flex:1;font-size:16px"><button class="btn gold" data-act="nsetname">SAVE</button></div><div class="xs bad" style="margin-top:6px">' + escH(UI.nErr || '') + '</div><div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="nback">BACK</button></div></div>',
   scRoom: () => {
-    const r = NET.room || {}, host = NET.role === 'host', me = NET.me || {}, full = !!r.guest, conn = NET.conn ? (NET.conn.mode === 'rtc' ? 'DIRECT' : 'RELAY') + (NET.conn.ping ? ' - ' + NET.conn.ping + ' ms' : '') : '';
+    const r = NET.room || {}, host = NET.role === 'host', gs = roomGuests(r), mx = roomMax(r), conn = NET.conn ? (NET.conn.mode === 'rtc' ? 'DIRECT' : 'RELAY') + (NET.conn.ping ? ' - ' + NET.conn.ping + ' ms' : '') : '', rk = r.mode === 'rk';
     const msg = NET.msg ? '<div class="xs ' + (NET.msg[0] === '!' ? 'bad' : 'good') + '" style="margin:6px 0">' + escH(NET.msg.replace(/^!/, '')) + '</div>' : '';
     const worlds = WORLDS.map((W, w) => w < SAVE.wu ? '<option value="' + w + '"' + ((r.w | 0) === w ? ' selected' : '') + '>' + (w + 1) + '. ' + escH(W.nm) + '</option>' : '').join('');
     const lvs = NODE_PAT.map((t, i) => '<option value="' + i + '"' + ((r.lv | 0) === i ? ' selected' : '') + '>Sector ' + (i + 1) + ' - ' + NODE_NAME[t] + '</option>').join('');
     const fr = Object.keys(NET.friends).filter(u => NET.pres[u] && NET.pres[u].on && !NET.pres[u].room);
-    return '<div class="card mid"><div class="row sp"><h2>' + (r.quick ? 'Quick Match' : 'Room') + '</h2><span class="gold b" style="font-size:22px;letter-spacing:.3em">' + escH(NET.code || '----') + '</span></div><div class="xs mut">Friends can join with this code from Online > JOIN ROOM.</div>' + msg +
-      '<div class="grid2" style="margin-top:10px"><div class="item"><div class="fl"><div class="xs mut b">PILOT 1 - HOST</div><div class="b acc">' + escH(r.hn || '...') + '</div></div></div><div class="item"><div class="fl"><div class="xs mut b">PILOT 2</div><div class="b" style="color:#fb923c">' + (full ? escH(r.gn || '...') : '<span class="mut">waiting...</span>') + '</div></div></div></div>' +
-      '<div class="xs mut b nh">MODE</div><div class="seg">' + [['coop', 'CO-OP'], ['vs', 'VERSUS']].map(m => '<button data-act="nmode:' + m[0] + '" class="' + (r.mode === m[0] ? 'on' : '') + '"' + (host ? '' : ' disabled') + '>' + m[1] + '</button>').join('') + '</div>' +
-      (r.mode === 'coop' ? '<div class="edrow" style="margin-top:8px"><label>WORLD</label><select data-nchg="w"' + (host ? '' : ' disabled') + '>' + worlds + '</select></div><div class="edrow"><label>SECTOR</label><select data-nchg="lv"' + (host ? '' : ' disabled') + '>' + lvs + '</select></div>' : '<div class="xs mut" style="margin-top:8px">Two minutes, most points wins. Getting hit or shot down costs points.</div>') +
-      (host && !full && fr.length ? '<div class="xs mut b nh">INVITE AN ONLINE FRIEND</div><div class="row wrap" style="gap:6px">' + fr.map(u => '<button class="btn sm" data-act="ninv:' + u + '">' + escH((NET.fdata[u] || {}).name || '?') + '</button>').join('') + '</div>' : '') +
-      '<div class="row sp" style="margin-top:14px"><button class="btn sm warn" data-act="nleave">LEAVE</button><span class="xs mut">' + conn + '</span>' + (host ? '<button class="btn big' + (full ? '' : ' off') + '" data-act="nstart">START</button>' : '<span class="xs mut">The host starts the match</span>') + '</div></div>';
+    const slot = (i, nm, tag) => '<div class="item rslot' + (nm ? ' on' : '') + '" style="--pc:' + PCOL[i] + '"><div class="fl"><div class="xs mut b">PILOT ' + (i + 1) + (tag ? ' - ' + tag : '') + '</div><div class="b" style="color:' + (nm ? PCOL[i] : '') + '">' + (nm ? escH(nm) : '<span class="mut">' + (i < mx ? 'waiting...' : '-') + '</span>') + '</div></div></div>';
+    const slots = [slot(0, r.hn || '...', 'HOST')]; for (let i = 1; i < mx; i++) { const u = gs[i - 1]; slots.push(slot(i, u ? (r.pl[u].n || '?') : '')); }
+    return '<div class="card mid"><div class="row sp"><h2>' + (rk ? 'Ranked Match' : r.quick ? 'Quick Match' : 'Room') + '</h2><span class="gold b" style="font-size:22px;letter-spacing:.3em">' + escH(NET.code || '----') + '</span></div><div class="xs mut">' + (rk ? 'One versus one. Your rating goes up or down when it ends.' : 'Up to 4 pilots. Friends can join with this code from Online > JOIN ROOM.') + '</div>' + msg +
+      '<div class="grid2" style="margin-top:10px">' + slots.join('') + '</div>' +
+      (rk ? '' : '<div class="xs mut b nh">MODE</div><div class="seg">' + [['coop', 'CO-OP'], ['vs', 'VERSUS']].map(m => '<button data-act="nmode:' + m[0] + '" class="' + (r.mode === m[0] ? 'on' : '') + '"' + (host ? '' : ' disabled') + '>' + m[1] + '</button>').join('') + '</div>') +
+      (r.mode === 'coop' ? '<div class="edrow" style="margin-top:8px"><label>WORLD</label><select data-nchg="w"' + (host ? '' : ' disabled') + '>' + worlds + '</select></div><div class="edrow"><label>SECTOR</label><select data-nchg="lv"' + (host ? '' : ' disabled') + '>' + lvs + '</select></div><div class="xs mut">Enemies get tougher with every extra pilot.</div>' : '<div class="xs mut" style="margin-top:8px">Two minutes, most points wins. Getting hit or shot down costs points.</div>') +
+      (host && !rk && gs.length < mx - 1 && fr.length ? '<div class="xs mut b nh">INVITE AN ONLINE FRIEND</div><div class="row wrap" style="gap:6px">' + fr.map(u => '<button class="btn sm" data-act="ninv:' + u + '">' + escH((NET.fdata[u] || {}).name || '?') + '</button>').join('') + '</div>' : '') +
+      '<div class="row sp" style="margin-top:14px"><button class="btn sm warn" data-act="nleave">LEAVE</button><span class="xs mut">' + conn + '</span>' + (host && !rk ? '<button class="btn big' + (gs.length ? '' : ' off') + '" data-act="nstart">START' + (gs.length ? ' (' + (gs.length + 1) + ')' : '') + '</button>' : '<span class="xs mut">' + (rk ? (gs.length ? 'Starting...' : 'Waiting for an opponent...') : 'The host starts the match') + '</span>') + '</div></div>';
   }
 });
 const nAsync = (p, ok) => Promise.resolve(p).then(m => { NET.msg = m || ok || ''; UI.refresh(); }).catch(e => { NET.msg = '!' + (e && e.message || 'Something went wrong'); UI.refresh(); });
@@ -7270,7 +7331,7 @@ const LB = [
   ['defense', 'Station Defense', 'Best score defending the station'],
   ['daily', 'Today\'s Daily', 'Best score on today\'s Daily Challenge']
 ];
-const lbKey = b => b === 'daily' ? 'daily_' + dayKey().replace(/[^0-9a-z_-]/gi, '') : b;
+let lbKey = b => b === 'daily' ? 'daily_' + dayKey().replace(/[^0-9a-z_-]/gi, '') : b;
 const N2 = { lb: {}, lbFr: {}, lbView: 'global', lbB: 'endless', lbLoading: false, inbox: {}, cloud: undefined, cloudBusy: false, msg: '', live: false };
 const netOn = () => !!(NET.ok && NET.ready && NET.user && NET.me && NET.me.name);
 function n2Msg(m) { N2.msg = m || ''; if (['scBoards', 'scCloud', 'scInbox', 'scChSend'].includes(UI.top)) UI.refresh(); }
@@ -7305,7 +7366,7 @@ async function lbLoad(b, force) {
   }
   N2.lbLoading = false; if (UI.top === 'scBoards') UI.refresh();
 }
-const lbFmt = (b, s) => b === 'pilot' ? fmt(s) + ' XP' : fmt(s);
+let lbFmt = (b, s) => b === 'pilot' ? fmt(s) + ' XP' : fmt(s);
 
 // ---------- cloud save ----------
 const saveSum = s => { s = s || SAVE; const x = s.xp || { lv: 1 }; return { wu: Math.min(s.wu || 1, WORLDS.length), lv: x.lv || 1, cores: s.cores | 0, kills: (s.st && s.st.kills) | 0 }; };
@@ -7418,6 +7479,48 @@ Object.assign(ACT, {
   chsendto(a) { UI.chSend = { code: a[0], s: +a[1] || 0 }; UI.chSent = {}; N2.msg = ''; UI.show('scChSend'); },
   chsend(a) { const S = UI.chSend || {}; if ((UI.chSent || {})[a[0]]) return; chSend(a[0], S.code, S.s).then(() => { (UI.chSent = UI.chSent || {})[a[0]] = 1; SFX.click && SFX.click(); n2Msg('Challenge sent!'); }).catch(e => n2Msg('!Could not send (' + (e.code || e.message) + ').')); }
 });
+
+// ---------- ranked versus: tiers + monthly seasons ----------
+const RKT = [[0, 'Bronze', '#d08a4f'], [1100, 'Silver', '#cbd5e1'], [1250, 'Gold', '#fbbf24'], [1400, 'Platinum', '#5eead4'], [1550, 'Diamond', '#a78bfa'], [1700, 'Ace', '#fb7185']];
+function rkTier(r) { let i = 0; RKT.forEach((x, k) => { if (r >= x[0]) i = k; }); const t = RKT[i], nx = RKT[i + 1]; return { i, nm: t[1], c: t[2], lo: t[0], next: nx ? nx[0] : null }; }
+const rkSeason = () => { const d = new Date(); return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0'); };
+const rkDaysLeft = () => { const d = new Date(), e = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1); return Math.max(1, Math.ceil((e - d.getTime()) / 864e5)); };
+const rkBadge = (r, big) => { const t = rkTier(r); return '<i class="rkb' + (big ? ' big' : '') + '" style="--rc:' + t.c + '"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/>' + (t.i >= 3 ? '<path d="M8 11l4-3 4 3M8 15l4-3 4 3"/>' : t.i >= 1 ? '<path d="M8 13l4-3 4 3"/>' : '') + '</svg></i>'; };
+async function rkLoad() {
+  if (!netOn()) return; const S = rkSeason();
+  try { const s = await R_('rank/' + S + '/' + NET.user.uid).once('value'), v = s.val(); N2.rk = v && typeof v.r === 'number' ? { r: v.r, w: v.w | 0, l: v.l | 0 } : { r: 1000, w: 0, l: 0 }; } catch (e) { N2.rk = N2.rk || { r: 1000, w: 0, l: 0 }; }
+  const L = SAVE.rkLast; if (L && L.s !== S && !SAVE.rkPaid) { SAVE.rkPaid = {}; } if (L && L.s !== S && !(SAVE.rkPaid || {})[L.s]) { const t = rkTier(L.r), c = 250 * (t.i + 1); (SAVE.rkPaid = SAVE.rkPaid || {})[L.s] = 1; SAVE.cores += c; saveGame(); toast('SEASON ' + L.s + ' REWARD', 'You finished ' + t.nm + ' - +' + fmt(c) + ' cores', t.c); }
+  if (UI.top === 'scRanked') UI.refresh();
+}
+function rkMatchStart() {
+  const me = G.netMe | 0, opp = me === 0 ? 1 : 0, uid = (G.netUids || [])[opp]; N2.rkOpp = { uid, r: 1000 }; NET.rkPending = true; rkLoad();
+  if (uid) R_('rank/' + rkSeason() + '/' + uid).once('value').then(s => { const v = s.val(); if (v && typeof v.r === 'number') N2.rkOpp.r = v.r; }).catch(() => { });
+}
+function rkAfter(d) {
+  if (!NET.rkPending || !d || !d.vs || !netOn()) return; NET.rkPending = false;
+  const me = G.netMe | 0, my = d.vs[me] || 0, op = d.vs[me ? 0 : 1] || 0, res = my > op ? 1 : my < op ? 0 : .5, cur = N2.rk || { r: 1000, w: 0, l: 0 };
+  const R0 = cur.r, E = 1 / (1 + Math.pow(10, ((N2.rkOpp ? N2.rkOpp.r : 1000) - R0) / 400)), K = cur.w + cur.l < 10 ? 48 : 32, r1 = Math.max(0, Math.min(4999, Math.round(R0 + K * (res - E))));
+  N2.rk = { r: r1, w: cur.w + (res === 1 ? 1 : 0), l: cur.l + (res === 0 ? 1 : 0) }; d.rk = { r0: R0, r1 }; const t0 = rkTier(R0), t1 = rkTier(r1); if (t1.i !== t0.i) d.rkTier = t1.i > t0.i ? 'up' : 'down';
+  const S = rkSeason(); SAVE.rkLast = { s: S, r: r1 }; saveGame();
+  R_('rank/' + S + '/' + NET.user.uid).set({ r: r1, w: N2.rk.w, l: N2.rk.l, n: NET.me.name, at: TS() }).catch(e => console.warn('rank', e));
+  R_('lb/ranked_' + S.replace('-', '') + '/' + NET.user.uid).set({ n: NET.me.name, s: r1, lv: PS().xp.lv, hull: SAVE.pl[0].cfg.hull, at: TS() }).catch(() => { });
+  if (d.rkTier) setTimeout(() => toast(d.rkTier === 'up' ? 'PROMOTED!' : 'DEMOTED', 'You are now ' + t1.nm, t1.c), 600);
+}
+LB.splice(1, 0, ['ranked', 'Ranked Season', 'Ranked versus rating this season (resets every month)']);
+const _lbKey0 = lbKey; lbKey = b => b === 'ranked' ? 'ranked_' + rkSeason().replace('-', '') : _lbKey0(b);
+const _lbFmt0 = lbFmt; lbFmt = (b, s) => b === 'ranked' ? rkBadge(s) + ' ' + fmt(s) : _lbFmt0(b, s);
+const _uiRes2 = UI.result; UI.result = function (d) { try { rkAfter(d); } catch (e) { console.warn('rank result', e); } return _uiRes2.apply(this, arguments); };
+SCR.scRanked = () => {
+  const g = n2Gate('Ranked'); if (g) return g; if (!N2.rk) setTimeout(rkLoad, 0);
+  const k = N2.rk || { r: 1000, w: 0, l: 0 }, t = rkTier(k.r), lo = t.i ? t.lo : 850, pc = t.next ? clamp(Math.round((k.r - lo) / (t.next - lo) * 100), 0, 100) : 100, gp = k.w + k.l;
+  return '<div class="card mid rk2" style="--rc:' + t.c + '"><div class="row sp"><h2>Ranked</h2><span class="xs mut">Season ' + rkSeason() + ' - ends in ' + rkDaysLeft() + ' day' + (rkDaysLeft() > 1 ? 's' : '') + '</span></div>' + n2m() +
+    '<div class="rk-hero">' + rkBadge(k.r, true) + '<div><div class="rk-tier">' + t.nm + '</div><div class="rk-r">' + fmt(k.r) + ' <span class="xs mut">rating</span></div><div class="rk-bar"><i style="width:' + pc + '%"></i></div><div class="xs mut">' + (t.next ? (t.next - k.r) + ' to ' + rkTier(t.next).nm : 'Top tier!') + ' - ' + k.w + ' wins, ' + k.l + ' losses' + (gp < 10 ? ' - ' + (10 - gp) + ' placement matches left (bigger swings)' : '') + '</div></div></div>' +
+    '<div class="rk-tiers">' + RKT.map((x, i) => '<b class="rkt' + (i === t.i ? ' on' : '') + '" style="--rc:' + x[2] + '">' + rkBadge(x[0]) + x[1] + '</b>').join('') + '</div>' +
+    '<p class="xs mut" style="line-height:1.6;margin:8px 0">One versus one, two minutes, most points wins. Beat higher-rated pilots for bigger gains. At the end of each month you get cores for the tier you reached: from 250 (Bronze) to 1,500 (Ace).</p>' +
+    '<div class="grid2"><button class="btn big gold" data-act="nquick:rk">FIND RANKED MATCH</button><button class="btn" data-act="rkboard">SEASON LEADERBOARD</button></div>' +
+    '<div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button></div></div>';
+};
+Object.assign(ACT, { ranked() { N2.msg = ''; UI.show('scRanked'); }, rkboard() { N2.lbB = 'ranked'; N2.lbView = 'global'; UI.show('scBoards'); } });
 
 // ================= BOOT =================
 function boot() {

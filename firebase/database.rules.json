@@ -71,19 +71,35 @@
     "rooms": {
       "$code": {
         ".read": "auth != null",
-        ".write": "auth != null && ((!data.exists() && newData.child('host').val() === auth.uid) || data.child('host').val() === auth.uid || data.child('guest').val() === auth.uid || (!data.child('guest').exists() && newData.child('guest').val() === auth.uid))"
+        ".write": "auth != null && ((!data.exists() && newData.child('host').val() === auth.uid) || data.child('host').val() === auth.uid)",
+        "pl": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && (data.exists() || !newData.exists() || root.child('rooms').child($code).child('st').val() === 'open')"
+          }
+        },
+        "gpl": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        }
       }
     },
     "signal": {
       "$code": {
-        ".read": "auth != null && (root.child('rooms').child($code).child('host').val() === auth.uid || root.child('rooms').child($code).child('guest').val() === auth.uid)",
-        ".write": "auth != null && (root.child('rooms').child($code).child('host').val() === auth.uid || root.child('rooms').child($code).child('guest').val() === auth.uid)"
+        "$g": {
+          ".read": "auth != null && (auth.uid === $g || root.child('rooms').child($code).child('host').val() === auth.uid)",
+          ".write": "auth != null && (auth.uid === $g || root.child('rooms').child($code).child('host').val() === auth.uid)"
+        },
+        ".write": "auth != null && root.child('rooms').child($code).child('host').val() === auth.uid"
       }
     },
     "relay": {
       "$code": {
-        ".read": "auth != null && (root.child('rooms').child($code).child('host').val() === auth.uid || root.child('rooms').child($code).child('guest').val() === auth.uid)",
-        ".write": "auth != null && (root.child('rooms').child($code).child('host').val() === auth.uid || root.child('rooms').child($code).child('guest').val() === auth.uid)"
+        "$g": {
+          ".read": "auth != null && (auth.uid === $g || root.child('rooms').child($code).child('host').val() === auth.uid)",
+          ".write": "auth != null && (auth.uid === $g || root.child('rooms').child($code).child('host').val() === auth.uid)"
+        },
+        ".write": "auth != null && root.child('rooms').child($code).child('host').val() === auth.uid"
       }
     },
     "lb": {
@@ -110,6 +126,15 @@
         ".read": "auth != null && auth.uid === $to",
         "$id": {
           ".write": "auth != null && ((!data.exists() && newData.child('f').val() === auth.uid && root.child('friends').child($to).child(auth.uid).exists() && !root.child('blocks').child($to).child(auth.uid).exists()) || (auth.uid === $to && !newData.exists()))"
+        }
+      }
+    },
+    "rank": {
+      "$s": {
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.child('r').isNumber() && newData.child('r').val() >= 0 && newData.child('r').val() < 5000"
         }
       }
     }

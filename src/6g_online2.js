@@ -8,7 +8,7 @@ const LB = [
   ['defense', 'Station Defense', 'Best score defending the station'],
   ['daily', 'Today\'s Daily', 'Best score on today\'s Daily Challenge']
 ];
-const lbKey = b => b === 'daily' ? 'daily_' + dayKey().replace(/[^0-9a-z_-]/gi, '') : b;
+let lbKey = b => b === 'daily' ? 'daily_' + dayKey().replace(/[^0-9a-z_-]/gi, '') : b;
 const N2 = { lb: {}, lbFr: {}, lbView: 'global', lbB: 'endless', lbLoading: false, inbox: {}, cloud: undefined, cloudBusy: false, msg: '', live: false };
 const netOn = () => !!(NET.ok && NET.ready && NET.user && NET.me && NET.me.name);
 function n2Msg(m) { N2.msg = m || ''; if (['scBoards', 'scCloud', 'scInbox', 'scChSend'].includes(UI.top)) UI.refresh(); }
@@ -43,7 +43,7 @@ async function lbLoad(b, force) {
   }
   N2.lbLoading = false; if (UI.top === 'scBoards') UI.refresh();
 }
-const lbFmt = (b, s) => b === 'pilot' ? fmt(s) + ' XP' : fmt(s);
+let lbFmt = (b, s) => b === 'pilot' ? fmt(s) + ' XP' : fmt(s);
 
 // ---------- cloud save ----------
 const saveSum = s => { s = s || SAVE; const x = s.xp || { lv: 1 }; return { wu: Math.min(s.wu || 1, WORLDS.length), lv: x.lv || 1, cores: s.cores | 0, kills: (s.st && s.st.kills) | 0 }; };
@@ -156,3 +156,45 @@ Object.assign(ACT, {
   chsendto(a) { UI.chSend = { code: a[0], s: +a[1] || 0 }; UI.chSent = {}; N2.msg = ''; UI.show('scChSend'); },
   chsend(a) { const S = UI.chSend || {}; if ((UI.chSent || {})[a[0]]) return; chSend(a[0], S.code, S.s).then(() => { (UI.chSent = UI.chSent || {})[a[0]] = 1; SFX.click && SFX.click(); n2Msg('Challenge sent!'); }).catch(e => n2Msg('!Could not send (' + (e.code || e.message) + ').')); }
 });
+
+// ---------- ranked versus: tiers + monthly seasons ----------
+const RKT = [[0, 'Bronze', '#d08a4f'], [1100, 'Silver', '#cbd5e1'], [1250, 'Gold', '#fbbf24'], [1400, 'Platinum', '#5eead4'], [1550, 'Diamond', '#a78bfa'], [1700, 'Ace', '#fb7185']];
+function rkTier(r) { let i = 0; RKT.forEach((x, k) => { if (r >= x[0]) i = k; }); const t = RKT[i], nx = RKT[i + 1]; return { i, nm: t[1], c: t[2], lo: t[0], next: nx ? nx[0] : null }; }
+const rkSeason = () => { const d = new Date(); return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0'); };
+const rkDaysLeft = () => { const d = new Date(), e = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1); return Math.max(1, Math.ceil((e - d.getTime()) / 864e5)); };
+const rkBadge = (r, big) => { const t = rkTier(r); return '<i class="rkb' + (big ? ' big' : '') + '" style="--rc:' + t.c + '"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/>' + (t.i >= 3 ? '<path d="M8 11l4-3 4 3M8 15l4-3 4 3"/>' : t.i >= 1 ? '<path d="M8 13l4-3 4 3"/>' : '') + '</svg></i>'; };
+async function rkLoad() {
+  if (!netOn()) return; const S = rkSeason();
+  try { const s = await R_('rank/' + S + '/' + NET.user.uid).once('value'), v = s.val(); N2.rk = v && typeof v.r === 'number' ? { r: v.r, w: v.w | 0, l: v.l | 0 } : { r: 1000, w: 0, l: 0 }; } catch (e) { N2.rk = N2.rk || { r: 1000, w: 0, l: 0 }; }
+  const L = SAVE.rkLast; if (L && L.s !== S && !SAVE.rkPaid) { SAVE.rkPaid = {}; } if (L && L.s !== S && !(SAVE.rkPaid || {})[L.s]) { const t = rkTier(L.r), c = 250 * (t.i + 1); (SAVE.rkPaid = SAVE.rkPaid || {})[L.s] = 1; SAVE.cores += c; saveGame(); toast('SEASON ' + L.s + ' REWARD', 'You finished ' + t.nm + ' - +' + fmt(c) + ' cores', t.c); }
+  if (UI.top === 'scRanked') UI.refresh();
+}
+function rkMatchStart() {
+  const me = G.netMe | 0, opp = me === 0 ? 1 : 0, uid = (G.netUids || [])[opp]; N2.rkOpp = { uid, r: 1000 }; NET.rkPending = true; rkLoad();
+  if (uid) R_('rank/' + rkSeason() + '/' + uid).once('value').then(s => { const v = s.val(); if (v && typeof v.r === 'number') N2.rkOpp.r = v.r; }).catch(() => { });
+}
+function rkAfter(d) {
+  if (!NET.rkPending || !d || !d.vs || !netOn()) return; NET.rkPending = false;
+  const me = G.netMe | 0, my = d.vs[me] || 0, op = d.vs[me ? 0 : 1] || 0, res = my > op ? 1 : my < op ? 0 : .5, cur = N2.rk || { r: 1000, w: 0, l: 0 };
+  const R0 = cur.r, E = 1 / (1 + Math.pow(10, ((N2.rkOpp ? N2.rkOpp.r : 1000) - R0) / 400)), K = cur.w + cur.l < 10 ? 48 : 32, r1 = Math.max(0, Math.min(4999, Math.round(R0 + K * (res - E))));
+  N2.rk = { r: r1, w: cur.w + (res === 1 ? 1 : 0), l: cur.l + (res === 0 ? 1 : 0) }; d.rk = { r0: R0, r1 }; const t0 = rkTier(R0), t1 = rkTier(r1); if (t1.i !== t0.i) d.rkTier = t1.i > t0.i ? 'up' : 'down';
+  const S = rkSeason(); SAVE.rkLast = { s: S, r: r1 }; saveGame();
+  R_('rank/' + S + '/' + NET.user.uid).set({ r: r1, w: N2.rk.w, l: N2.rk.l, n: NET.me.name, at: TS() }).catch(e => console.warn('rank', e));
+  R_('lb/ranked_' + S.replace('-', '') + '/' + NET.user.uid).set({ n: NET.me.name, s: r1, lv: PS().xp.lv, hull: SAVE.pl[0].cfg.hull, at: TS() }).catch(() => { });
+  if (d.rkTier) setTimeout(() => toast(d.rkTier === 'up' ? 'PROMOTED!' : 'DEMOTED', 'You are now ' + t1.nm, t1.c), 600);
+}
+LB.splice(1, 0, ['ranked', 'Ranked Season', 'Ranked versus rating this season (resets every month)']);
+const _lbKey0 = lbKey; lbKey = b => b === 'ranked' ? 'ranked_' + rkSeason().replace('-', '') : _lbKey0(b);
+const _lbFmt0 = lbFmt; lbFmt = (b, s) => b === 'ranked' ? rkBadge(s) + ' ' + fmt(s) : _lbFmt0(b, s);
+const _uiRes2 = UI.result; UI.result = function (d) { try { rkAfter(d); } catch (e) { console.warn('rank result', e); } return _uiRes2.apply(this, arguments); };
+SCR.scRanked = () => {
+  const g = n2Gate('Ranked'); if (g) return g; if (!N2.rk) setTimeout(rkLoad, 0);
+  const k = N2.rk || { r: 1000, w: 0, l: 0 }, t = rkTier(k.r), lo = t.i ? t.lo : 850, pc = t.next ? clamp(Math.round((k.r - lo) / (t.next - lo) * 100), 0, 100) : 100, gp = k.w + k.l;
+  return '<div class="card mid rk2" style="--rc:' + t.c + '"><div class="row sp"><h2>Ranked</h2><span class="xs mut">Season ' + rkSeason() + ' - ends in ' + rkDaysLeft() + ' day' + (rkDaysLeft() > 1 ? 's' : '') + '</span></div>' + n2m() +
+    '<div class="rk-hero">' + rkBadge(k.r, true) + '<div><div class="rk-tier">' + t.nm + '</div><div class="rk-r">' + fmt(k.r) + ' <span class="xs mut">rating</span></div><div class="rk-bar"><i style="width:' + pc + '%"></i></div><div class="xs mut">' + (t.next ? (t.next - k.r) + ' to ' + rkTier(t.next).nm : 'Top tier!') + ' - ' + k.w + ' wins, ' + k.l + ' losses' + (gp < 10 ? ' - ' + (10 - gp) + ' placement matches left (bigger swings)' : '') + '</div></div></div>' +
+    '<div class="rk-tiers">' + RKT.map((x, i) => '<b class="rkt' + (i === t.i ? ' on' : '') + '" style="--rc:' + x[2] + '">' + rkBadge(x[0]) + x[1] + '</b>').join('') + '</div>' +
+    '<p class="xs mut" style="line-height:1.6;margin:8px 0">One versus one, two minutes, most points wins. Beat higher-rated pilots for bigger gains. At the end of each month you get cores for the tier you reached: from 250 (Bronze) to 1,500 (Ace).</p>' +
+    '<div class="grid2"><button class="btn big gold" data-act="nquick:rk">FIND RANKED MATCH</button><button class="btn" data-act="rkboard">SEASON LEADERBOARD</button></div>' +
+    '<div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button></div></div>';
+};
+Object.assign(ACT, { ranked() { N2.msg = ''; UI.show('scRanked'); }, rkboard() { N2.lbB = 'ranked'; N2.lbView = 'global'; UI.show('scBoards'); } });
