@@ -1,10 +1,15 @@
 // ================= EXPEDITION 2: themed world maps, branching routes and 7 extra sectors per world =================
 // Branch sectors use indices 13-19 so every save, medal, ghost and star keeps working.
-const BR = [
-  { i: 13, p: 2, t: 'n', j: 5, lane: -1, k: 1 }, { i: 14, p: 13, t: 'g', j: 5, lane: -1, k: 2 },
-  { i: 15, p: 5, t: 'e', j: -1, lane: 1, k: 1 }, { i: 16, p: 15, t: 'x', j: -1, lane: 1, k: 2 }, { i: 17, p: 16, t: 'v', j: -1, lane: 1, k: 3 },
-  { i: 18, p: 8, t: 'q', j: 11, lane: -1, k: 1 }, { i: 19, p: 18, t: 'n', j: 11, lane: -1, k: 2 }
+const BR = [ // i: sector index, p: parent sector, t: kind, j: spine sector it rejoins (-1 = dead end), lane: -2/-1 above the main path, 1/2 below, k: step along the branch
+  { i: 13, p: 1, t: 'n', j: -1, lane: -2, k: 1 }, { i: 14, p: 13, t: 'g', j: -1, lane: -2, k: 2 },
+  { i: 15, p: 2, t: 'q', j: 5, lane: 2, k: 1 }, { i: 16, p: 15, t: 'e', j: 5, lane: 2, k: 2 },
+  { i: 17, p: 4, t: 'e', j: -1, lane: -1, k: 1 }, { i: 18, p: 17, t: 'x', j: -1, lane: -1, k: 2 }, { i: 19, p: 18, t: 'v', j: -1, lane: -1, k: 3 },
+  { i: 20, p: 6, t: 'n', j: -1, lane: 1, k: 1 }, { i: 21, p: 20, t: 'g', j: -1, lane: 1, k: 2 },
+  { i: 22, p: 7, t: 'q', j: 10, lane: -2, k: 1 }, { i: 23, p: 22, t: 'n', j: 10, lane: -2, k: 2 },
+  { i: 24, p: 9, t: 'e', j: -1, lane: 2, k: 1 }, { i: 25, p: 24, t: 'x', j: -1, lane: 2, k: 2 }, { i: 26, p: 25, t: 'v', j: -1, lane: 2, k: 3 },
+  { i: 27, p: 16, t: 'g', j: -1, lane: 1, k: 3 }, { i: 28, p: 23, t: 'e', j: -1, lane: -1, k: 3 }
 ];
+const BRLAB = { 13: 'DEAD END', 15: 'SHORTCUT', 17: 'DEEP ROUTE', 20: 'DEAD END', 22: 'SHORTCUT', 24: 'DEEP ROUTE', 27: 'HIDDEN', 28: 'HIDDEN' };
 const brOf = i => BR.find(b => b.i === i);
 const BRT = {
   n: { nm: 'SWARM NEST', ds: 'A nest has hatched: far more enemies, each one weaker.', ic: 'multi' },
@@ -56,8 +61,8 @@ function wmDeco(type, W, H, c, rs) { // a few hundred bytes of SVG art per world
   }
   return s;
 }
-const MPW = 1640, MPH = 330, sxy = i => [80 + i * 122, MPH / 2 + Math.sin(i * .85) * 34];
-function nodeXY(i) { if (i < LV) return sxy(i); const b = brOf(i); let rt = b; while (rt.p >= LV) rt = brOf(rt.p); const [px] = sxy(rt.p); if (b.lane < 0) { const [jx] = sxy(b.j), n = BR.filter(q => q.j === b.j && q.lane === b.lane).length; return [px + (jx - px) * b.k / (n + 1), 58]; } return [px + b.k * 122, MPH - 52]; }
+const MPW = 1640, MPH = 384, LANEY = { '-2': 50, '-1': 116, '1': 268, '2': 334 }, sxy = i => [80 + i * 122, MPH / 2 + Math.sin(i * .85) * 30];
+function nodeXY(i) { if (i < LV) return sxy(i); const b = brOf(i); let rt = b; while (rt.p >= LV) rt = brOf(rt.p); const [px] = sxy(rt.p), y = LANEY[b.lane]; if (b.j >= 0) { const [jx] = sxy(b.j), n = BR.filter(q => q.j === b.j && q.lane === b.lane).length; return [px + (jx - px) * b.k / (n + 1), y]; } return [px + b.k * 112, y]; }
 const _scMapBr = SCR.scMap;
 SCR.scMap = () => {
   if (UI.mode !== 'expedition') return _scMapBr();
@@ -85,7 +90,7 @@ SCR.scMap = () => {
     '<div class="wm-side">' + tierSeg + '<div class="wm-bs"><span class="xs mut">WORLD BOSS</span><b>' + escH(B.nm) + '</b></div><div class="xs mut">' + nDone + ' / ' + nAll + ' sectors cleared</div></div></header>' +
     '<nav class="wm-ws">' + pills + '</nav>' +
     '<div class="wm-map" id="mapScroll"><div class="wm-in" style="width:' + MPW + 'px;height:' + MPH + 'px"><svg class="wm-deco" viewBox="0 0 ' + MPW + ' ' + MPH + '" width="' + MPW + '" height="' + MPH + '" aria-hidden="true">' + deco + '</svg><svg class="wm-paths" viewBox="0 0 ' + MPW + ' ' + MPH + '" width="' + MPW + '" height="' + MPH + '" aria-hidden="true">' + paths + '</svg>' + nodes +
-    '<span class="wm-lab" style="left:' + nodeXY(13)[0] + 'px;top:16px">SIDE ROUTE</span><span class="wm-lab" style="left:' + nodeXY(16)[0] + 'px;top:' + (MPH - 18) + 'px">DEEP ROUTE</span><span class="wm-lab" style="left:' + nodeXY(18)[0] + 'px;top:16px">SIDE ROUTE</span></div></div>' + info +
+    Object.keys(BRLAB).map(k => { const [x, y] = nodeXY(+k); return '<span class="wm-lab" style="left:' + x + 'px;top:' + (y < MPH / 2 ? y - 44 : y + 30) + 'px">' + BRLAB[k] + '</span>'; }).join('') + '</div></div>' + info +
     '<footer class="wm-f"><button class="btn sm" data-act="back">Back</button><span class="xs mut">Main path to the boss unlocks the next world. Side routes branch off for extra rewards - dashed lines show where they rejoin.</span></footer></div>';
 };
 const _startBr = ACT.start;

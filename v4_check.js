@@ -5718,12 +5718,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V47';
+const GAME_VER = 'V48';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V48', 'Many Roads', ['Every world now branches much more: 16 side sectors per world on top of the main path (29 sectors per world, over 490 in all)', 'Dead ends with treasure, shortcuts that rejoin the main path, two Deep Routes ending in Sector Caches, and hidden sectors off the side routes', 'Main menu music: a new theme plays on the menus', 'World map music: each world map plays that world\'s theme', 'Menu music can be turned off in Settings']],
   ['V47', 'New Routes', ['Every world map is redrawn with its own theme: city skylines, jungle vines, dunes, ice peaks, gears, a black hole, data grids and more', 'A winding route map: the main path leads to the boss, and side routes branch off it', 'Seven new sectors in every world (119 in all): two side routes that rejoin the main path, and a three-sector Deep Route', 'New sector types: Swarm Nest, Ace Duel and Storm Run, plus Treasure Runs and Gauntlets on the side routes', 'The Deep Route ends in a Sector Cache with a huge one-time reward', 'First clears of side sectors pay bonus cores']],
   ['V46', 'Clear Path', ['The Play screen now puts Expedition, the story campaign, front and centre with a big CONTINUE button', 'It shows which world you are on and how far through it you are', 'Every other mode sits underneath under More ways to play']],
   ['V45', 'Flux', ['New currency: Flux, used only for cosmetics - it never buys anything that changes how you play', 'Item Shop items, the Daily Bundle and Premium Battle Pass now cost Flux, so cores are saved for ships, weapons and upgrades', 'Earn Flux from every run you finish, from daily (+25) and weekly (+120) missions, from pilot level-ups (+30) and from the Battle Pass', 'Everyone gets 600 Flux to start', 'Your Flux shows on the main menu and in the Locker']],
@@ -7811,11 +7812,16 @@ SCR.scMenu = () => { let h = _menuF(); h = h.replace(/<div><dt>Kills<\/dt><dd>[^
 
 // ================= EXPEDITION 2: themed world maps, branching routes and 7 extra sectors per world =================
 // Branch sectors use indices 13-19 so every save, medal, ghost and star keeps working.
-const BR = [
-  { i: 13, p: 2, t: 'n', j: 5, lane: -1, k: 1 }, { i: 14, p: 13, t: 'g', j: 5, lane: -1, k: 2 },
-  { i: 15, p: 5, t: 'e', j: -1, lane: 1, k: 1 }, { i: 16, p: 15, t: 'x', j: -1, lane: 1, k: 2 }, { i: 17, p: 16, t: 'v', j: -1, lane: 1, k: 3 },
-  { i: 18, p: 8, t: 'q', j: 11, lane: -1, k: 1 }, { i: 19, p: 18, t: 'n', j: 11, lane: -1, k: 2 }
+const BR = [ // i: sector index, p: parent sector, t: kind, j: spine sector it rejoins (-1 = dead end), lane: -2/-1 above the main path, 1/2 below, k: step along the branch
+  { i: 13, p: 1, t: 'n', j: -1, lane: -2, k: 1 }, { i: 14, p: 13, t: 'g', j: -1, lane: -2, k: 2 },
+  { i: 15, p: 2, t: 'q', j: 5, lane: 2, k: 1 }, { i: 16, p: 15, t: 'e', j: 5, lane: 2, k: 2 },
+  { i: 17, p: 4, t: 'e', j: -1, lane: -1, k: 1 }, { i: 18, p: 17, t: 'x', j: -1, lane: -1, k: 2 }, { i: 19, p: 18, t: 'v', j: -1, lane: -1, k: 3 },
+  { i: 20, p: 6, t: 'n', j: -1, lane: 1, k: 1 }, { i: 21, p: 20, t: 'g', j: -1, lane: 1, k: 2 },
+  { i: 22, p: 7, t: 'q', j: 10, lane: -2, k: 1 }, { i: 23, p: 22, t: 'n', j: 10, lane: -2, k: 2 },
+  { i: 24, p: 9, t: 'e', j: -1, lane: 2, k: 1 }, { i: 25, p: 24, t: 'x', j: -1, lane: 2, k: 2 }, { i: 26, p: 25, t: 'v', j: -1, lane: 2, k: 3 },
+  { i: 27, p: 16, t: 'g', j: -1, lane: 1, k: 3 }, { i: 28, p: 23, t: 'e', j: -1, lane: -1, k: 3 }
 ];
+const BRLAB = { 13: 'DEAD END', 15: 'SHORTCUT', 17: 'DEEP ROUTE', 20: 'DEAD END', 22: 'SHORTCUT', 24: 'DEEP ROUTE', 27: 'HIDDEN', 28: 'HIDDEN' };
 const brOf = i => BR.find(b => b.i === i);
 const BRT = {
   n: { nm: 'SWARM NEST', ds: 'A nest has hatched: far more enemies, each one weaker.', ic: 'multi' },
@@ -7867,8 +7873,8 @@ function wmDeco(type, W, H, c, rs) { // a few hundred bytes of SVG art per world
   }
   return s;
 }
-const MPW = 1640, MPH = 330, sxy = i => [80 + i * 122, MPH / 2 + Math.sin(i * .85) * 34];
-function nodeXY(i) { if (i < LV) return sxy(i); const b = brOf(i); let rt = b; while (rt.p >= LV) rt = brOf(rt.p); const [px] = sxy(rt.p); if (b.lane < 0) { const [jx] = sxy(b.j), n = BR.filter(q => q.j === b.j && q.lane === b.lane).length; return [px + (jx - px) * b.k / (n + 1), 58]; } return [px + b.k * 122, MPH - 52]; }
+const MPW = 1640, MPH = 384, LANEY = { '-2': 50, '-1': 116, '1': 268, '2': 334 }, sxy = i => [80 + i * 122, MPH / 2 + Math.sin(i * .85) * 30];
+function nodeXY(i) { if (i < LV) return sxy(i); const b = brOf(i); let rt = b; while (rt.p >= LV) rt = brOf(rt.p); const [px] = sxy(rt.p), y = LANEY[b.lane]; if (b.j >= 0) { const [jx] = sxy(b.j), n = BR.filter(q => q.j === b.j && q.lane === b.lane).length; return [px + (jx - px) * b.k / (n + 1), y]; } return [px + b.k * 112, y]; }
 const _scMapBr = SCR.scMap;
 SCR.scMap = () => {
   if (UI.mode !== 'expedition') return _scMapBr();
@@ -7896,11 +7902,42 @@ SCR.scMap = () => {
     '<div class="wm-side">' + tierSeg + '<div class="wm-bs"><span class="xs mut">WORLD BOSS</span><b>' + escH(B.nm) + '</b></div><div class="xs mut">' + nDone + ' / ' + nAll + ' sectors cleared</div></div></header>' +
     '<nav class="wm-ws">' + pills + '</nav>' +
     '<div class="wm-map" id="mapScroll"><div class="wm-in" style="width:' + MPW + 'px;height:' + MPH + 'px"><svg class="wm-deco" viewBox="0 0 ' + MPW + ' ' + MPH + '" width="' + MPW + '" height="' + MPH + '" aria-hidden="true">' + deco + '</svg><svg class="wm-paths" viewBox="0 0 ' + MPW + ' ' + MPH + '" width="' + MPW + '" height="' + MPH + '" aria-hidden="true">' + paths + '</svg>' + nodes +
-    '<span class="wm-lab" style="left:' + nodeXY(13)[0] + 'px;top:16px">SIDE ROUTE</span><span class="wm-lab" style="left:' + nodeXY(16)[0] + 'px;top:' + (MPH - 18) + 'px">DEEP ROUTE</span><span class="wm-lab" style="left:' + nodeXY(18)[0] + 'px;top:16px">SIDE ROUTE</span></div></div>' + info +
+    Object.keys(BRLAB).map(k => { const [x, y] = nodeXY(+k); return '<span class="wm-lab" style="left:' + x + 'px;top:' + (y < MPH / 2 ? y - 44 : y + 30) + 'px">' + BRLAB[k] + '</span>'; }).join('') + '</div></div>' + info +
     '<footer class="wm-f"><button class="btn sm" data-act="back">Back</button><span class="xs mut">Main path to the boss unlocks the next world. Side routes branch off for extra rewards - dashed lines show where they rejoin.</span></footer></div>';
 };
 const _startBr = ACT.start;
 ACT.start = function () { if (UI.mode === 'expedition' && UI.sel >= LV) { const arr = prog(UI.w).done[UI.tier - 1] || []; if (!brOpen(arr, UI.sel) && !SAVE.devAll) { SFX.no(); return; } startLevel(UI.w, UI.sel, UI.tier, false); return; } if (UI.mode === 'expedition') { const arr = prog(UI.w).done[UI.tier - 1] || []; let f = 0; while (f < LV && arr[f]) f++; if (UI.sel > f && !SAVE.devAll) { SFX.no(); return; } } return _startBr.apply(this, arguments); };
+
+// ================= MENU MUSIC: a main theme for the menus, and each world's theme on its map =================
+const MENU_TH = MSPEC.length;
+MSPEC.push({ key: 50, sc: 'dor', bpm: 92, prog: [0, 5, 3, 4], boss: [0, 5, 3, 4], lead: 'bell', pad: 'saw', drums: 'halftime', bass: 'pulse', arp: 'sparkle',
+  A: '4 _ _ _ 7 _ 6 _ 4 _ _ _ 2 _ 4 _ 3 _ _ _ 2 _ 0 _ 2 _ _ _ . . . .', B: '7 _ _ _ 9 _ 7 _ 6 _ _ _ 4 _ 6 _ 7 _ _ _ 9 _ 11 _ 9 _ _ _ 7 _ _ _' });
+if (SET.menuMusic === undefined) SET.menuMusic = true;
+SETS.AUDIO = SETS.AUDIO || []; if (Array.isArray(SETS.AUDIO)) SETS.AUDIO.push(['menuMusic', 'tog', 'Menu music', 'Music on the menus and world maps']);
+function menuTheme(id) { if (id === 'scMap' && UI.mode === 'expedition' && WORLDS[UI.w]) return UI.w; if (id === 'scGalaxy') return 10; if (id === 'scBase') return 6; return MENU_TH; }
+function menuMusic(id) {
+  try {
+    if (!AC || G.scene === 'play' || G.cut || music.jbx >= 0 || id === 'scJukebox' || id === 'scPause' || id === 'scResult' || id === 'scCards') return;
+    if (SET.menuMusic === false) { if (music.menuOn) { music.menuOn = false; music.stop(); } return; }
+    const t = menuTheme(id), target = t === 15 ? 23 : t === 16 ? 24 : t;
+    if (music.on && music.menuOn && music.w === target) return;
+    if (AC.state !== 'running') { try { AC.resume(); } catch (e) { } }
+    const go = () => { if (G.scene === 'play' || G.cut || music.jbx >= 0) return; const mx = G.mapX; G.mapX = null; music.on = false; clearInterval(music.timer); music.force = 1; music._menuCall = 1; music.start(t, false); music._menuCall = 0; music.menuOn = true; G.mapX = mx; };
+    if (music.on && music.menuOn) { music.stop(); clearTimeout(menuMusic.tm); menuMusic.tm = setTimeout(go, 450); } else go();
+  } catch (e) { console.warn('menu music', e); }
+}
+const _mStartM = music.start;
+music.start = function (w, boss) {
+  if (this.menuOn && !this._menuCall) { this.menuOn = false; this.on = false; clearInterval(this.timer); if (G.scene === 'play' && !G.cut) this.force = -1; }
+  return _mStartM.apply(this, arguments);
+};
+const _mStopM = music.stop;
+music.stop = function () { if (!this._menuCall) this.menuOn = false; return _mStopM.apply(this, arguments); };
+const _showMM = UI.show.bind(UI);
+UI.show = function (id, nh) { const r = _showMM(id, nh); if (G.scene !== 'play') setTimeout(() => menuMusic(id), 0); return r; };
+// browsers only allow sound after the first tap or key press
+const mmKick = () => { audio(); setTimeout(() => { if (UI.top && G.scene !== 'play') menuMusic(UI.top); }, 60); };
+addEventListener('pointerdown', mmKick, { once: true, capture: true }); addEventListener('keydown', mmKick, { once: true, capture: true });
 
 // ================= BOOT =================
 function boot() {
