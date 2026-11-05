@@ -92,3 +92,16 @@ itemCard = function (cat, id, o) { let h = _icM(cat, id, o); if (ICO3[cat] && id
 // Battle Pass now also hands out 3D items
 const _bpRM = bpReward;
 bpReward = function (tr, n) { const X = tr === 'f' ? { 12: ['hat', 'party'], 22: ['trailfx', 'sparkle'], 32: ['pet', 'duck'], 42: ['engine', 'white'] } : { 2: ['hat', 'tophat'], 5: ['pet', 'cat'], 9: ['trailfx', 'notes'], 14: ['body', 'shark'], 17: ['engine', 'void'], 24: ['hat', 'wizard'], 27: ['pet', 'jelly'], 34: ['trailfx', 'comet'], 39: ['body', 'manta'], 44: ['pet', 'dragon'], 47: ['hat', 'crown'] }; return X[n] ? { cos: X[n] } : _bpRM(tr, n); };
+
+// ---------- Flux: earned by playing, spent only on looks ----------
+for (const c in COS) for (const id in COS[c]) { const it = COS[c][id]; if (it.src === 'shop' && it.p > 0) it.p = RARX[it.r | 0][2]; }
+if (typeof SAVE.flux !== 'number') { SAVE.flux = 600; SAVE.fluxNew = 1; }
+function fluxAdd(n) { n = Math.max(0, Math.round(n)); if (!n) return 0; SAVE.flux = FLX() + n; return n; }
+const _resF = UI.result;
+UI.result = function (d) { try { if (d && !d.fluxDone) { d.fluxDone = 1; if (d.mode !== 'training' && d.mode !== 'tutorial') { d.flux = fluxAdd(Math.min(60, 5 + (d.win ? 10 : 0) + Math.floor((d.score || 0) / 2000) + (d.bossDown || d.hadBoss && d.win ? 10 : 0))); saveGame(); } } } catch (e) { } return _resF.apply(this, arguments); };
+const _claimF = claimMission;
+claimMission = function (i) { const M = missions(), m = i === 'w' ? M.w : M.d[+i], ok = m && m.done && !m.got; const r = _claimF.apply(this, arguments); if (ok) { const n = fluxAdd(i === 'w' ? 120 : 25); saveGame(); toast('FLUX', '+' + n + ' Flux for your Locker', '#c084fc'); } return r; };
+const _xpF = addXP;
+addXP = function (n, d) { const lv0 = PS().xp.lv, r = _xpF.apply(this, arguments), up = PS().xp.lv - lv0; if (up > 0) { const f = fluxAdd(30 * up); if (d) d.fluxLv = f; } return r; };
+const _menuF = SCR.scMenu;
+SCR.scMenu = () => { let h = _menuF(); h = h.replace(/<div><dt>Kills<\/dt><dd>[^<]*<\/dd><\/div>/, '<div><dt>Flux</dt><dd class="flux">' + fmt(FLX()) + '</dd></div>'); if (SAVE.fluxNew) { SAVE.fluxNew = 0; setTimeout(() => toast('NEW: FLUX', 'A currency just for cosmetics. Here are 600 to start - spend them in the Locker', '#c084fc'), 1200); } return h; };
