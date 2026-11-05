@@ -370,7 +370,7 @@
       }
     },
     draw(Gs, Vw) {
-      const on = R.on = !!SET.models && view !== 'off' && !R.lost; cvs.style.visibility = on ? 'visible' : 'hidden'; R.bgActive = false;
+      let flyOn = false; const on = R.on = !!SET.models && view !== 'off' && !R.lost; cvs.style.visibility = on ? 'visible' : 'hidden'; R.bgActive = false;
       if (TOON.om) TOON.om.uniforms.w.value = view === 'play' ? 2 : 3.2;
       if (SET.toon) { keyL.intensity = .72; rimL.intensity = 1.05; hemiL.intensity = .26; } else { keyL.intensity = 3.2; rimL.intensity = 2.2; hemiL.intensity = .55; }
       if (!on) return;
@@ -413,6 +413,20 @@
           if (MV.anim && tk % 2 === 0) MV.anim(tk * .05);
           const rk = 'mv'; if (rk !== rimKey) { rimKey = rk; rimL.color.setHex(0x22d3ee); }
         }
+      } else if (view === 'menu' && typeof MENU3 !== 'undefined' && MENU3.fly()) { // flying main menu: your ship cruises through your latest world
+        const M = MENU3, cfg = SAVE.pl[0].cfg, r = rigFor('show', cfg); M.tick(df); flyOn = !r.bad;
+        if (!r.bad) {
+          const t = M.t, narrow = W < 760, u = M.ease(), bx = narrow ? W * .5 : W * .68, by = narrow ? Hh * .3 : Hh * .5;
+          let x = bx + Math.sin(t * .009) * W * .045, y = by + Math.sin(t * .015) * Hh * .07 + Math.sin(t * .043) * 5;
+          const vy = Math.cos(t * .015) * .015 * Hh * .07, w = 1 - u;
+          x = x - w * W * .75; y = y + w * Hh * .45; M.sx = x; M.sy = y;
+          const sc = (narrow ? Hh * .075 : Hh * .1) * r.k;
+          r.rig.visible = !M.hide; r.rig.position.set(x - W / 2, Hh / 2 - y, w * 720); r.rig.scale.setScalar(sc * (1 + w * .4));
+          r.ship.rotation.y = -H + .32 + Math.sin(t * .007) * .12 - w * .5;
+          r.rig.rotation.x = .55 + M.roll() + w * Math.PI * 2; r.rig.rotation.z = clamp(-vy * .35, -.35, .35) + w * .3;
+          r.s.body.rotation.z = Math.sin(t * .05) * .05; flicker(r, tk, 2.4 + (M.warp > 0 ? 3 : 0) + w * 3);
+          const rk = 's' + cfg.accent; if (rk !== rimKey) { rimKey = rk; rimL.color.setHex(hx(cfg.accent)); }
+        }
       } else { // menu / hangar showcase ship
         const cfg = Gs.showCfg || SAVE.pl[0].cfg, r = rigFor('show', cfg), hang = view === 'hangar', narrow = W < 760; if (r.bad) { renderer.render(scene, camera); return; }
         R.hy += .006 * df; const yaw = hang ? R.hy : Math.sin(tk * .012) * .7;
@@ -423,6 +437,7 @@
       }
       camera.position.set(-(Gs.sx || 0), Gs.sy || 0, DIST);
       let bgOk = false;
+      if (BG3 && flyOn && SET.bg3d !== false) { const M = MENU3, mx = G.mapX, fk = 'f' + M.w; if (fk !== bgFail) { G.mapX = null; renderer.autoClear = false; renderer.clear(); try { BG3.draw({ world: M.w, run: M, players: [{ alive: true, x: M.sx || Vw.W * .6, y: M.sy || Vw.H * .5 }], scrollMul: M.warp > 0 ? 6 : 1.7, sx: 0, sy: 0 }, W, Hh, df); bgOk = true; } catch (e) { console.warn('menu backdrop failed', e); bgFail = fk; } G.mapX = mx; renderer.clearDepth(); } }
       const bgKey = G.mapX ? 'm:' + G.mapX.k : Gs.world | 0;
       if (BG3 && view === 'play' && SET.bg3d !== false && bgKey !== bgFail) { // 3D world backdrop first, then the ships on top with a fresh depth buffer
         renderer.autoClear = false; renderer.clear();

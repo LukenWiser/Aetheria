@@ -292,10 +292,10 @@ function render() {
   const dpr = V.dpr * V.s, play = G.scene === 'play';
   let sx = 0, sy = 0; if (G.shake > 0 && !SET.reduce) { const a = G.shakeA * Math.min(1, G.shake / 8); sx = (Math.random() - .5) * 2 * a; sy = (Math.random() - .5) * 2 * a; } else G.shakeA = 0;
   G.sx = sx; G.sy = sy;
-  bg.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr); if (!(play && R3 && R3.bgActive)) drawBackdrop(bg, G.t); if (G.crash && play) drawDesktop(bg, G.t);
+  bg.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr); if (!(R3 && R3.bgActive && (play || G.scene !== 'play'))) drawBackdrop(bg, G.t); else if (!play) bg.clearRect(0, 0, V.W, V.H); if (G.crash && play) drawDesktop(bg, G.t);
   fx.setTransform(1, 0, 0, 1, 0, 0); fx.clearRect(0, 0, cvFx.width, cvFx.height); fx.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr);
   if (R3) { try { R3.draw(G, V); r3err = 0; } catch (e) { console.error('R3', e); if (++r3err > 6) { R3.on = false; R3 = null; } } }
-  const g = fx, t = G.t, use3 = R3 && R3.on;
+  const g = fx, t = G.t, use3 = R3 && R3.on; if (!play) menuFx(g);
   if (play) {
     if (!SET.reduce && (G.world === 2 || G.world === 6)) { // heat shimmer: slow wavy bands of hot air rising off the ground
       g.save(); g.globalCompositeOperation = 'lighter'; g.lineWidth = 14; g.lineCap = 'round';
