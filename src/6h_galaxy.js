@@ -14,9 +14,12 @@ const gxLv = w => { const p = GXS().rep[w] | 0; let l = 0; GX_REP.forEach((t, i)
 const gxOpen = () => Math.max(1, Math.min(SAVE.wu, WORLDS.length));
 function gxMissions(w) { // three missions per system, new ones every day
   const day = dayKey(), rs = seeded((w + 1) * 7919 + day.split('').reduce((a, c) => a * 31 + c.charCodeAt(0) | 0, 7)), ks = Object.keys(GX_T), out = []; rs(); rs(); for (let i = ks.length - 1; i > 0; i--) { const j = Math.floor(rs() * (i + 1)); [ks[i], ks[j]] = [ks[j], ks[i]]; }
-  for (let i = 0; i < 3; i++) { const t = ks[i], T = GX_T[t]; out.push({ id: day + ':' + w + ':' + i, t, w, lv: Math.min(12, T.lv + (rs() < .4 ? 1 : 0)), rew: Math.round((70 + 45 * w) * T.k * (1 + rs() * .3)), rep: Math.round(35 + 30 * T.k), tgt: t === 'bounty' ? GX_NAMES[Math.floor(rs() * GX_NAMES.length)] : '' }); }
+  for (let i = 0; i < 3; i++) { const t = ks[i], T = GX_T[t]; out.push({ id: day + ':' + w + ':' + i, t, w, lv: Math.min(12, T.lv + (rs() < .4 ? 1 : 0)), rew: Math.round((70 + 45 * w) * T.k * (1 + rs() * .3)), rep: Math.round(35 + 30 * T.k), tgt: t === 'bounty' ? GX_NAMES[Math.floor(rs() * GX_NAMES.length)] : '', map: i < 2 ? gxMapsFor(w)[i] : '' }); }
   return out;
 }
+const GXM = ['dockyard', 'mine', 'comet', 'cinder', 'tidewell', 'lattice', 'rosette'];
+const gxMapsFor = w => [GXM[w % GXM.length], GXM[(w * 3 + 2) % GXM.length]];
+const gxMapNm = k => { const m = MAPS.find(x => x.k === k); return m ? m.nm : ''; };
 const gxDone = id => !!(GXS().done[id.split(':')[0]] || {})[id];
 
 // ---------- the side mission as a run variant ----------
@@ -39,7 +42,7 @@ variantFinish = function (R, win, d) {
   if (win) { d.bonus = Math.round(m.rew * (1 + lvl * .1)); const r0 = gxLv(m.w); S.rep[m.w] = (S.rep[m.w] | 0) + m.rep; d.rep = m.rep; if (gxLv(m.w) > r0) d.repUp = GX_RN[gxLv(m.w)]; if (m.id) { const day = m.id.split(':')[0]; Object.keys(S.done).forEach(k => { if (k !== day) delete S.done[k]; }); (S.done[day] = S.done[day] || {})[m.id] = 1; } S.runs = (S.runs | 0) + 1; }
   else d.bonus = Math.round(R.wave * 20);
 };
-function gxPlay(m) { const o = { mode: 'expedition', var: 'side', w: m.w, lv: m.lv, tier: 1, co: SAVE.players === 2, side: m }; G.last = o; GXS().at = m.w; beginRun(o); }
+function gxPlay(m) { const o = { mode: 'expedition', var: 'side', w: m.w, lv: m.lv, tier: 1, co: SAVE.players === 2, side: m, map: m.map || undefined }; G.last = o; GXS().at = m.w; beginRun(o); }
 
 // ---------- star map renderer (2D canvas, real perspective) ----------
 const GXV = { yaw: .4, pitch: .9, zoom: 1, sel: -1, raf: 0, stars: null, sys: null, fly: null, drag: null, enc: null, t: 0 };
@@ -102,7 +105,7 @@ function gxPanel() {
   if (F) { el.innerHTML = '<div class="gx-k">JUMPING</div><h2 class="gx-n">' + GX_ST[F.b] + '</h2><p class="mut sm">Hyperspace route plotted...</p>'; return; }
   if (lk) { el.innerHTML = '<div class="gx-k">UNCHARTED</div><h2 class="gx-n">???</h2><p class="mut sm">Beat the World ' + w + ' boss in Expedition to chart this system.</p>'; return; }
   const ms = gxMissions(w), crate = (S.crate || {})[w] === dayKey();
-  const job = m => { const T = GX_T[m.t], dn = gxDone(m.id); return '<div class="gx-job' + (dn ? ' dn' : '') + '"><span class="gx-ji">' + (ICO[T.ic] || '') + '</span><div class="fl"><b>' + T.nm + (m.tgt ? ': ' + m.tgt : '') + '</b><div class="xs mut">' + T.ds + '</div><div class="xs"><span class="gold b">+' + fmt(Math.round(m.rew * (1 + lvl * .1))) + ' cores</span> <span class="acc">+' + m.rep + ' rep</span></div></div>' + (dn ? '<span class="xs good b">DONE</span>' : here ? '<button class="btn sm gold" data-act="gxjob:' + m.id + '">GO</button>' : '') + '</div>'; };
+  const job = m => { const T = GX_T[m.t], dn = gxDone(m.id); return '<div class="gx-job' + (dn ? ' dn' : '') + '"><span class="gx-ji">' + (ICO[T.ic] || '') + '</span><div class="fl"><b>' + T.nm + (m.tgt ? ': ' + m.tgt : '') + '</b><div class="xs mut">' + T.ds + '</div><div class="xs">' + (m.map ? '<span class="acc">' + gxMapNm(m.map) + '</span> - ' : '') + '<span class="gold b">+' + fmt(Math.round(m.rew * (1 + lvl * .1))) + ' cores</span> <span class="acc">+' + m.rep + ' rep</span></div></div>' + (dn ? '<span class="xs good b">DONE</span>' : here ? '<button class="btn sm gold" data-act="gxjob:' + m.id + '">GO</button>' : '') + '</div>'; };
   el.innerHTML = '<div class="gx-k" style="color:' + WORLDS[w].ac + '">SYSTEM ' + (w + 1) + ' - ' + escH(WORLDS[w].nm.toUpperCase()) + '</div><h2 class="gx-n">' + GX_ST[w] + '</h2>' +
     '<div class="gx-rep"><div class="row sp xs"><b>' + GX_RN[lvl] + '</b><span class="mut">' + (nx ? rp + ' / ' + nx + ' rep' : 'Max reputation') + '</span></div><div class="gx-bar"><i style="width:' + (nx ? Math.round((rp - GX_REP[lvl]) / (nx - GX_REP[lvl]) * 100) : 100) + '%"></i></div><div class="xs mut">+' + lvl * 10 + '% cores from jobs here</div></div>' +
     (here ? '<div class="xs mut b nh">JOB BOARD - NEW JOBS EVERY DAY</div>' : '<div class="xs mut b nh">JOBS HERE</div>') + '<div class="stack" style="gap:6px">' + ms.map(job).join('') + '</div>' +
@@ -131,7 +134,7 @@ Object.assign(ACT, {
   gxhome() { GXV.sel = GXS().at; GXV.enc = null; gxPanel(); },
   gxjob(a) { const id = a.join(':'), w = +id.split(':')[1], m = gxMissions(w).find(x => x.id === id); if (m && !gxDone(id)) gxPlay(m); },
   gxcrate() { const S = GXS(), w = S.at; S.crate = S.crate || {}; if (S.crate[w] === dayKey()) return; S.crate[w] = dayKey(); const c = Math.round((40 + 20 * w) * (1 + gxLv(w) * .25)); SAVE.cores += c; saveGame(); toast('SUPPLY CRATE', '+' + fmt(c) + ' cores from ' + GX_ST[w], '#fbbf24'); gxPanel(); },
-  gxfight() { const E = GXV.enc; if (!E) return; GXV.enc = null; gxPlay({ t: 'ambush', w: E.w, lv: 5, rew: E.rew, rep: 20, id: '' }); },
+  gxfight() { const E = GXV.enc; if (!E) return; GXV.enc = null; gxPlay({ t: 'ambush', w: E.w, lv: 5, rew: E.rew, rep: 20, id: '', map: GXM[Math.floor(Math.random() * GXM.length)] }); },
   gxflee() { const E = GXV.enc; if (!E) return; SAVE.cores = Math.max(0, SAVE.cores - E.loss); saveGame(); alertMsg('ESCAPED - ' + fmt(E.loss) + ' CORES DROPPED'); GXV.enc = null; gxPanel(); }
 });
 MODES.galaxy = { nm: 'Open Galaxy', ds: 'Fly a 3D star map between every system you have charted. Dock at stations, take bounties and side jobs, earn reputation and survive ambushes on the way.', ic: 'map' };

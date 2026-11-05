@@ -1246,6 +1246,12 @@ const BG3D_W = [
   { arena: 'sanctum', seed: 151 },
   { arena: 'glitchcore', seed: 301 },
   { p: 'gas', seed: 163, r: 190, d: 520, h: 40, nx: .5, ny: -.5, atm: '#fde047', ramp: [[0, '#451a03'], [.3, '#b45309'], [.55, '#f59e0b'], [.75, '#fde047'], [1, '#fffbeb']], bands: 9, warp: .7, eye: { x: .64, y: .4, s: .07 }, deb: { k: 'rock', n: 18, c: '#fbbf24', s: [2, 6] }, neb: 1.2, dust: '#fef3c7' }
+,
+  // galaxy sector maps (17+)
+  { p: 'lava', seed: 401, r: 160, d: 540, h: 36, nx: .55, ny: -.6, atm: '#fb923c', ramp: [[0, '#0c0a09'], [.5, '#292524'], [1, '#57534e']], crack: '#f97316', xtra: 'forge', deb: { k: 'slag', n: 24, c: '#44403c', s: [3, 9] }, dust: '#fdba74', neb: .9 },
+  { p: 'ocean', seed: 409, r: 170, d: 540, h: 38, nx: .5, ny: -.65, atm: '#67e8f9', ramp: [[0, '#082f49'], [.5, '#0e7490'], [1, '#67e8f9']], bio: '#5eead4', xtra: 'station', deb: { k: 'ice', n: 20, c: '#e0f2fe', s: [2, 7] }, dust: '#cffafe', neb: 1.1 },
+  { p: 'grid', seed: 419, r: 165, d: 540, h: 36, nx: .5, ny: -.6, atm: '#22d3ee', ramp: [[0, '#020617'], [1, '#1e293b']], line: '#22d3ee', xtra: 'wire', deb: { k: 'cube', n: 24, c: '#334155', s: [3, 8] }, dust: '#a5f3fc', neb: 1 },
+  { p: 'gas', seed: 431, r: 200, d: 520, h: 40, nx: .45, ny: -.5, atm: '#fb7185', ramp: [[0, '#3f0d1e'], [.3, '#9f1239'], [.55, '#f43f5e'], [.75, '#fda4af'], [1, '#fff1f2']], bands: 13, warp: 1.1, eye: { x: .6, y: .45, s: .09 }, deb: { k: 'crystal', n: 20, c: '#fecdd3', s: [2, 6] }, neb: 1.7, dust: '#ffe4e6' }
 ];
 
 let TOON_GRAD = null;
@@ -1431,7 +1437,7 @@ function makeBG3D(renderer) {
   const tex = c => track(new T.CanvasTexture(c));
 
   function build(wi) {
-    clear(); curW = wi;
+    clear(); curW = wi; { const mp0 = typeof wi === 'string' ? MAPS.find(m => 'm:' + m.k === wi) : null; if (mp0 && mp0.bw !== undefined) wi = mp0.bw; }
     const MP = typeof wi === 'string' ? MAPS.find(m => 'm:' + m.k === wi) : null, C = MP ? { arena: MP.arena, seed: MP.seed } : BG3D_W[wi] || BG3D_W[0], W = MP ? WORLDS[0] : WORLDS[wi] || WORLDS[0], q = SET.back === 0 ? .45 : SET.back === 1 ? .75 : 1, rs = seeded(C.seed * 13 + 1), R = C.r;
     lastQ = SET.back; lastToon = !!SET.toon; const upd = []; cur = { C, upd };
     if (C.arena) { flashSp = null; cur.arena = buildArena(C.arena, { scene, track, lc, rs, q, sunL, amb, glowTex, cloudTex: nebT, timeU, seed: C.seed, pr: () => renderer.getPixelRatio() }); return; }
@@ -2404,6 +2410,56 @@ function buildArena(kind, X) {
       fleet(Object.assign({}, KIT, { retro: KIT.car.concat([[G.box, neon, 0, 2, 0, 44, 2, 24]]) }), flock('retro', 8, [-950, -1250], [A.gy + 1, A.gy + 1], [3, 5, 'both'], () => ({ col: ['#ff2bd6', '#22d3ee', '#f8fafc', '#a855f7'][(rs() * 4) | 0], k: 1.3 })), { span: 7000 });
       weather(0, 400, '#ff9de2', [1400, 700, 1400], [-.4, .2, 3], 4);
     },
+    // Galaxy sector: an orbital shipyard - deck plating, gantries, half-built cruisers, sweeping cranes
+    dockyard() {
+      A.gy = -470; A.fogNear = 900; A.fogFar = 7800; A.tilt = .1; A.speed = 2.4;
+      sky('#02030c', '#1b2a55', '#050814', { fog: '#16213f', sun: '#fff1d6', sx: -.35, sy: .25 });
+      amb.intensity = .45; sunL.color.set(lc('#dbeafe')); sunL.intensity = 2; sunL.position.set(-700, 500, -600); scene.add(track(new T.HemisphereLight(lc('#60a5fa'), lc('#0b1222'), .5)));
+      ground('#ffffff', (g, w, h) => { g.fillStyle = '#1a2130'; g.fillRect(0, 0, w, h); g.strokeStyle = '#0f141f'; g.lineWidth = 3; for (let i = 0; i <= 4; i++) { g.beginPath(); g.moveTo(i * 64, 0); g.lineTo(i * 64, h); g.stroke(); g.beginPath(); g.moveTo(0, i * 64); g.lineTo(w, i * 64); g.stroke(); } g.fillStyle = '#3a4560'; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) g.fillRect(i * 64 + 6, j * 64 + 6, 4, 4); }, { tile: 400, rough: .5, metal: .4, emi: (g, w, h) => { g.fillStyle = '#000'; g.fillRect(0, 0, w, h); g.fillStyle = '#38bdf8'; g.fillRect(0, h / 2 - 2, w, 4); }, emiCol: '#38bdf8', ei: .7 });
+      const planet = new T.Mesh(G.sph, MAT({ color: '#1e3a8a', emissive: '#1d4ed8', emissiveIntensity: .25, vertexColors: false })); planet.scale.setScalar(2200); planet.position.set(1800, 1500, -7600); scene.add(planet);
+      const steel = C3('#64748b'), dark = C3('#1f2937'), hullC = C3('#94a3b8'), warn = C3('#facc15'), lit = GL3('#7dd3fc', 2.4), red = GL3('#f43f5e', 3);
+      layer(-2900, lenFor(-2900), put => { const L = lenFor(-2900); for (let x = 300; x < L; x += 1300) { // dry docks with cruisers under construction
+        for (const dz of [-200, 200]) { put(steel, G.box, x, gy() + 380, dz, 30, 760, 30); put(steel, G.box, x + 900, gy() + 380, dz, 30, 760, 30); } put(steel, G.box, x + 450, gy() + 760, 0, 960, 24, 430);
+        put(hullC, G.box, x + 450, gy() + 300, 0, 780, 150, 170, 0, 0, 0, 6, 1, tint(1, .15)); put(hullC, G.cone, x + 900, gy() + 300, 0, 120, 200, 120, 0, 0, -Math.PI / 2); put(dark, G.box, x + 300, gy() + 300, 0, 260, 152, 172); for (let r = 0; r < 6; r++) put(lit, G.box, x + 150 + r * 110, gy() + 340, 88, 40, 8, 2); } });
+      const gant = layer(-2200, lenFor(-2200), put => { const L = lenFor(-2200); for (let x = 100; x < L; x += 560) { put(steel, G.box, x, gy() + 260, 0, 26, 520, 26); for (let k = 1; k < 6; k++) put(steel, G.box, x, gy() + k * 90, 0, 120, 6, 6, 0, 0, k % 2 ? .6 : -.6); put(warn, G.box, x, gy() + 525, 0, 60, 10, 60); put(red, G.box, x, gy() + 540, 0, 10, 10, 10); } });
+      for (let i = 0; i < 4; i++) { const arm = new T.Group(), b = new T.Mesh(G.box, warn); b.scale.set(420, 14, 14); b.position.x = 180; arm.add(b); const hk = new T.Mesh(G.box, dark); hk.scale.set(8, 120, 8); hk.position.set(370, -60, 0); arm.add(hk); const ph = rs() * 6; ride(gant, arm, i * gant.len / 4 + 100, gy() + 520, 0, (o, t) => { o.rotation.y = Math.sin(t * .2 + ph) * .9; }); }
+      layer(-1250, lenFor(-1250), put => { const L = lenFor(-1250); for (let x = 80; x < L; x += 300) { put(dark, G.box, x, gy() + 40, 0, 120, 80, 80, 0, 0, 0, 1, 1, tint(1, .3)); put(warn, G.box, x, gy() + 82, 0, 124, 4, 84); put(lit, G.box, x - 40, gy() + 30, 41, 20, 10, 1); } for (let x = 200; x < L; x += 900) { put(steel, G.cyl, x, gy() + 70, -60, 70, 140, 70); put(lit, G.cyl, x, gy() + 142, -60, 50, 4, 50); } });
+      const KIT = kits(); fleet(KIT, traffic([[-1050, 2.6, A.gy + 1], [-1110, -2, A.gy + 1]], 6, () => rs() < .5 ? 'truck' : 'car', 7000), { span: 7000 });
+      for (let i = 0; i < 6; i++) { const sh = new T.Group(), hb = new T.Mesh(G.box, hullC); hb.scale.set(140, 26, 40); sh.add(hb); const nz = new T.Mesh(G.cone, hullC); nz.scale.set(26, 50, 26); nz.rotation.z = -Math.PI / 2; nz.position.x = 94; sh.add(nz); const en = new T.Mesh(G.box, GL3('#38bdf8', 3)); en.scale.set(6, 18, 30); en.position.x = -72; sh.add(en); const v = 2 + rs() * 2; ride(A.layers[1], sh, rs() * A.layers[1].len, gy() + 900 + rs() * 500, (rs() - .5) * 400, (o, t, df) => { o.position.x += v * df; if (o.position.x > A.layers[1].len * 2) o.position.x -= A.layers[1].len * 3; }); }
+      weather(0, 220, '#bae6fd', [1400, 800, 1600], [-.2, .05, 2], 3);
+    },
+    // Galaxy sector: an asteroid mine - cratered rock, drill rigs, ore conveyors, haul trucks under a gas giant
+    mine() {
+      A.gy = -450; A.fogNear = 600; A.fogFar = 6800; A.tilt = .11; A.speed = 2.3;
+      sky('#0a0510', '#4a2a1c', '#140a06', { fog: '#3b2416', sun: '#ffd8a8', sx: .4, sy: .08 });
+      amb.intensity = .4; sunL.color.set(lc('#ffd2a1')); sunL.intensity = 2; sunL.position.set(800, 220, -700); scene.add(track(new T.HemisphereLight(lc('#fdba74'), lc('#1c0f08'), .45)));
+      ground('#ffffff', (g, w, h) => { g.fillStyle = '#5b4636'; g.fillRect(0, 0, w, h); for (let i = 0; i < 70; i++) { const x = rs() * w, y = rs() * h, r = 4 + rs() * 22; g.fillStyle = 'rgba(30,20,14,' + (.25 + rs() * .3) + ')'; g.beginPath(); g.arc(x, y, r, 0, 6.3); g.fill(); g.strokeStyle = 'rgba(160,130,100,.35)'; g.lineWidth = 2; g.beginPath(); g.arc(x - 1, y - 1, r, 3.6, 5.6); g.stroke(); } }, { tile: 520 });
+      const giant = new T.Mesh(G.sph, MAT({ color: '#c2410c', emissive: '#7c2d12', emissiveIntensity: .35, vertexColors: false })); giant.scale.setScalar(3000); giant.position.set(-2600, 1400, -9200); scene.add(giant);
+      const rock = C3('#6b5444'), rock2 = C3('#3f2f24'), rig = C3('#a3a3a3'), yel = C3('#eab308'), ore = GL3('#22d3ee', 2.2), lamp = GL3('#fde68a', 2.6);
+      layer(-4200, lenFor(-4200), put => { const L = lenFor(-4200); for (let i = 0; i < 26; i++) { const s = 300 + rs() * 700; put(rs() < .5 ? rock : rock2, G.cone, rs() * L, gy() + s * .35, (rs() - .5) * 700, s * 1.4, s * .7, s, 0, rs() * 3, 0); } });
+      layer(-2400, lenFor(-2400), put => { const L = lenFor(-2400); for (let x = 200; x < L; x += 800) { put(rig, G.box, x - 60, gy() + 220, 0, 16, 440, 16, 0, 0, .12); put(rig, G.box, x + 60, gy() + 220, 0, 16, 440, 16, 0, 0, -.12); put(yel, G.box, x, gy() + 450, 0, 170, 30, 60); put(lamp, G.box, x, gy() + 470, 0, 30, 10, 30); put(rock2, G.cone, x, gy() + 50, 0, 260, 100, 260); }
+        for (let i = 0; i < 18; i++) put(ore, G.box, rs() * L, gy() + 10 + rs() * 40, (rs() - .5) * 300, 20 + rs() * 30, 20 + rs() * 40, 20 + rs() * 30, rs(), rs(), rs()); });
+      const drills = layer(-2400, lenFor(-2400), () => { }); for (let x = 200; x < drills.len; x += 800) { const d = new T.Mesh(G.cone, C3('#9ca3af')); d.scale.set(50, 180, 50); d.rotation.z = Math.PI; ride(drills, d, x, gy() + 300, 0, (o, t) => { o.rotation.y = t * 3; o.position.y = gy() + 300 + Math.sin(t * 1.5) * 60; }); }
+      layer(-1300, lenFor(-1300), put => { const L = lenFor(-1300); put(C3('#262626'), G.box, L / 2, gy() + 46, 0, L, 10, 40); for (let x = 0; x < L; x += 140) { put(rig, G.box, x, gy() + 22, 0, 8, 44, 40); } for (let x = 100; x < L; x += 600) { put(rock, G.sph, x, gy() + 20, 120, 140, 80, 120); put(lamp, G.cyl6, x + 200, gy() + 90, -40, 6, 180, 6); } });
+      const belt = layer(-1300, lenFor(-1300), () => { }); for (let i = 0; i < 24; i++) { const c = new T.Mesh(G.box, i % 3 ? C3('#57534e') : ore); c.scale.set(26, 22, 26); ride(belt, c, i * belt.len / 24, gy() + 62, 0, (o, t, df) => { o.position.x -= 1.4 * df; if (o.position.x < -belt.len) o.position.x += belt.len * 3; }); }
+      const KIT = kits(); fleet(KIT, traffic([[-1080, 1.8, A.gy + 1], [-1160, -1.6, A.gy + 1]], 5, () => 'truck', 7000), { span: 7000 });
+      weather(0, 260, '#fdba74', [1400, 700, 1600], [-.6, .1, 3], 4);
+    },
+    // Galaxy sector: a comet's frozen surface - crystal spires, jetting geysers, a frozen probe and a tail of ice
+    comet() {
+      A.gy = -430; A.fogNear = 700; A.fogFar = 7600; A.tilt = .09; A.speed = 2.5;
+      sky('#030712', '#164e63', '#082f49', { fog: '#0e3a4f', sun: '#e0f2fe', sx: -.2, sy: .18, aur: 1 });
+      amb.intensity = .3; sunL.color.set(lc('#e0f2fe')); sunL.intensity = 1.15; sunL.position.set(-500, 400, -800); scene.add(track(new T.HemisphereLight(lc('#a5f3fc'), lc('#082f49'), .35)));
+      ground('#ffffff', (g, w, h) => { g.fillStyle = '#5f97ad'; g.fillRect(0, 0, w, h); for (let i = 0; i < 40; i++) { g.strokeStyle = 'rgba(14,116,144,' + (.15 + rs() * .25) + ')'; g.lineWidth = 1 + rs() * 2; g.beginPath(); let x = rs() * w, y = rs() * h; g.moveTo(x, y); for (let k = 0; k < 4; k++) { x += (rs() - .5) * 60; y += (rs() - .5) * 60; g.lineTo(x, y); } g.stroke(); } }, { tile: 600, rough: .25, metal: .1 });
+      const ice = MAT({ color: '#5fb8cc', emissive: '#0e7490', emissiveIntensity: .3, roughness: .15, metalness: .1, vertexColors: false }), ice2 = MAT({ color: '#9fd3e0', emissive: '#155e75', emissiveIntensity: .25, roughness: .2, vertexColors: false }), probe = C3('#d4d4d8'), gold = MAT({ color: '#d4a64a', metalness: .8, roughness: .3, vertexColors: false }), blink = GL3('#f43f5e', 3);
+      layer(-4600, lenFor(-4600), put => { const L = lenFor(-4600); for (let i = 0; i < 30; i++) { const h = 500 + rs() * 1100; put(rs() < .5 ? ice : ice2, G.cone, rs() * L, gy() + h / 2, (rs() - .5) * 800, h * .35, h, h * .35, (rs() - .5) * .2, rs() * 3, (rs() - .5) * .25); } });
+      layer(-2300, lenFor(-2300), put => { const L = lenFor(-2300); for (let i = 0; i < 40; i++) { const h = 80 + rs() * 360, x = rs() * L; for (let k = 0; k < 3; k++) put(k ? ice2 : ice, G.cone, x + (k - 1) * h * .25, gy() + h * (k ? .3 : .5), (rs() - .5) * 200, h * .25, h * (k ? .6 : 1), h * .25, 0, rs() * 3, (k - 1) * .35); } });
+      layer(-1400, lenFor(-1400), put => { const L = lenFor(-1400); for (let x = 600; x < L; x += 2400) { put(probe, G.box, x, gy() + 50, 0, 120, 70, 80, 0, .3, .2); put(gold, G.box, x, gy() + 50, 0, 124, 30, 84, 0, .3, .2); put(probe, G.box, x - 140, gy() + 80, 0, 160, 4, 60, 0, .3, .5); put(probe, G.cyl6, x + 40, gy() + 130, 0, 4, 90, 4); put(blink, G.box, x + 40, gy() + 178, 0, 8, 8, 8); }
+        for (let i = 0; i < 30; i++) put(rs() < .5 ? ice : ice2, G.sph, rs() * L, gy() + 10, (rs() - .5) * 400, 40 + rs() * 90, 20 + rs() * 30, 40 + rs() * 90); });
+      const gey = layer(-1900, lenFor(-1900), () => { }), jet = BAS({ color: '#cffafe', opacity: .35 }); for (let i = 0; i < 6; i++) { const m = new T.Mesh(G.cone, jet), ph = rs() * 6; m.scale.set(60, 700, 60); ride(gey, m, i * gey.len / 6 + rs() * 200, gy() + 350, (rs() - .5) * 200, (o, t) => { const k = Math.max(.05, Math.sin(t * .7 + ph)); o.scale.set(60 * k + 10, 700 * k, 60 * k + 10); o.position.y = gy() + 350 * k; }); }
+      for (let i = 0; i < 6 * q + 2; i++) { const s = new T.Sprite(spriteM('#a5f3fc', .12, true)); s.scale.set(2400 + rs() * 1600, 260 + rs() * 200, 1); ride(A.layers[0], s, rs() * A.layers[0].len, 1300 + rs() * 700, (rs() - .5) * 600); }
+      weather(0, 380, '#ecfeff', [1400, 800, 1600], [-.5, -.4, 3], 3);
+    },
     // Null Sector: the void where broken pieces of every world drift (World 16 boss arena)
     glitchcore() {
       A.gy = -480; A.fogNear = 600; A.fogFar = 6000; A.tilt = .06; A.speed = 2.2;
@@ -3001,6 +3057,13 @@ const MAPS = [
   { k: 'school', nm: 'Hall Pass', sub: 'A high school hallway between classes', arena: 'school', mi: 20, seed: 239, ac: '#60a5fa' },
   { k: 'beach', nm: 'Boardwalk', sub: 'Sand, surf, a pier and a sunset', arena: 'beach', mi: 21, seed: 241, ac: '#38bdf8' },
   { k: 'vapor', nm: 'Vapor Grid', sub: 'A neon sunset over a grid that never ends', arena: 'vapor', mi: 22, seed: 251, ac: '#f472b6' },
+  { k: 'dockyard', nm: 'Orbital Dockyard', sub: 'A shipyard in orbit: gantries, cranes and cruisers half built', arena: 'dockyard', mi: 10, seed: 263, ac: '#38bdf8', gx: 1 },
+  { k: 'mine', nm: 'Ore Belt Mine', sub: 'Drill rigs and ore conveyors on a cratered asteroid', arena: 'mine', mi: 6, seed: 269, ac: '#fb923c', gx: 1 },
+  { k: 'comet', nm: 'Comet Glacier', sub: 'Crystal spires and ice geysers on a comet racing past the sun', arena: 'comet', mi: 5, seed: 271, ac: '#67e8f9', gx: 1 },
+  { k: 'cinder', nm: 'Cinder Reach', sub: 'A cracked molten moon wrapped in a ring of foundries', arena: 'x', bw: 17, mi: 6, seed: 277, ac: '#f97316', gx: 1 },
+  { k: 'tidewell', nm: 'Tidewell', sub: 'A glowing ocean world with a station in high orbit', arena: 'x', bw: 18, mi: 7, seed: 281, ac: '#5eead4', gx: 1 },
+  { k: 'lattice', nm: 'Dyson Lattice', sub: 'A machine sphere wired in light, older than every empire', arena: 'x', bw: 19, mi: 8, seed: 283, ac: '#22d3ee', gx: 1 },
+  { k: 'rosette', nm: 'Rosette Giant', sub: 'A rose-red storm giant with a crystal ring', arena: 'x', bw: 20, mi: 3, seed: 293, ac: '#fb7185', gx: 1 },
   { k: 'glitchcore', nm: 'Null Sector', sub: 'Where the broken pieces of every world drift', arena: 'glitchcore', mi: 23, seed: 257, ac: '#ff2bd6', hidden: 1 }
 ];
 // World 16 is the glitch: every sector drops you into a different place that should not be there
@@ -5355,7 +5418,7 @@ function jbTracks() {
   const T = []; for (let w = 0; w < 15; w++) T.push({ i: w, nm: WORLDS[w].nm, sub: 'World ' + (w + 1), c: WORLDS[w].ac, ok: w < SAVE.wu });
   T.push({ i: 23, nm: WORLDS[15].nm, sub: 'World 16', c: WORLDS[15].ac, ok: SAVE.wu > 15 });
   if (WORLDS[16]) T.push({ i: 24, nm: WORLDS[16].nm, sub: 'World 17', c: WORLDS[16].ac, ok: SAVE.wu > 16 });
-  MAPS.filter(m => !m.hidden).forEach(m => T.push({ i: m.mi, nm: m.nm, sub: 'The Glitch - side map', c: m.ac, ok: SAVE.wu > 15 }));
+  MAPS.filter(m => !m.hidden && !m.gx).forEach(m => T.push({ i: m.mi, nm: m.nm, sub: 'The Glitch - side map', c: m.ac, ok: SAVE.wu > 15 }));
   return T;
 }
 const JBL = [['CALM', 0], ['CRUISE', 1], ['ACTION', 2], ['BOSS', 3], ['FINALE', 4]];
@@ -6159,12 +6222,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V41';
+const GAME_VER = 'V42';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V42', 'New Frontiers', ['Seven new maps for the galaxy sectors', 'Orbital Dockyard: dry docks, half-built cruisers, swinging cranes and a blue planet overhead', 'Ore Belt Mine: drill rigs, ore conveyors and haul trucks on a cratered asteroid under a red giant', 'Comet Glacier: crystal spires and jetting ice geysers', 'Cinder Reach, Tidewell, Dyson Lattice and Rosette Giant: four new planets to orbit', 'Galaxy jobs and ambushes now take place on the maps of their sector', 'All seven are also playable as Extra Maps in Endless']],
   ['V41', 'Forge and Film', ['The Forge (Station > Forge): fuse any two guns you own into a hybrid weapon', '56 possible hybrids - the first gun sets the firing pattern, the second adds its trait (homing, piercing, chain lightning, twin shots and more)', 'Hybrids level up with their base gun and swap with Q / E like any other weapon', 'Replay Theater (Replays on the main menu): press K or F8 in a run to save the last 12-24 seconds as a clip', 'Boss kills clip themselves automatically', 'Watch clips in slow motion, download them as video files, or delete them', 'Replay recording can be turned off in Settings > Graphics']],
   ['V40', 'Home Base', ['Your own space station (Station button on the main menu), drawn live and spinning in orbit', 'Six modules to build and upgrade to level 5: Refinery, Armory, Research Lab, Shield Array, Defense Turrets and Drone Bay', 'The Refinery mines cores while you are away - come back and collect them', 'Raids: once your station grows, raiders attack. Defend it in a station battle with your own turrets, or lose stored cores', 'Drone companions: six drones (Spark, Magnet, Aegis, Medic, Hunter and Nova) that fly beside your ship', 'Drones level up to 10 from the enemies you destroy and get stronger each level']],
   ['V39', 'Open Galaxy', ['A new Galaxy mode: a 3D star map of every system you have charted - drag to turn, pinch or scroll to zoom', 'Jump between systems and watch your ship fly the route', 'A space station in every system, each with a job board that changes every day', 'Five kinds of side jobs: Patrols, Bounties on named aces, Hazard Runs, Swarm Purges and Elite Hunts', 'Reputation with every station, from Stranger to Legend - higher reputation pays more', 'Daily supply crates at every station', 'Random ambushes when you jump: fight for a reward or run and drop some cores', 'Galaxy is on the main menu', 'World 1 city: billboards now stand on steel towers instead of floating, and the roads and sidewalks no longer flicker']],
@@ -7579,9 +7643,12 @@ const gxLv = w => { const p = GXS().rep[w] | 0; let l = 0; GX_REP.forEach((t, i)
 const gxOpen = () => Math.max(1, Math.min(SAVE.wu, WORLDS.length));
 function gxMissions(w) { // three missions per system, new ones every day
   const day = dayKey(), rs = seeded((w + 1) * 7919 + day.split('').reduce((a, c) => a * 31 + c.charCodeAt(0) | 0, 7)), ks = Object.keys(GX_T), out = []; rs(); rs(); for (let i = ks.length - 1; i > 0; i--) { const j = Math.floor(rs() * (i + 1)); [ks[i], ks[j]] = [ks[j], ks[i]]; }
-  for (let i = 0; i < 3; i++) { const t = ks[i], T = GX_T[t]; out.push({ id: day + ':' + w + ':' + i, t, w, lv: Math.min(12, T.lv + (rs() < .4 ? 1 : 0)), rew: Math.round((70 + 45 * w) * T.k * (1 + rs() * .3)), rep: Math.round(35 + 30 * T.k), tgt: t === 'bounty' ? GX_NAMES[Math.floor(rs() * GX_NAMES.length)] : '' }); }
+  for (let i = 0; i < 3; i++) { const t = ks[i], T = GX_T[t]; out.push({ id: day + ':' + w + ':' + i, t, w, lv: Math.min(12, T.lv + (rs() < .4 ? 1 : 0)), rew: Math.round((70 + 45 * w) * T.k * (1 + rs() * .3)), rep: Math.round(35 + 30 * T.k), tgt: t === 'bounty' ? GX_NAMES[Math.floor(rs() * GX_NAMES.length)] : '', map: i < 2 ? gxMapsFor(w)[i] : '' }); }
   return out;
 }
+const GXM = ['dockyard', 'mine', 'comet', 'cinder', 'tidewell', 'lattice', 'rosette'];
+const gxMapsFor = w => [GXM[w % GXM.length], GXM[(w * 3 + 2) % GXM.length]];
+const gxMapNm = k => { const m = MAPS.find(x => x.k === k); return m ? m.nm : ''; };
 const gxDone = id => !!(GXS().done[id.split(':')[0]] || {})[id];
 
 // ---------- the side mission as a run variant ----------
@@ -7604,7 +7671,7 @@ variantFinish = function (R, win, d) {
   if (win) { d.bonus = Math.round(m.rew * (1 + lvl * .1)); const r0 = gxLv(m.w); S.rep[m.w] = (S.rep[m.w] | 0) + m.rep; d.rep = m.rep; if (gxLv(m.w) > r0) d.repUp = GX_RN[gxLv(m.w)]; if (m.id) { const day = m.id.split(':')[0]; Object.keys(S.done).forEach(k => { if (k !== day) delete S.done[k]; }); (S.done[day] = S.done[day] || {})[m.id] = 1; } S.runs = (S.runs | 0) + 1; }
   else d.bonus = Math.round(R.wave * 20);
 };
-function gxPlay(m) { const o = { mode: 'expedition', var: 'side', w: m.w, lv: m.lv, tier: 1, co: SAVE.players === 2, side: m }; G.last = o; GXS().at = m.w; beginRun(o); }
+function gxPlay(m) { const o = { mode: 'expedition', var: 'side', w: m.w, lv: m.lv, tier: 1, co: SAVE.players === 2, side: m, map: m.map || undefined }; G.last = o; GXS().at = m.w; beginRun(o); }
 
 // ---------- star map renderer (2D canvas, real perspective) ----------
 const GXV = { yaw: .4, pitch: .9, zoom: 1, sel: -1, raf: 0, stars: null, sys: null, fly: null, drag: null, enc: null, t: 0 };
@@ -7667,7 +7734,7 @@ function gxPanel() {
   if (F) { el.innerHTML = '<div class="gx-k">JUMPING</div><h2 class="gx-n">' + GX_ST[F.b] + '</h2><p class="mut sm">Hyperspace route plotted...</p>'; return; }
   if (lk) { el.innerHTML = '<div class="gx-k">UNCHARTED</div><h2 class="gx-n">???</h2><p class="mut sm">Beat the World ' + w + ' boss in Expedition to chart this system.</p>'; return; }
   const ms = gxMissions(w), crate = (S.crate || {})[w] === dayKey();
-  const job = m => { const T = GX_T[m.t], dn = gxDone(m.id); return '<div class="gx-job' + (dn ? ' dn' : '') + '"><span class="gx-ji">' + (ICO[T.ic] || '') + '</span><div class="fl"><b>' + T.nm + (m.tgt ? ': ' + m.tgt : '') + '</b><div class="xs mut">' + T.ds + '</div><div class="xs"><span class="gold b">+' + fmt(Math.round(m.rew * (1 + lvl * .1))) + ' cores</span> <span class="acc">+' + m.rep + ' rep</span></div></div>' + (dn ? '<span class="xs good b">DONE</span>' : here ? '<button class="btn sm gold" data-act="gxjob:' + m.id + '">GO</button>' : '') + '</div>'; };
+  const job = m => { const T = GX_T[m.t], dn = gxDone(m.id); return '<div class="gx-job' + (dn ? ' dn' : '') + '"><span class="gx-ji">' + (ICO[T.ic] || '') + '</span><div class="fl"><b>' + T.nm + (m.tgt ? ': ' + m.tgt : '') + '</b><div class="xs mut">' + T.ds + '</div><div class="xs">' + (m.map ? '<span class="acc">' + gxMapNm(m.map) + '</span> - ' : '') + '<span class="gold b">+' + fmt(Math.round(m.rew * (1 + lvl * .1))) + ' cores</span> <span class="acc">+' + m.rep + ' rep</span></div></div>' + (dn ? '<span class="xs good b">DONE</span>' : here ? '<button class="btn sm gold" data-act="gxjob:' + m.id + '">GO</button>' : '') + '</div>'; };
   el.innerHTML = '<div class="gx-k" style="color:' + WORLDS[w].ac + '">SYSTEM ' + (w + 1) + ' - ' + escH(WORLDS[w].nm.toUpperCase()) + '</div><h2 class="gx-n">' + GX_ST[w] + '</h2>' +
     '<div class="gx-rep"><div class="row sp xs"><b>' + GX_RN[lvl] + '</b><span class="mut">' + (nx ? rp + ' / ' + nx + ' rep' : 'Max reputation') + '</span></div><div class="gx-bar"><i style="width:' + (nx ? Math.round((rp - GX_REP[lvl]) / (nx - GX_REP[lvl]) * 100) : 100) + '%"></i></div><div class="xs mut">+' + lvl * 10 + '% cores from jobs here</div></div>' +
     (here ? '<div class="xs mut b nh">JOB BOARD - NEW JOBS EVERY DAY</div>' : '<div class="xs mut b nh">JOBS HERE</div>') + '<div class="stack" style="gap:6px">' + ms.map(job).join('') + '</div>' +
@@ -7696,7 +7763,7 @@ Object.assign(ACT, {
   gxhome() { GXV.sel = GXS().at; GXV.enc = null; gxPanel(); },
   gxjob(a) { const id = a.join(':'), w = +id.split(':')[1], m = gxMissions(w).find(x => x.id === id); if (m && !gxDone(id)) gxPlay(m); },
   gxcrate() { const S = GXS(), w = S.at; S.crate = S.crate || {}; if (S.crate[w] === dayKey()) return; S.crate[w] = dayKey(); const c = Math.round((40 + 20 * w) * (1 + gxLv(w) * .25)); SAVE.cores += c; saveGame(); toast('SUPPLY CRATE', '+' + fmt(c) + ' cores from ' + GX_ST[w], '#fbbf24'); gxPanel(); },
-  gxfight() { const E = GXV.enc; if (!E) return; GXV.enc = null; gxPlay({ t: 'ambush', w: E.w, lv: 5, rew: E.rew, rep: 20, id: '' }); },
+  gxfight() { const E = GXV.enc; if (!E) return; GXV.enc = null; gxPlay({ t: 'ambush', w: E.w, lv: 5, rew: E.rew, rep: 20, id: '', map: GXM[Math.floor(Math.random() * GXM.length)] }); },
   gxflee() { const E = GXV.enc; if (!E) return; SAVE.cores = Math.max(0, SAVE.cores - E.loss); saveGame(); alertMsg('ESCAPED - ' + fmt(E.loss) + ' CORES DROPPED'); GXV.enc = null; gxPanel(); }
 });
 MODES.galaxy = { nm: 'Open Galaxy', ds: 'Fly a 3D star map between every system you have charted. Dock at stations, take bounties and side jobs, earn reputation and survive ambushes on the way.', ic: 'map' };

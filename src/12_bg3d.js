@@ -24,6 +24,12 @@ const BG3D_W = [
   { arena: 'sanctum', seed: 151 },
   { arena: 'glitchcore', seed: 301 },
   { p: 'gas', seed: 163, r: 190, d: 520, h: 40, nx: .5, ny: -.5, atm: '#fde047', ramp: [[0, '#451a03'], [.3, '#b45309'], [.55, '#f59e0b'], [.75, '#fde047'], [1, '#fffbeb']], bands: 9, warp: .7, eye: { x: .64, y: .4, s: .07 }, deb: { k: 'rock', n: 18, c: '#fbbf24', s: [2, 6] }, neb: 1.2, dust: '#fef3c7' }
+,
+  // galaxy sector maps (17+)
+  { p: 'lava', seed: 401, r: 160, d: 540, h: 36, nx: .55, ny: -.6, atm: '#fb923c', ramp: [[0, '#0c0a09'], [.5, '#292524'], [1, '#57534e']], crack: '#f97316', xtra: 'forge', deb: { k: 'slag', n: 24, c: '#44403c', s: [3, 9] }, dust: '#fdba74', neb: .9 },
+  { p: 'ocean', seed: 409, r: 170, d: 540, h: 38, nx: .5, ny: -.65, atm: '#67e8f9', ramp: [[0, '#082f49'], [.5, '#0e7490'], [1, '#67e8f9']], bio: '#5eead4', xtra: 'station', deb: { k: 'ice', n: 20, c: '#e0f2fe', s: [2, 7] }, dust: '#cffafe', neb: 1.1 },
+  { p: 'grid', seed: 419, r: 165, d: 540, h: 36, nx: .5, ny: -.6, atm: '#22d3ee', ramp: [[0, '#020617'], [1, '#1e293b']], line: '#22d3ee', xtra: 'wire', deb: { k: 'cube', n: 24, c: '#334155', s: [3, 8] }, dust: '#a5f3fc', neb: 1 },
+  { p: 'gas', seed: 431, r: 200, d: 520, h: 40, nx: .45, ny: -.5, atm: '#fb7185', ramp: [[0, '#3f0d1e'], [.3, '#9f1239'], [.55, '#f43f5e'], [.75, '#fda4af'], [1, '#fff1f2']], bands: 13, warp: 1.1, eye: { x: .6, y: .45, s: .09 }, deb: { k: 'crystal', n: 20, c: '#fecdd3', s: [2, 6] }, neb: 1.7, dust: '#ffe4e6' }
 ];
 
 let TOON_GRAD = null;
@@ -209,7 +215,7 @@ function makeBG3D(renderer) {
   const tex = c => track(new T.CanvasTexture(c));
 
   function build(wi) {
-    clear(); curW = wi;
+    clear(); curW = wi; { const mp0 = typeof wi === 'string' ? MAPS.find(m => 'm:' + m.k === wi) : null; if (mp0 && mp0.bw !== undefined) wi = mp0.bw; }
     const MP = typeof wi === 'string' ? MAPS.find(m => 'm:' + m.k === wi) : null, C = MP ? { arena: MP.arena, seed: MP.seed } : BG3D_W[wi] || BG3D_W[0], W = MP ? WORLDS[0] : WORLDS[wi] || WORLDS[0], q = SET.back === 0 ? .45 : SET.back === 1 ? .75 : 1, rs = seeded(C.seed * 13 + 1), R = C.r;
     lastQ = SET.back; lastToon = !!SET.toon; const upd = []; cur = { C, upd };
     if (C.arena) { flashSp = null; cur.arena = buildArena(C.arena, { scene, track, lc, rs, q, sunL, amb, glowTex, cloudTex: nebT, timeU, seed: C.seed, pr: () => renderer.getPixelRatio() }); return; }

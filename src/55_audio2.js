@@ -76,7 +76,7 @@ function jbTracks() {
   const T = []; for (let w = 0; w < 15; w++) T.push({ i: w, nm: WORLDS[w].nm, sub: 'World ' + (w + 1), c: WORLDS[w].ac, ok: w < SAVE.wu });
   T.push({ i: 23, nm: WORLDS[15].nm, sub: 'World 16', c: WORLDS[15].ac, ok: SAVE.wu > 15 });
   if (WORLDS[16]) T.push({ i: 24, nm: WORLDS[16].nm, sub: 'World 17', c: WORLDS[16].ac, ok: SAVE.wu > 16 });
-  MAPS.filter(m => !m.hidden).forEach(m => T.push({ i: m.mi, nm: m.nm, sub: 'The Glitch - side map', c: m.ac, ok: SAVE.wu > 15 }));
+  MAPS.filter(m => !m.hidden && !m.gx).forEach(m => T.push({ i: m.mi, nm: m.nm, sub: 'The Glitch - side map', c: m.ac, ok: SAVE.wu > 15 }));
   return T;
 }
 const JBL = [['CALM', 0], ['CRUISE', 1], ['ACTION', 2], ['BOSS', 3], ['FINALE', 4]];

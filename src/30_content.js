@@ -328,6 +328,13 @@ const MAPS = [
   { k: 'school', nm: 'Hall Pass', sub: 'A high school hallway between classes', arena: 'school', mi: 20, seed: 239, ac: '#60a5fa' },
   { k: 'beach', nm: 'Boardwalk', sub: 'Sand, surf, a pier and a sunset', arena: 'beach', mi: 21, seed: 241, ac: '#38bdf8' },
   { k: 'vapor', nm: 'Vapor Grid', sub: 'A neon sunset over a grid that never ends', arena: 'vapor', mi: 22, seed: 251, ac: '#f472b6' },
+  { k: 'dockyard', nm: 'Orbital Dockyard', sub: 'A shipyard in orbit: gantries, cranes and cruisers half built', arena: 'dockyard', mi: 10, seed: 263, ac: '#38bdf8', gx: 1 },
+  { k: 'mine', nm: 'Ore Belt Mine', sub: 'Drill rigs and ore conveyors on a cratered asteroid', arena: 'mine', mi: 6, seed: 269, ac: '#fb923c', gx: 1 },
+  { k: 'comet', nm: 'Comet Glacier', sub: 'Crystal spires and ice geysers on a comet racing past the sun', arena: 'comet', mi: 5, seed: 271, ac: '#67e8f9', gx: 1 },
+  { k: 'cinder', nm: 'Cinder Reach', sub: 'A cracked molten moon wrapped in a ring of foundries', arena: 'x', bw: 17, mi: 6, seed: 277, ac: '#f97316', gx: 1 },
+  { k: 'tidewell', nm: 'Tidewell', sub: 'A glowing ocean world with a station in high orbit', arena: 'x', bw: 18, mi: 7, seed: 281, ac: '#5eead4', gx: 1 },
+  { k: 'lattice', nm: 'Dyson Lattice', sub: 'A machine sphere wired in light, older than every empire', arena: 'x', bw: 19, mi: 8, seed: 283, ac: '#22d3ee', gx: 1 },
+  { k: 'rosette', nm: 'Rosette Giant', sub: 'A rose-red storm giant with a crystal ring', arena: 'x', bw: 20, mi: 3, seed: 293, ac: '#fb7185', gx: 1 },
   { k: 'glitchcore', nm: 'Null Sector', sub: 'Where the broken pieces of every world drift', arena: 'glitchcore', mi: 23, seed: 257, ac: '#ff2bd6', hidden: 1 }
 ];
 // World 16 is the glitch: every sector drops you into a different place that should not be there
