@@ -312,7 +312,7 @@ function ramCheck() {
 
 // ---------- bosses ----------
 function spawnBoss(wi, hpMul) {
-  const B = BOSSES[wi], mu = runMul(), hp = Math.round(B.hp * (hpMul || 1) * mu.hp * (1 + (G.run.tier - 1) * .35));
+  const B = BOSSES[wi], mu = runMul(), R0 = G.run, bm = R0.bhm && R0.spec ? R0.bhm * R0.hpm / R0.spec.diff : 1, hp = Math.round(B.hp * (hpMul || 1) * mu.hp * bm / (R0.bhm && R0.spec ? R0.hpm : 1) * (1 + (G.run.tier - 1) * .35));
   const e = { id: 'boss', boss: true, bi: wi, d: { ai: 'boss', m: ['boss', {}], sc: B.rew, cr: 0, nm: B.nm }, x: V.W + B.w, y: V.H / 2, y0: V.H / 2, w: B.w, r: B.w * .3, hp, mhp: hp, t: 0, hf: 0, ph: 0, atk: 0, acd: 120, inv: true, st: 0, tgx: V.W - B.w * .55, dead: false, rcd: 0, hide: false, sa: 0, q: [], mv: B.ph[0].mv };
   e.pods = B.ph.map((_, i) => mkPod(e, B, i)); e.stg = 0;
   G.ent.en.push(e); G.run.boss = e; G.ent.eb.length = 0;

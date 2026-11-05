@@ -2856,7 +2856,7 @@ const HULLK = { falcon: 1, vanguard: 1.08, phantom: .96, titan: 1.2, nova: 1, wr
 
 // ---------- level generation ----------
 function levelSpec(w, i, tier, alt) {
-  const t = alt && ALT_NODE[i] ? ALT_NODE[i] : NODE_PAT[i], d = 1 + w * .2 + i * .045 + (tier - 1) * .5;
+  const t = alt && ALT_NODE[i] ? ALT_NODE[i] : NODE_PAT[i], d = 1.3 + w * .16 + i * .035 + (tier - 1) * .5;
   const rs = seeded(w * 977 + i * 131 + tier * 7919 + 13);
   return { w, i, tier, type: t, diff: d, seed: w * 977 + i * 131 + tier, name: lvName(w, i) + (t === 'g' ? ' - Treasure Run' : t === 'x' ? ' - Gauntlet' : ''), rs, waves: t === 'B' ? 2 : t === 's' ? 3 : t === 'x' ? 5 + Math.floor(i / 4) : 4 + Math.floor(i / 4), alt: !!(alt && ALT_NODE[i]) };
 }
@@ -3444,7 +3444,7 @@ function ramCheck() {
 
 // ---------- bosses ----------
 function spawnBoss(wi, hpMul) {
-  const B = BOSSES[wi], mu = runMul(), hp = Math.round(B.hp * (hpMul || 1) * mu.hp * (1 + (G.run.tier - 1) * .35));
+  const B = BOSSES[wi], mu = runMul(), R0 = G.run, bm = R0.bhm && R0.spec ? R0.bhm * R0.hpm / R0.spec.diff : 1, hp = Math.round(B.hp * (hpMul || 1) * mu.hp * bm / (R0.bhm && R0.spec ? R0.hpm : 1) * (1 + (G.run.tier - 1) * .35));
   const e = { id: 'boss', boss: true, bi: wi, d: { ai: 'boss', m: ['boss', {}], sc: B.rew, cr: 0, nm: B.nm }, x: V.W + B.w, y: V.H / 2, y0: V.H / 2, w: B.w, r: B.w * .3, hp, mhp: hp, t: 0, hf: 0, ph: 0, atk: 0, acd: 120, inv: true, st: 0, tgx: V.W - B.w * .55, dead: false, rcd: 0, hide: false, sa: 0, q: [], mv: B.ph[0].mv };
   e.pods = B.ph.map((_, i) => mkPod(e, B, i)); e.stg = 0;
   G.ent.en.push(e); G.run.boss = e; G.ent.eb.length = 0;
@@ -3867,7 +3867,7 @@ function beginRun(o) {
   G.players = [mkPlayer(0)]; if (co) G.players.push(mkPlayer(1));
   G.players.forEach(p => { p.x = 150; p.y = V.H / 2 + (co ? (p.id ? 80 : -80) : 0); });
   G.ent = { en: [], pb: [], eb: [], pk: [], pa: [], fl: [], bm: [], hz: [] }; G.freeze = 0; G.shake = 0; G.hitT = 0; G.ts = 1; G.paused = false; G.god = false; G.pick = null; G.abTs = 0; G.slowUntil = 0; IN.ab = [0, 0];
-  if (o.mode === 'expedition') { const sp = R.spec = levelSpec(R.w, R.lv, R.tier, o.alt); R.diff = sp.diff; R.waves = sp.waves; R.hazMode = sp.type === 'h'; R.hpm = sp.diff; R.edm = 1 + (sp.diff - 1) * .35; R.alt = sp.alt; applyRoute(R); }
+  if (o.mode === 'expedition') { const sp = R.spec = levelSpec(R.w, R.lv, R.tier, o.alt); R.diff = sp.diff; R.waves = sp.waves; R.hazMode = sp.type === 'h'; R.hpm = sp.diff; R.edm = 1.15 + R.w * .055 + R.lv * .012 + (R.tier - 1) * .18; R.bhm = 1.6 + R.w * .02; R.alt = sp.alt; applyRoute(R); }
   if (R.mode === 'expedition' && !o.var && R.tier > 1) R.remix = R.tier;
   if (R.mode === 'expedition' && !o.var && !G.net && (o.lv | 0) === 0 && SET.brief !== 'off') { R.brief = 1; if (SET.brief === 'always' || !(SAVE.flags.brief && SAVE.flags.brief[R.w])) { G.brief = 1; setTimeout(() => { if (G.brief) UI.show('scBrief'); }, 30); } }
   if (R.mode === 'expedition' && !o.var && SAVE.devAll && R.spec && R.spec.type === 'B') R.skipToBoss = 1; // dev: boss sectors jump straight to the boss
@@ -3910,7 +3910,7 @@ function genWave(R) { if (!R.rng) return genWave0(R); const old = RF; RF = R.rng
 function genWave0(R) {
   if (R.cust) return customWave(R);
   const w = R.w, lv = R.lv, wave = R.wave, q = []; let ro, budget, t = 20;
-  if (R.mode === 'expedition') { ro = rosterFor(w, lv); budget = 4 + lv * 1.05 + w * .8 + wave * 1.3; if (R.spec.type === 's') budget *= .6; }
+  if (R.mode === 'expedition') { ro = rosterFor(w, lv); budget = 5.5 + lv * 1.05 + w * .6 + wave * 1.3; if (R.spec.type === 's') budget *= .6; }
   else if (R.mode === 'endless') { ro = WORLDS[w].ro.slice(0, Math.min(4, 2 + (wave / 3 | 0))); budget = 5 + wave * 1.5; }
   else if (R.mode === 'blitz') { ro = WORLDS[w].ro.slice(0, 3); budget = 7 + (R.wave) * 1.1; }
   else if (R.mode === 'defense') { ro = WORLDS[w].ro.slice(0, Math.min(4, 2 + (wave / 2 | 0))); budget = 5 + wave * 1.7; }
@@ -6031,8 +6031,9 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V33';
+const GAME_VER = 'V34';
 const UPDATES = [
+  ['V34', 'Difficulty Rebalance', ['Early worlds are tougher: enemies have more health, hit harder and come in bigger waves from World 1', 'Late bosses are fairer: World 15-17 bosses have about 60% less health than before', 'Enemy damage now rises more smoothly from world to world', 'Regular enemies in the last worlds are slightly less tanky']],
   ['V33', 'New Screen Layouts', ['Select Mode: a big list of modes on the left and a briefing for the one you pick', 'Shop: categories down the side and one clean list with level bars', 'Pause: big Resume / Restart / Settings / Photo / Quit choices with your run stats', 'Results: a huge title and rank on one side, your stats on the other', 'Settings, Hangar and Profile: side rails instead of rows of tabs', 'Expedition map: numbered world buttons and a bigger sector route']],
   ['V32', 'Every Screen Restyled', ['Every menu screen now matches the new main menu: big titles, glass panels and your ship in the background', 'Buttons, tabs, cards and toggles all follow your ship\'s accent colour', 'Cleaner layouts on phones']],
   ['V31', 'New Main Menu', ['A brand-new full-screen main menu: big title, your ship front and centre, and everything else tidied into one row', 'The menu takes its colour from your ship\'s accent', 'Pilot card with your rank, level progress, cores and worlds', 'Works with mouse, touch and controller, on any screen size']],

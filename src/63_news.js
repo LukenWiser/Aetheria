@@ -1,7 +1,8 @@
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V33';
+const GAME_VER = 'V34';
 const UPDATES = [
+  ['V34', 'Difficulty Rebalance', ['Early worlds are tougher: enemies have more health, hit harder and come in bigger waves from World 1', 'Late bosses are fairer: World 15-17 bosses have about 60% less health than before', 'Enemy damage now rises more smoothly from world to world', 'Regular enemies in the last worlds are slightly less tanky']],
   ['V33', 'New Screen Layouts', ['Select Mode: a big list of modes on the left and a briefing for the one you pick', 'Shop: categories down the side and one clean list with level bars', 'Pause: big Resume / Restart / Settings / Photo / Quit choices with your run stats', 'Results: a huge title and rank on one side, your stats on the other', 'Settings, Hangar and Profile: side rails instead of rows of tabs', 'Expedition map: numbered world buttons and a bigger sector route']],
   ['V32', 'Every Screen Restyled', ['Every menu screen now matches the new main menu: big titles, glass panels and your ship in the background', 'Buttons, tabs, cards and toggles all follow your ship\'s accent colour', 'Cleaner layouts on phones']],
   ['V31', 'New Main Menu', ['A brand-new full-screen main menu: big title, your ship front and centre, and everything else tidied into one row', 'The menu takes its colour from your ship\'s accent', 'Pilot card with your rank, level progress, cores and worlds', 'Works with mouse, touch and controller, on any screen size']],

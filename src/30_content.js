@@ -311,7 +311,7 @@ const HULLK = { falcon: 1, vanguard: 1.08, phantom: .96, titan: 1.2, nova: 1, wr
 
 // ---------- level generation ----------
 function levelSpec(w, i, tier, alt) {
-  const t = alt && ALT_NODE[i] ? ALT_NODE[i] : NODE_PAT[i], d = 1 + w * .2 + i * .045 + (tier - 1) * .5;
+  const t = alt && ALT_NODE[i] ? ALT_NODE[i] : NODE_PAT[i], d = 1.3 + w * .16 + i * .035 + (tier - 1) * .5;
   const rs = seeded(w * 977 + i * 131 + tier * 7919 + 13);
   return { w, i, tier, type: t, diff: d, seed: w * 977 + i * 131 + tier, name: lvName(w, i) + (t === 'g' ? ' - Treasure Run' : t === 'x' ? ' - Gauntlet' : ''), rs, waves: t === 'B' ? 2 : t === 's' ? 3 : t === 'x' ? 5 + Math.floor(i / 4) : 4 + Math.floor(i / 4), alt: !!(alt && ALT_NODE[i]) };
 }

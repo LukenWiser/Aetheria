@@ -65,7 +65,7 @@ function beginRun(o) {
   G.players = [mkPlayer(0)]; if (co) G.players.push(mkPlayer(1));
   G.players.forEach(p => { p.x = 150; p.y = V.H / 2 + (co ? (p.id ? 80 : -80) : 0); });
   G.ent = { en: [], pb: [], eb: [], pk: [], pa: [], fl: [], bm: [], hz: [] }; G.freeze = 0; G.shake = 0; G.hitT = 0; G.ts = 1; G.paused = false; G.god = false; G.pick = null; G.abTs = 0; G.slowUntil = 0; IN.ab = [0, 0];
-  if (o.mode === 'expedition') { const sp = R.spec = levelSpec(R.w, R.lv, R.tier, o.alt); R.diff = sp.diff; R.waves = sp.waves; R.hazMode = sp.type === 'h'; R.hpm = sp.diff; R.edm = 1 + (sp.diff - 1) * .35; R.alt = sp.alt; applyRoute(R); }
+  if (o.mode === 'expedition') { const sp = R.spec = levelSpec(R.w, R.lv, R.tier, o.alt); R.diff = sp.diff; R.waves = sp.waves; R.hazMode = sp.type === 'h'; R.hpm = sp.diff; R.edm = 1.15 + R.w * .055 + R.lv * .012 + (R.tier - 1) * .18; R.bhm = 1.6 + R.w * .02; R.alt = sp.alt; applyRoute(R); }
   if (R.mode === 'expedition' && !o.var && R.tier > 1) R.remix = R.tier;
   if (R.mode === 'expedition' && !o.var && !G.net && (o.lv | 0) === 0 && SET.brief !== 'off') { R.brief = 1; if (SET.brief === 'always' || !(SAVE.flags.brief && SAVE.flags.brief[R.w])) { G.brief = 1; setTimeout(() => { if (G.brief) UI.show('scBrief'); }, 30); } }
   if (R.mode === 'expedition' && !o.var && SAVE.devAll && R.spec && R.spec.type === 'B') R.skipToBoss = 1; // dev: boss sectors jump straight to the boss
@@ -108,7 +108,7 @@ function genWave(R) { if (!R.rng) return genWave0(R); const old = RF; RF = R.rng
 function genWave0(R) {
   if (R.cust) return customWave(R);
   const w = R.w, lv = R.lv, wave = R.wave, q = []; let ro, budget, t = 20;
-  if (R.mode === 'expedition') { ro = rosterFor(w, lv); budget = 4 + lv * 1.05 + w * .8 + wave * 1.3; if (R.spec.type === 's') budget *= .6; }
+  if (R.mode === 'expedition') { ro = rosterFor(w, lv); budget = 5.5 + lv * 1.05 + w * .6 + wave * 1.3; if (R.spec.type === 's') budget *= .6; }
   else if (R.mode === 'endless') { ro = WORLDS[w].ro.slice(0, Math.min(4, 2 + (wave / 3 | 0))); budget = 5 + wave * 1.5; }
   else if (R.mode === 'blitz') { ro = WORLDS[w].ro.slice(0, 3); budget = 7 + (R.wave) * 1.1; }
   else if (R.mode === 'defense') { ro = WORLDS[w].ro.slice(0, Math.min(4, 2 + (wave / 2 | 0))); budget = 5 + wave * 1.7; }
