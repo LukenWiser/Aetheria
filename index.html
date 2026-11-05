@@ -3686,7 +3686,7 @@ function objText(R) {
 
 // ---------- run setup ----------
 function beginRun(o) {
-  retroOff(); crashOff(); BOSSES.length = BASE_BOSSES; if (music.jbx >= 0) jbStop(); G.mapX = o.map ? MAPS.find(m => m.k === o.map) || null : (o.mode === 'expedition' && (o.w | 0) === GLITCH_W) ? glitchMap(o.lv) : null;
+  if (!G.net && NET.code) netLeaveRoom(); retroOff(); crashOff(); BOSSES.length = BASE_BOSSES; if (music.jbx >= 0) jbStop(); G.mapX = o.map ? MAPS.find(m => m.k === o.map) || null : (o.mode === 'expedition' && (o.w | 0) === GLITCH_W) ? glitchMap(o.lv) : null;
   audio(); if (UI.hideAll) UI.hideAll(); clearMsgs();
   const co = !!o.co && o.mode !== 'tutorial'; G.coop = co; G.mode = o.mode; G.world = (o.w | 0) % WORLDS.length;
   const R = G.run = { mode: o.mode, w: G.world, lv: o.lv | 0, tier: o.tier || 1, diff: 1, hpm: 1, edm: 1, stage: 'intro', st: 0, wave: 0, waves: 4, q: [], kills: 0, score: 0, cores: 0, hurt: 0, combo: 0, comboT: 0, boss: null, time: 0, hazMode: false, nodmg: false, freeAmmo: false, blitz: false, tut: null, over: false, bossDown: 0, spec: null, gap: 0, t0: G.t, rush: null, ri: 0, graze: 0, maxCombo: 0, esc: 0, gzT: 0, var: o.var || null, assist: !!o.assist, rng: null, swarm: 1, ammoDrop: 1, bmul: 1, stn: null, lastSrc: null, low: undefined, dinfo: null };
@@ -6735,9 +6735,9 @@ const dot = on => '<i class="ndot' + (on ? ' on' : '') + '"></i>';
 Object.assign(SCR, {
   scOnline: () => {
     const msg = NET.msg ? '<div class="xs ' + (NET.msg[0] === '!' ? 'bad' : 'good') + '" style="margin:6px 0">' + escH(NET.msg.replace(/^!/, '')) + '</div>' : '';
-    if (!NET.ok) return '<div class="card mid"><h2>Online</h2><p class="mut sm" style="line-height:1.7;margin:10px 0">Online play - friends, co-op and versus with other people - runs on the Aetheria website, because Google sign-in cannot open inside this window.</p><div class="item" style="flex-direction:column;align-items:stretch;gap:8px"><b class="acc" style="letter-spacing:.06em">' + WEB_URL + '</b><div class="row" style="gap:8px"><button class="btn sm" data-act="copycode:' + WEB_URL + '">COPY LINK</button></div></div><div class="xs mut" style="margin-top:8px">Your progress here and on the website are separate saves. Use Settings > Data > Save Slots > EXPORT to move it over.</div><div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button></div></div>';
-    if (!NET.ready) { netInit().catch(e => { NET.msg = '!Could not reach the online service (' + e.message + ').'; UI.refresh(); }); return '<div class="card mid"><h2>Online</h2><p class="mut" style="margin:14px 0">Connecting...</p>' + msg + '<button class="btn sm" data-act="back">BACK</button></div>'; }
-    if (!NET.user) return '<div class="card mid"><h2>Online</h2><p class="mut sm" style="line-height:1.7;margin:10px 0">Sign in to add friends, see who is online, and fly co-op or versus with other pilots. Single-player never needs an account.</p>' + msg + '<button class="btn big" data-act="nsignin">SIGN IN WITH GOOGLE</button><div class="xs mut" style="margin-top:8px">We only store your pilot name, friend code and game stats - never your email in public.</div><div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button></div></div>';
+    if (!NET.ok) return '<div class="card mid"><h2>Online</h2><p class="mut sm" style="line-height:1.7;margin:10px 0">Online play - friends, co-op and versus with other people - runs on the Aetheria website, because Google sign-in cannot open inside this window.</p><div class="item" style="flex-direction:column;align-items:stretch;gap:8px"><b class="acc" style="letter-spacing:.06em">' + WEB_URL + '</b><div class="row" style="gap:8px"><button class="btn sm" data-act="copycode:' + WEB_URL + '">COPY LINK</button></div></div><div class="xs mut" style="margin-top:8px">Your progress here and on the website are separate saves. Use Settings > Data > Save Slots > EXPORT to move it over.</div><div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="nhome">BACK</button></div></div>';
+    if (!NET.ready) { netInit().catch(e => { NET.msg = '!Could not reach the online service (' + e.message + ').'; UI.refresh(); }); return '<div class="card mid"><h2>Online</h2><p class="mut" style="margin:14px 0">Connecting...</p>' + msg + '<button class="btn sm" data-act="nhome">BACK</button></div>'; }
+    if (!NET.user) return '<div class="card mid"><h2>Online</h2><p class="mut sm" style="line-height:1.7;margin:10px 0">Sign in to add friends, see who is online, and fly co-op or versus with other pilots. Single-player never needs an account.</p>' + msg + '<button class="btn big" data-act="nsignin">SIGN IN WITH GOOGLE</button><div class="xs mut" style="margin-top:8px">We only store your pilot name, friend code and game stats - never your email in public.</div><div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="nhome">BACK</button></div></div>';
     if (!NET.me || !NET.me.name) return SCR.scName();
     const me = NET.me, fr = Object.keys(NET.friends), rq = Object.keys(NET.reqs).filter(k => !NET.blocked[k]), inv = Object.keys(NET.invites).filter(k => !NET.blocked[k] && Date.now() - (NET.invites[k].at || 0) < 600000);
     const fl = fr.length ? fr.map(uid => { const f = NET.fdata[uid] || {}, pr = NET.pres[uid], on = !!(pr && pr.on); return '<div class="item frow"><div class="fl"><div class="b sm">' + dot(on) + escH(f.name || '...') + ' <span class="xs mut">' + escH(f.rk || '') + ' LV ' + (f.lv || 1) + '</span></div><div class="xs mut">' + (on ? (pr.room ? 'In a room' : 'Online') : 'Offline') + ' - best endless ' + fmt(f.hi || 0) + ' - ' + (f.wu || 1) + ' worlds</div></div><span class="row" style="gap:6px">' + (NET.code && on ? '<button class="btn sm gold" data-act="ninv:' + uid + '">INVITE</button>' : '') + '<button class="btn sm" data-act="nmore:' + uid + '">...</button></span></div>' + (UI.nmore === uid ? '<div class="row" style="gap:6px;margin:-4px 0 6px 10px"><button class="btn sm warn" data-act="nunf:' + uid + '">REMOVE FRIEND</button><button class="btn sm warn" data-act="nblock:' + uid + '">BLOCK</button><button class="btn sm warn" data-act="nrep:' + uid + '">REPORT NAME</button></div>' : ''); }).join('') : '<div class="xs mut">No friends yet. Share your friend code, or add someone else\'s below.</div>';
@@ -6747,7 +6747,7 @@ Object.assign(SCR, {
       (rq.length ? '<div class="xs mut b nh">FRIEND REQUESTS</div>' + rq.map(k => '<div class="item"><div class="fl b sm">' + escH(NET.reqs[k].name || '?') + '</div><span class="row" style="gap:6px"><button class="btn sm gold" data-act="nacc:' + k + '">ACCEPT</button><button class="btn sm" data-act="ndec:' + k + '">NO</button><button class="btn sm warn" data-act="nblock:' + k + '">BLOCK</button></span></div>').join('') : '') +
       '<div class="xs mut b nh">ADD A FRIEND</div><div class="row" style="gap:6px"><input id="nFriend" class="code" placeholder="ACE-1234" style="flex:1;text-transform:uppercase"><button class="btn" data-act="nadd">SEND REQUEST</button></div></div>' +
       '<div><div class="xs mut b nh">FRIENDS (' + fr.length + ')</div><div class="stack flist" style="gap:6px">' + fl + '</div></div></div>' +
-      '<div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button><span class="xs mut">In a match: 7 8 9 0 send quick emotes</span></div></div>';
+      '<div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="nhome">BACK</button><span class="xs mut">In a match: 7 8 9 0 send quick emotes</span></div></div>';
   },
   scName: () => '<div class="card mid"><h2>Pick your pilot name</h2><p class="mut sm" style="margin:8px 0">This is what friends and other players see. 3-16 characters: letters, numbers, spaces, - or _. Keep it friendly.</p><div class="row" style="gap:8px"><input id="nName" class="code" maxlength="16" value="' + escH((NET.me && NET.me.name) || UI.nName || '') + '" style="flex:1;font-size:16px"><button class="btn gold" data-act="nsetname">SAVE</button></div><div class="xs bad" style="margin-top:6px">' + escH(UI.nErr || '') + '</div><div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="nback">BACK</button></div></div>',
   scRoom: () => {
@@ -6767,6 +6767,7 @@ Object.assign(SCR, {
 const nAsync = (p, ok) => Promise.resolve(p).then(m => { NET.msg = m || ok || ''; UI.refresh(); }).catch(e => { NET.msg = '!' + (e && e.message || 'Something went wrong'); UI.refresh(); });
 Object.assign(ACT, {
   online() { NET.msg = ''; UI.show('scOnline'); },
+  nhome() { netLeaveRoom(); NET.msg = ''; UI.hist = []; UI.show('scMenu'); },
   nsignin() { NET.msg = ''; netSignIn(); },
   nsignout() { netSignOut(); NET.msg = 'Signed out.'; UI.refresh(); },
   nrename() { UI.nErr = ''; UI.show('scName'); },
@@ -6791,7 +6792,11 @@ Object.assign(ACT, {
 });
 document.addEventListener('change', e => { const el = e.target && e.target.closest && e.target.closest('[data-nchg]'); if (el && UI.top === 'scRoom') netRoomSet(el.dataset.nchg, +el.value); });
 // after an online match: back to the room instead of replaying alone
-['retry', 'menu', 'nextlv', 'tomap'].forEach(k => { const f = ACT[k]; ACT[k] = function (a) { if (G.net || (UI.res && UI.res.online) || NET.inMatch || NET.code) { const host = NET.role === 'host'; netEndNet(); NET.inMatch = 0; exitToMenu(NET.code ? 'scRoom' : 'scOnline'); if (host && NET.code) netRoomSet('st', 'open'); return; } return f.apply(this, arguments); }; });
+['retry', 'menu', 'nextlv', 'tomap'].forEach(k => { const f = ACT[k]; ACT[k] = function (a) { if (G.net || (UI.res && UI.res.online) || NET.inMatch) { const host = NET.role === 'host'; netEndNet(); NET.inMatch = 0; exitToMenu(NET.code ? 'scRoom' : 'scOnline'); if (host && NET.code) netRoomSet('st', 'open'); return; } return f.apply(this, arguments); }; });
+
+// leaving the online screens any other way (Esc, back gesture) never traps you in a room
+const _uiBack = UI.back.bind(UI);
+UI.back = function () { if (this.top === 'scOnline' || this.top === 'scName') { ACT.nhome(); return; } if (this.top === 'scRoom') { ACT.nleave(); return; } return _uiBack(); };
 
 // ================= BOOT =================
 function boot() {

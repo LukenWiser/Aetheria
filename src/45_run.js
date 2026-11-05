@@ -58,7 +58,7 @@ function objText(R) {
 
 // ---------- run setup ----------
 function beginRun(o) {
-  retroOff(); crashOff(); BOSSES.length = BASE_BOSSES; if (music.jbx >= 0) jbStop(); G.mapX = o.map ? MAPS.find(m => m.k === o.map) || null : (o.mode === 'expedition' && (o.w | 0) === GLITCH_W) ? glitchMap(o.lv) : null;
+  if (!G.net && NET.code) netLeaveRoom(); retroOff(); crashOff(); BOSSES.length = BASE_BOSSES; if (music.jbx >= 0) jbStop(); G.mapX = o.map ? MAPS.find(m => m.k === o.map) || null : (o.mode === 'expedition' && (o.w | 0) === GLITCH_W) ? glitchMap(o.lv) : null;
   audio(); if (UI.hideAll) UI.hideAll(); clearMsgs();
   const co = !!o.co && o.mode !== 'tutorial'; G.coop = co; G.mode = o.mode; G.world = (o.w | 0) % WORLDS.length;
   const R = G.run = { mode: o.mode, w: G.world, lv: o.lv | 0, tier: o.tier || 1, diff: 1, hpm: 1, edm: 1, stage: 'intro', st: 0, wave: 0, waves: 4, q: [], kills: 0, score: 0, cores: 0, hurt: 0, combo: 0, comboT: 0, boss: null, time: 0, hazMode: false, nodmg: false, freeAmmo: false, blitz: false, tut: null, over: false, bossDown: 0, spec: null, gap: 0, t0: G.t, rush: null, ri: 0, graze: 0, maxCombo: 0, esc: 0, gzT: 0, var: o.var || null, assist: !!o.assist, rng: null, swarm: 1, ammoDrop: 1, bmul: 1, stn: null, lastSrc: null, low: undefined, dinfo: null };
