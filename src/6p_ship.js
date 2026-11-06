@@ -347,8 +347,8 @@ const SHIP = (() => {
   function arrive() { const k = S.travel.k; S.room = k; S.travel = null; showRooms(k, null); lightRoom(k, 0); lights[2].intensity = 0; lights[3].intensity = 0; setTimeout(() => tag.classList.remove('on'), 500); }
 
   // ---------- turning ship mode on and off ----------
-  function wanted() {
-    return !!T && !!T.CatmullRomCurve3 && !!T.Fog && SET.shipMenu !== false && !!R3 && !!SET.models && !R3.lost && !R3.shipFail && G.scene !== 'play' && !G.cut && !(typeof INTRO !== 'undefined' && INTRO.on && !document.body.classList.contains('introfade'))
+  function wanted(ignoreIntro) {
+    return !!T && !!T.CatmullRomCurve3 && !!T.Fog && SET.shipMenu !== false && !!R3 && !!SET.models && !R3.lost && !R3.shipFail && G.scene !== 'play' && !G.cut && (ignoreIntro || !(typeof INTRO !== 'undefined' && INTRO.on && !document.body.classList.contains('introfade')))
       && !!UI.top && !!SHIPROOM[UI.top] && !document.body.classList.contains('photo');
   }
   function enable() {
@@ -416,6 +416,8 @@ const SHIP = (() => {
   // a tap during a flight skips straight to the room
   addEventListener('pointerdown', () => { if (S.on && S.travel && S.travel.t > .08) S.travel.t = 1; }, { capture: true, passive: true });
   requestAnimationFrame(frame);
-  return { S, go, get on() { return S.on; }, get room() { return S.room; }, get busy() { return !!S.travel || S.fade < 1 || (UI.top && SHIPROOM[UI.top] && SHIPROOM[UI.top] !== S.room); } };
+  // the intro calls this the instant it starts to fade, so the ship is in place before anything underneath shows
+  function handoff() { if (!S.on && wanted(true)) { enable(); if (S.on) { ui.style.opacity = 0; ui.style.pointerEvents = 'none'; const W = innerWidth, H = innerHeight; cam.aspect = W / H; cam.updateProjectionMatrix(); cam.lookAt(S.look); cam.updateMatrixWorld(); S.pm = panelMatrix(SHIPROOM[UI.top], W, H); cssApply(W, H); } } }
+  return { S, go, handoff, get on() { return S.on; }, get room() { return S.room; }, get busy() { return !!S.travel || S.fade < 1 || (UI.top && SHIPROOM[UI.top] && SHIPROOM[UI.top] !== S.room); } };
 })();
 window.__SHIP = SHIP;

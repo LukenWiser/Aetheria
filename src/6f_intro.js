@@ -78,7 +78,7 @@ function introPlay() {
       if (t >= T_TITLE) add('title');
       if (t >= T_SUB) { add('sub'); if (shockT < 0) shockT = t; }
       if (shockT >= 0 && t - shockT < 900) { const k = (t - shockT) / 900; g.strokeStyle = rgba(ac, .7 * (1 - k)); g.lineWidth = 6 * (1 - k) + 1; g.beginPath(); g.ellipse(cx, cy, k * W * .7, k * W * .16, 0, 0, Math.PI * 2); g.stroke(); g.fillStyle = 'rgba(255,255,255,' + .25 * (1 - k) * (1 - k) + ')'; g.fillRect(0, 0, W, H); }
-      if (t >= T_OUT) { add('out'); if (document.body.classList.contains('intro')) { document.body.classList.remove('intro'); document.body.classList.add('introfade'); setTimeout(() => document.body.classList.remove('introfade'), 1200); } }
+      if (t >= T_OUT) { add('out'); if (document.body.classList.contains('intro')) { try { if (typeof SHIP !== 'undefined') SHIP.handoff(); } catch (e) { } document.body.classList.remove('intro'); document.body.classList.add('introfade'); setTimeout(() => document.body.classList.remove('introfade'), 1200); } }
       if (t >= T_END) return end();
     }
     requestAnimationFrame(loop);

@@ -5798,12 +5798,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V53';
+const GAME_VER = 'V54';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V54', 'No Flicker', ['Fixed: a split-second flash of the old flat menu at the end of the intro - the ship now takes over the exact moment the intro starts to fade']],
   ['V53', 'Straight to the Bridge', ['Fixed: the intro ended on the old flat menu - it now glides straight onto the Bridge of your ship, with the menu fading in', 'The first-time tutorial prompt now appears on the Bridge too']],
   ['V52', 'Where Is Vex?', ['Fixed: Vex, the rival ace, could be skipped entirely - she was tied to one exact sector that the new random routes could fly around', 'Vex now finds you a few sectors into her world, on any route and any tier', 'Missed her? She catches up with you in the next world you play, so every save gets the whole story', 'She also shows up during the first wave of a long sector, not only after it']],
   ['V51', 'All Aboard', ['The menus now float in the air inside your own ship - every button flies you through the corridors to the right room', 'Eight rooms around a central hub: Bridge, Map Room, Star Deck, Workshop, Fab Bay, Engineering, Comms and Archive', 'The Workshop has your real ship on a lift - change your look and the robot arms repaint it', 'The Bridge window shows the planet of your newest world, the Map Room table orbits all 17 worlds, the Archive fills with a trophy for every boss you beat', 'Move the mouse to look around - the menus really hang in the room', 'Tap during a flight to skip straight there', 'Prefer the old flat menus? Settings > Graphics > Ship interior menus']],
@@ -7027,7 +7028,7 @@ function introPlay() {
       if (t >= T_TITLE) add('title');
       if (t >= T_SUB) { add('sub'); if (shockT < 0) shockT = t; }
       if (shockT >= 0 && t - shockT < 900) { const k = (t - shockT) / 900; g.strokeStyle = rgba(ac, .7 * (1 - k)); g.lineWidth = 6 * (1 - k) + 1; g.beginPath(); g.ellipse(cx, cy, k * W * .7, k * W * .16, 0, 0, Math.PI * 2); g.stroke(); g.fillStyle = 'rgba(255,255,255,' + .25 * (1 - k) * (1 - k) + ')'; g.fillRect(0, 0, W, H); }
-      if (t >= T_OUT) { add('out'); if (document.body.classList.contains('intro')) { document.body.classList.remove('intro'); document.body.classList.add('introfade'); setTimeout(() => document.body.classList.remove('introfade'), 1200); } }
+      if (t >= T_OUT) { add('out'); if (document.body.classList.contains('intro')) { try { if (typeof SHIP !== 'undefined') SHIP.handoff(); } catch (e) { } document.body.classList.remove('intro'); document.body.classList.add('introfade'); setTimeout(() => document.body.classList.remove('introfade'), 1200); } }
       if (t >= T_END) return end();
     }
     requestAnimationFrame(loop);
@@ -8439,8 +8440,8 @@ const SHIP = (() => {
   function arrive() { const k = S.travel.k; S.room = k; S.travel = null; showRooms(k, null); lightRoom(k, 0); lights[2].intensity = 0; lights[3].intensity = 0; setTimeout(() => tag.classList.remove('on'), 500); }
 
   // ---------- turning ship mode on and off ----------
-  function wanted() {
-    return !!T && !!T.CatmullRomCurve3 && !!T.Fog && SET.shipMenu !== false && !!R3 && !!SET.models && !R3.lost && !R3.shipFail && G.scene !== 'play' && !G.cut && !(typeof INTRO !== 'undefined' && INTRO.on && !document.body.classList.contains('introfade'))
+  function wanted(ignoreIntro) {
+    return !!T && !!T.CatmullRomCurve3 && !!T.Fog && SET.shipMenu !== false && !!R3 && !!SET.models && !R3.lost && !R3.shipFail && G.scene !== 'play' && !G.cut && (ignoreIntro || !(typeof INTRO !== 'undefined' && INTRO.on && !document.body.classList.contains('introfade')))
       && !!UI.top && !!SHIPROOM[UI.top] && !document.body.classList.contains('photo');
   }
   function enable() {
@@ -8508,7 +8509,9 @@ const SHIP = (() => {
   // a tap during a flight skips straight to the room
   addEventListener('pointerdown', () => { if (S.on && S.travel && S.travel.t > .08) S.travel.t = 1; }, { capture: true, passive: true });
   requestAnimationFrame(frame);
-  return { S, go, get on() { return S.on; }, get room() { return S.room; }, get busy() { return !!S.travel || S.fade < 1 || (UI.top && SHIPROOM[UI.top] && SHIPROOM[UI.top] !== S.room); } };
+  // the intro calls this the instant it starts to fade, so the ship is in place before anything underneath shows
+  function handoff() { if (!S.on && wanted(true)) { enable(); if (S.on) { ui.style.opacity = 0; ui.style.pointerEvents = 'none'; const W = innerWidth, H = innerHeight; cam.aspect = W / H; cam.updateProjectionMatrix(); cam.lookAt(S.look); cam.updateMatrixWorld(); S.pm = panelMatrix(SHIPROOM[UI.top], W, H); cssApply(W, H); } } }
+  return { S, go, handoff, get on() { return S.on; }, get room() { return S.room; }, get busy() { return !!S.travel || S.fade < 1 || (UI.top && SHIPROOM[UI.top] && SHIPROOM[UI.top] !== S.room); } };
 })();
 window.__SHIP = SHIP;
 
