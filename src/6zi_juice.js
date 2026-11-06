@@ -34,8 +34,8 @@
 .mx-tab.on{color:var(--tc)}.mx-tab::after{background:var(--tc)}
 .mx-hero .mx-go{animation:jBreathe 2.6s ease-in-out infinite}
 /* tab content slides in from the side you moved towards, tiles pop in one after another */
-.mx-body.jl>*{animation:jFromR .38s cubic-bezier(.16,.9,.25,1) both}.mx-body.jr>*{animation:jFromL .38s cubic-bezier(.16,.9,.25,1) both}
-.mx-body.jl .mx-tile,.mx-body.jr .mx-tile{animation:jTile .42s cubic-bezier(.2,.9,.3,1.25) both}
+.mx-body.j-l>*{animation:jFromR .38s cubic-bezier(.16,.9,.25,1) both}.mx-body.j-r>*{animation:jFromL .38s cubic-bezier(.16,.9,.25,1) both}
+.mx-body.j-l .mx-tile,.mx-body.j-r .mx-tile{animation:jTile .42s cubic-bezier(.2,.9,.3,1.25) both}
 .mx-body .mx-tile:nth-child(2){animation-delay:.04s}.mx-body .mx-tile:nth-child(3){animation-delay:.08s}.mx-body .mx-tile:nth-child(4){animation-delay:.12s}.mx-body .mx-tile:nth-child(5){animation-delay:.16s}.mx-body .mx-tile:nth-child(6){animation-delay:.2s}
 @keyframes jFromR{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}@keyframes jFromL{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
 @keyframes jTile{from{opacity:0;transform:translateY(16px) scale(.92)}to{opacity:1;transform:none}}
@@ -61,20 +61,20 @@
 /* click burst */
 .jb{position:fixed;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;pointer-events:none;z-index:10000;animation:jBurst .5s cubic-bezier(.2,.8,.3,1) forwards}
 @keyframes jBurst{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
-.jr{position:fixed;border-radius:50%;pointer-events:none;z-index:9999;border:2px solid var(--c);animation:jRing .45s ease-out forwards}
+.jring{position:fixed;border-radius:50%;pointer-events:none;z-index:9999;border:2px solid var(--c);animation:jRing .45s ease-out forwards}
 @keyframes jRing{from{width:0;height:0;margin:0;opacity:.9}to{width:70px;height:70px;margin:-35px 0 0 -35px;opacity:0}}
 /* screen exits: the old screen slides and fades out while the new one comes in */
 .jx{position:absolute;inset:0;pointer-events:none;z-index:19;animation:jOut .3s ease-in forwards}
 @keyframes jOut{to{opacity:0;transform:translateX(-30px) scale(.98);filter:blur(4px)}}
 .scr.vin>.card,.scr.vin>.lay,.scr.vin>.mx,.scr.vin>.gx,.scr.vin>.wm{animation:jIn .45s cubic-bezier(.16,.9,.25,1) both}
 @keyframes jIn{from{opacity:0;transform:translateX(30px) scale(.985)}to{opacity:1;transform:none}}
-.reduce .jx,.reduce .jb,.reduce .jr{display:none}.reduce .btn,.reduce .mx-tile,.reduce .mx-body>*{animation:none!important}
+.reduce .jx,.reduce .jb,.reduce .jring{display:none}.reduce .btn,.reduce .mx-tile,.reduce .mx-body>*{animation:none!important}
 `; document.head.appendChild(st);
 })();
 // tile spotlight follows the pointer
 document.addEventListener('pointermove', e => { const t = e.target.closest && e.target.closest('.mx-tile'); if (!t) return; const r = t.getBoundingClientRect(); t.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%'); t.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%'); }, { passive: true });
 // click bursts in the button's colour
-function jBurst(x, y, c) { if (SET.reduce) return; const n = 9; for (let i = 0; i < n; i++) { const d = document.createElement('i'), a = i / n * TAU + Math.random() * .4, r = 26 + Math.random() * 22; d.className = 'jb'; d.style.cssText = 'left:' + x + 'px;top:' + y + 'px;background:' + c + ';box-shadow:0 0 6px ' + c + ';--dx:' + (Math.cos(a) * r) + 'px;--dy:' + (Math.sin(a) * r) + 'px'; document.body.appendChild(d); setTimeout(() => d.remove(), 520); } const ring = document.createElement('i'); ring.className = 'jr'; ring.style.cssText = 'left:' + x + 'px;top:' + y + 'px;--c:' + c; document.body.appendChild(ring); setTimeout(() => ring.remove(), 470); }
+function jBurst(x, y, c) { if (SET.reduce) return; const n = 9; for (let i = 0; i < n; i++) { const d = document.createElement('i'), a = i / n * TAU + Math.random() * .4, r = 26 + Math.random() * 22; d.className = 'jb'; d.style.cssText = 'left:' + x + 'px;top:' + y + 'px;background:' + c + ';box-shadow:0 0 6px ' + c + ';--dx:' + (Math.cos(a) * r) + 'px;--dy:' + (Math.sin(a) * r) + 'px'; document.body.appendChild(d); setTimeout(() => d.remove(), 520); } const ring = document.createElement('i'); ring.className = 'jring'; ring.style.cssText = 'left:' + x + 'px;top:' + y + 'px;--c:' + c; document.body.appendChild(ring); setTimeout(() => ring.remove(), 470); }
 document.addEventListener('pointerdown', e => {
   const b = e.target.closest && e.target.closest('.btn,.mx-tile,.mx-tab,.bm-card,.sh-cat,.opt,.sm-tile,.lk-it,.node.av,.tog'); if (!b || b.classList.contains('off')) return;
   const cs = getComputedStyle(b); let c = cs.getPropertyValue('--h1').trim() || cs.getPropertyValue('--tc').trim() || cs.getPropertyValue('--mc').trim() || '#22d3ee'; if (b.classList.contains('gold')) c = '#fde047';
@@ -87,7 +87,7 @@ SCR.scMenu = function () { return _scMenuJ.apply(this, arguments).replace('<div 
 QPOST.push((id, el) => {
   if (id !== 'scMenu' || !el) return; const tabs = el.querySelector('.mx-tabs'), body = el.querySelector('.mx-body'); if (!tabs) return;
   const order = MX_TABS.map(x => x[0]), ni = order.indexOf(UI.mtab), pi0 = order.indexOf(jPrevTab);
-  if (body && jPrevTab !== UI.mtab && !SET.reduce) { body.classList.add(ni > pi0 ? 'jl' : 'jr'); const s = el.querySelector('.mx-sub'); if (s) s.classList.add('jt'); }
+  if (body && jPrevTab !== UI.mtab && !SET.reduce) { body.classList.add(ni > pi0 ? 'j-l' : 'j-r'); const s = el.querySelector('.mx-sub'); if (s) s.classList.add('jt'); }
   let ul = tabs.querySelector('.mx-ul'); if (!ul) { ul = document.createElement('i'); ul.className = 'mx-ul'; tabs.appendChild(ul); }
   const on = tabs.querySelector('.mx-tab.on'); if (on) { const place = (b, anim) => { ul.style.transition = anim ? '' : 'none'; ul.style.left = (b.offsetLeft + 12) + 'px'; ul.style.width = Math.max(10, b.offsetWidth - 24) + 'px'; }; const prev = tabs.querySelector('[data-act="mtab:' + jPrevTab + '"]'); if (prev && prev !== on) { place(prev, false); void ul.offsetWidth; requestAnimationFrame(() => place(on, true)); } else place(on, false); }
   jPrevTab = UI.mtab;
