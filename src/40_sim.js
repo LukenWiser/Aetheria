@@ -105,6 +105,8 @@ function fireP(p) {
 }
 
 // ---------- damage to player ----------
+// V55: an enemy bullet always takes at least a third of your max hull (before shields)
+function bulletDmg(p, d) { const R = G.run, m = R && R.mode; if (!R || m === 'training' || m === 'tutorial' || R.var === 'versus') return d; return Math.max(d, p.mhp / 3); }
 function hurt(p, dmg, kind) {
   if (!p.alive || p.inv > 0 || G.god || (G.run && G.run.nodmg)) return false;
   const R0 = G.run; dmg = Math.round(dmg * (DIFFM[SET.diff] || DIFFM[1]).dm * p.mod.arm * (R0 && R0.assist ? .65 : 1)); if (dmg <= 0) return false;
@@ -283,7 +285,7 @@ function updEB() {
       if (!p.alive) continue;
       const dx = p.x - b.x, dy = p.y - b.y, d2 = dx * dx + dy * dy, rr = b.r + 11;
       if (p.inv > 0) { if (p.dashT > 0 && !b.gz && d2 < (rr + 18) * (rr + 18)) graze(p, b); continue; }
-      if (d2 < rr * rr) { hurt(p, b.d, 'b'); if (b.ice) { p.slow = 100; ftext(p.x, p.y - 36, 'FROZEN', '#bae6fd', 11); } rm = true; break; }
+      if (d2 < rr * rr) { hurt(p, bulletDmg(p, b.d), 'b'); if (b.ice) { p.slow = 100; ftext(p.x, p.y - 36, 'FROZEN', '#bae6fd', 11); } rm = true; break; }
       if (!b.gz && d2 < (rr + 18) * (rr + 18)) graze(p, b);
     }
     if (!rm && G.run && G.run.stn && b.x < STN_X && b.vx < 0 && !b.mine) { stnHit(G.run, b.d * .3, b.x, b.y); rm = true; }
