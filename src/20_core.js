@@ -25,6 +25,7 @@ const SET_KEY = 'aetheria_set4';
 const SET_DEF = { intro: true, menu3d: true, speed: 1, autoperf: true, ghost: true, bigb: false, hitbox: false, cbp: 'off', diff: 1, auto: false, dmgnum: true, flash: true, pauseBlur: true, q: 2, models: true, parts: 180, back: 2, vig: true, shake: 1, glow: 1, fps: false, cap30: false, ui3d: true, tilt: 1, reduce: false, vol: .8, sfx: 1, mus: .5, touch: 'auto', scheme: 'stick', tsize: 1, tside: 'left', haptic: true, dead: .2, hc: false, cb: false, cards: true, slowmo: true, story: 'once', bg3d: true, toon: true, brief: 'once', bloom: true, weather: true, daynight: true };
 const firstRun = store.get(SET_KEY) === null;
 const SET = Object.assign({}, SET_DEF, jget(SET_KEY, {}));
+Object.defineProperty(SET, 'toon', { get: () => false, set() { }, enumerable: false, configurable: false }); // cel shading was retired: always the standard look
 if (firstRun && IS_TOUCH) { SET.q = 1.5; SET.parts = 100; SET.back = 1; }
 function saveSet() { store.set(SET_KEY, JSON.stringify(SET)); }
 const touchOn = () => SET.touch === 'on' || (SET.touch === 'auto' && IS_TOUCH);
