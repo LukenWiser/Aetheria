@@ -1,7 +1,7 @@
 // ================= SHIP MENUS: every menu floats in the air inside your ship, and buttons fly you between its rooms =================
 // The real menu screens (#ui) are placed in 3D with CSS transforms; the ship interior is drawn by the 3D layer behind them.
 const SHIPROOM = {
-  scMenu: 'bridge', scUpdates: 'bridge', scName: 'bridge', scCredits: 'bridge', scSlots: 'bridge',
+  scMenu: 'bridge', scTut: 'bridge', scUpdates: 'bridge', scName: 'bridge', scCredits: 'bridge', scSlots: 'bridge',
   scModes: 'map', scMap: 'map', scMaps: 'map', scBrief: 'map', scDaily: 'map', scMissions: 'map', scChal: 'map', scCreate: 'map',
   scGalaxy: 'deck',
   scLocker: 'shop', scHangar: 'shop', scCos: 'shop',
@@ -348,7 +348,7 @@ const SHIP = (() => {
 
   // ---------- turning ship mode on and off ----------
   function wanted() {
-    return !!T && !!T.CatmullRomCurve3 && !!T.Fog && SET.shipMenu !== false && !!R3 && !!SET.models && !R3.lost && !R3.shipFail && G.scene !== 'play' && !G.cut && !(typeof INTRO !== 'undefined' && INTRO.on)
+    return !!T && !!T.CatmullRomCurve3 && !!T.Fog && SET.shipMenu !== false && !!R3 && !!SET.models && !R3.lost && !R3.shipFail && G.scene !== 'play' && !G.cut && !(typeof INTRO !== 'undefined' && INTRO.on && !document.body.classList.contains('introfade'))
       && !!UI.top && !!SHIPROOM[UI.top] && !document.body.classList.contains('photo');
   }
   function enable() {
@@ -356,6 +356,10 @@ const SHIP = (() => {
     wrapUI(); if (!wrap) return; S.on = true; document.body.classList.add('shipm'); R3.shipDraw = draw; R3.setView('ship');
     const k = SHIPROOM[UI.top]; S.look = new T.Vector3();
     // first boarding: start at the hub and walk in; afterwards come back through the hub too
+    if (S.first) { // straight out of the intro (or the first load): glide up to the room's menu instead of flying in from the hub
+      S.first = false; const v = viewOf(k), back = v.p.clone().sub(v.l).setY(0).normalize(); cam.position.copy(v.p).addScaledVector(back, 3.5).add(new T.Vector3(0, .5, 0)); S.look.copy(v.l);
+      S.room = null; showRooms(k, null); lightRoom(k, 0); lights[2].intensity = lights[3].intensity = 0; S.fade = 0; ui.style.opacity = 0; ui.style.pointerEvents = 'none';
+      S.travel = { curve: new T.CatmullRomCurve3([cam.position.clone(), cam.position.clone().lerp(v.p, .5), v.p.clone()]), t: 0, d: SET.reduce ? .01 : 1.8, from: v.l.clone(), to: v.l.clone(), k }; syncShip(true); return; }
     cam.position.set(0, 1.85, 0); const th = ORDER.indexOf(k) * Math.PI / 4; S.look.set(Math.sin(th) * 6, 1.85, -Math.cos(th) * 6);
     S.room = null; go(k, 'hub'); syncShip(true);
   }
