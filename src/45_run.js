@@ -207,13 +207,13 @@ function togglePause() { if (G.net) { netPauseKey(); return; } if (!G.inCombat |
 const TUT = [
   { t: 'WELCOME, PILOT', x: () => 'This is a 2-minute flight briefing. You can leave any time with SKIP.', btn: 1 },
   { t: 'MOVE', x: () => touchOn() ? (SET.scheme === 'stick' ? 'Use the LEFT STICK to fly. Fly around to continue.' : 'Drag your finger anywhere - the ship follows. Fly around to continue.') : 'Fly with WASD or the ARROW KEYS, or just move the MOUSE. Fly around to continue.' },
-  { t: 'SHOOT', x: () => (touchOn() ? (SET.scheme === 'stick' ? 'Hold the red FIRE button' : 'Keep your finger down - the ship fires while you touch') : 'Hold SPACE or click and hold') + ' to shoot. Destroy the 3 target drones!', hl: '#hp0 .rw:nth-of-type(4)' },
-  { t: 'PLASMA (YOUR AMMO)', x: () => 'Every shot burns PLASMA (the teal bar). At zero you only get a weak backup blaster. Enemies drop teal PLASMA CELLS - capsules inside a spinning bracket. Grab them!', hl: '#hp0 .rw:nth-of-type(4)' },
-  { t: 'ENEMY FIRE', x: () => 'Glowing RED orbs with a dark core are ENEMY shots - they hurt. Your real hitbox is tiny, so weave between them. Destroy the 2 gunships.', hl: '#hp0 .rw:nth-of-type(2)' },
+  { t: 'SHOOT', x: () => (touchOn() ? (SET.scheme === 'stick' ? 'Hold the red FIRE button' : 'Keep your finger down - the ship fires while you touch') : 'Hold SPACE or click and hold') + ' to shoot. Destroy the 3 target drones!', hl: '#hp0 [data-k=am]' },
+  { t: 'PLASMA (YOUR AMMO)', x: () => 'Every shot burns PLASMA (the teal gauge at the bottom of your panel). At zero you only get a weak backup blaster. Enemies drop teal PLASMA CELLS - capsules inside a spinning bracket. Grab them!', hl: '#hp0 [data-k=am]' },
+  { t: 'ENEMY FIRE', x: () => 'Glowing RED orbs with a dark core are ENEMY shots - they hurt. Your real hitbox is tiny, so weave between them. Destroy the 2 gunships.', hl: '#hp0 [data-k=hull]' },
   { t: 'PICKUPS', x: () => 'Green cross = REPAIR hull. Blue shield = SHIELD. Gold hex = CORES (money). Orange bolt = OVERDRIVE (+50% damage). Collect all four.' },
   { t: 'RAMMING', x: () => 'Crash into a normal enemy and it explodes - but you take damage too. Shields soak it first. Ram the drone to see (or dodge it!).' },
   { t: 'WEAPONS', x: () => (touchOn() ? 'Tap GUN' : 'Press Q / E (or 1-6)') + ' to cycle weapons you own. Buy new guns in the SHOP and equip your favorite there.' },
-  { t: 'YOUR ABILITY', x: () => 'Every hull has a special ABILITY on a cooldown - the yellow bar. Yours is ' + abilOf(G.players[0]).nm + ': ' + abilOf(G.players[0]).ds.toLowerCase() + ' ' + (touchOn() ? 'Tap the ABILITY button now.' : 'Press SHIFT or R now.'), hl: '#hp0 .rw:nth-of-type(5)' },
+  { t: 'YOUR ABILITY', x: () => 'Every hull has a special ABILITY on a cooldown - the yellow dial. Yours is ' + abilOf(G.players[0]).nm + ': ' + abilOf(G.players[0]).ds.toLowerCase() + ' ' + (touchOn() ? 'Tap the ABILITY button now.' : 'Press SHIFT or R now.'), hl: '#hp0 [data-k=ab]' },
   { t: 'YOUR HOME BASE', x: () => 'After missions: SHOP = upgrades (each costs more than the last), HANGAR = custom ship parts and paint, EXPEDITION = 15 worlds. Tap PLAYERS for 2-player co-op.', btn: 1, last: 1 }
 ];
 function coachShow(i) {
