@@ -146,7 +146,7 @@ function pcClick(el) {
   requestAnimationFrame(loop);
   try {
     const dt = Math.min(.05, (now - (PCUR.last || now)) / 1000); PCUR.last = now;
-    if (SET.padCursor === false || G.cut || G.photo || G.padBind || G.walk) { if (G.walk && PCUR.on) { PCUR.on = false; PCUR.el.style.display = 'none'; } return; }
+    if (SET.padCursor === false || G.cut || G.photo || G.padBind) return;
     const inUI = !G.inCombat || G.paused || G.pick || G.brief; if (!inUI) { if (PCUR.on) { PCUR.on = false; PCUR.el.style.display = 'none'; } return; }
     const gps = navigator.getGamepads ? navigator.getGamepads() : []; let gp = null; for (const g of gps) if (g && g.connected) { gp = g; break; } if (!gp) return;
     const dz = Math.max(.15, SET.dead || .2), b = i => gp.buttons[i] && gp.buttons[i].pressed, ax = v => Math.abs(v) > dz ? (v - Math.sign(v) * dz) / (1 - dz) : 0;

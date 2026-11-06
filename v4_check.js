@@ -5853,12 +5853,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V81';
+const GAME_VER = 'V82';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V82', 'Hotfix', ['Walk mode has been taken out; the main menu is back to how it was']],
   ['V81', 'Walk The Ship', ['New WALK button on the main menu: leave the menus and explore the whole ship in first person', 'Keyboard and mouse: WASD or arrows to move, mouse to look, Shift to run, Esc to leave', 'Touch: drag the left side to move and the right side to look', 'Controller: left stick moves, right stick looks, click the left stick to run, B to leave', 'Walk through every room, corridor and the hub; you bump into walls, consoles, crates and machines, doors slide open as you come near, and the room name appears as you walk in', 'Leaving drops you straight back into the menu you came from']],
   ['V80', 'Hotfix', ['Surfaces now fit what they are: cargo crates look like cargo crates, seats and benches are padded leather, the Workshop bay door is a real pressure door, and the bridge deck and ship lift are steel deck plating', 'Round platforms no longer stretch their texture across the top', 'Fixed a rare freeze when a run ended while enemy bullets were in the air']],
   ['V79', 'No Plain Blocks', ['Every solid block on the ship now has a real surface: consoles, cabinets, pedestals, platforms and machinery get panel plates with seams, screws, vents, grilles, hatches and service labels', 'Frames, pillars and posts are brushed metal with bolt rows; pipes, tanks and tools are painted metal with scratches and wear', 'Workbenches and tables are wood grain, chairs and sofas are stitched fabric, cables are ribbed rubber', 'Details stay the same size on big and small parts instead of stretching']],
@@ -8250,7 +8251,7 @@ const SHIP = (() => {
     // sliding door in the door gap
     const dg = new T.Group(); G.add(dg); const fr = M.trim;
     [-1, 1].forEach(s => box(dg, .3, DOORH + .3, .5, fr, s * (DOORW / 2 + .15), (DOORH + .3) / 2, 0)); box(dg, DOORW + .6, .3, .5, fr, 0, DOORH + .15, 0); box(dg, DOORW, .06, .52, emi(col, 2.2), 0, DOORH - .02, 0);
-    const L = []; [-1, 1].forEach(s => { const lf = box(dg, DOORW / 2, DOORH, .14, M.mid, s * DOORW / 4, DOORH / 2, 0); lf.userData.door = 1; box(lf, .05, DOORH * .7, .16, emi(col, 1.8), -s * (DOORW / 4 - .12), 0, 0); L.push([lf, s]); });
+    const L = []; [-1, 1].forEach(s => { const lf = box(dg, DOORW / 2, DOORH, .14, M.mid, s * DOORW / 4, DOORH / 2, 0); box(lf, .05, DOORH * .7, .16, emi(col, 1.8), -s * (DOORW / 4 - .12), 0, 0); L.push([lf, s]); });
     doors.push({ G, L, o: 0, wp: new T.Vector3() });
   }
   // corridor from the room's door (local z=0) back to the hub (local z = R0 - HUB_A)
@@ -8778,7 +8779,7 @@ const SHIP = (() => {
     cam.position.set(0, 1.85, 0); const th = ORDER.indexOf(k) * Math.PI / 4; S.look.set(Math.sin(th) * 6, 1.85, -Math.cos(th) * 6);
     S.room = null; go(k, 'hub'); syncShip(true);
   }
-  function disable() { if (S.walk) walkEnd(true); S.on = false; S.travel = null; document.body.classList.remove('shipm'); cssClear(); if (tag) tag.classList.remove('on'); if (R3 && R3.getView && R3.getView() === 'ship') { if (G.scene !== 'play' && UI.top) UI.refresh(); else R3.setView('menu'); } }
+  function disable() { S.on = false; S.travel = null; document.body.classList.remove('shipm'); cssClear(); if (tag) tag.classList.remove('on'); if (R3 && R3.getView && R3.getView() === 'ship') { if (G.scene !== 'play' && UI.top) UI.refresh(); else R3.setView('menu'); } }
 
   // runs every frame: keeps the mode in sync, moves the camera and the menus
   let lastT = performance.now();
@@ -8789,7 +8790,6 @@ const SHIP = (() => {
     if (want && !S.on) enable(); else if (!want && S.on) disable();
     if (!S.on) return;
     if (R3.getView && R3.getView() !== 'ship') R3.setView('ship');
-    if (S.walk) { const W = innerWidth, H = innerHeight; cam.aspect = W / H; cam.fov = cam.aspect < .8 ? 74 : 68; cam.updateProjectionMatrix(); walkFrame(dt, rdt); return; }
     const k = SHIPROOM[UI.top]; if (k && k !== S.room && (!S.travel || S.travel.k !== k)) go(k);
     const W = innerWidth, H = innerHeight; cam.aspect = W / H; cam.fov = cam.aspect < .8 ? 70 : cam.aspect < 1.25 ? 62 : 55; cam.updateProjectionMatrix();
     if (S.travel) {
@@ -8834,94 +8834,7 @@ const SHIP = (() => {
   requestAnimationFrame(frame);
   // the intro calls this the instant it starts to fade, so the ship is in place before anything underneath shows
   function handoff() { if (!S.on && wanted(true)) { enable(); if (S.on) { ui.style.opacity = 0; ui.style.pointerEvents = 'none'; const W = innerWidth, H = innerHeight; cam.aspect = W / H; cam.updateProjectionMatrix(); cam.lookAt(S.look); cam.updateMatrixWorld(); S.pm = panelMatrix(SHIPROOM[UI.top], W, H); cssApply(W, H); } } }
-  // ================= V81: walk the ship in first person =================
-  const WK = { cols: null, hubCols: null, keys: {}, lock: false, mv: { x: 0, y: 0 }, lk: null, region: null, bob: 0, hud: null };
-  function wkColliders() {
-    if (WK.cols) return; WK.cols = {}; const bb = new T.Box3();
-    const grab = (G, out) => { G.updateMatrixWorld(true); G.traverse(o => { if (!o.isMesh || !o.geometry || /Plane|Circle|Ring|Torus/.test(o.geometry.type) || o.userData.door || (o.parent && o.parent.userData.door)) return; const m = o.material; if (m && !Array.isArray(m) && m.transparent && m.opacity < .5 && m.blending === T.AdditiveBlending) return; let p = o.parent, hid = false; while (p) { if (p.visible === false && p !== G && !ORDER.some(k => rooms[k] === p)) { hid = true; break; } p = p.parent; } if (hid) return; bb.setFromObject(o); if (bb.max.y < .32 || bb.min.y > 1.7) return; if (bb.max.x - bb.min.x > 7.5 || bb.max.z - bb.min.z > 7.5) return; out.push([bb.min.x, bb.min.z, bb.max.x, bb.max.z]); }); };
-    ORDER.forEach(k => { const a = []; const v = rooms[k].visible; rooms[k].visible = true; grab(rooms[k], a); rooms[k].visible = v; WK.cols[k] = a; });
-    WK.hubCols = []; grab(hubG, WK.hubCols);
-  }
-  // which part of the ship a point is in: a room, its corridor, the hub, or nowhere (inside a wall)
-  function wkRegion(p) {
-    const r = Math.hypot(p.x, p.z); if (r < HUB_A - .45) return { k: null, hub: true };
-    for (const k of ORDER) {
-      const G = rooms[k], D = G.userData.dim; if (!D) continue; const l = G.worldToLocal(tv.copy(p)); const L = R0 - HUB_A;
-      if (Math.abs(l.x) < D.w / 2 - .5 && l.z < -.25 && l.z > -D.d + .5) return { k, room: true };
-      if (Math.abs(l.x) < 1.05 && l.z >= -.6 && l.z < L + .8) return { k, cor: true, hub: l.z > L - .4 };
-    }
-    return null;
-  }
-  function wkFree(x, z, reg) {
-    const p = ts.set(x, 1, z), g = wkRegion(p); if (!g) return false; const R = .28;
-    const lists = [WK.hubCols]; if (g.k) lists.push(WK.cols[g.k]); if (reg && reg.k && reg.k !== g.k) lists.push(WK.cols[reg.k]);
-    for (const L of lists) for (const b of L) if (x > b[0] - R && x < b[2] + R && z > b[1] - R && z < b[3] + R) return false;
-    return true;
-  }
-  function wkHud() {
-    const d = document.createElement('div'); d.id = 'wkHud';
-    d.innerHTML = '<i class="wk-x"></i><div class="wk-room"></div><div class="wk-help">' + (matchMedia('(pointer: coarse)').matches ? 'Left side: move &middot; Right side: look' : 'WASD / arrows move &middot; Mouse looks &middot; Shift runs &middot; Esc leaves') + '</div><button class="wk-exit" type="button">EXIT WALK</button><div class="wk-click">CLICK TO LOOK AROUND</div><div class="wk-joy"><i></i></div><div class="wk-fade"></div>';
-    document.body.appendChild(d); WK.hud = d;
-    d.querySelector('.wk-exit').addEventListener('click', e => { e.stopPropagation(); walkEnd(); });
-    const joy = d.querySelector('.wk-joy'), knob = joy.firstChild; let jid = null, jx = 0, jy = 0, lid = null, lx = 0, ly = 0;
-    d.addEventListener('pointerdown', e => {
-      if (e.target.closest('.wk-exit')) return; e.preventDefault();
-      if (e.pointerType === 'mouse') { if (!WK.lock && d.requestPointerLock) { try { const r = d.requestPointerLock(); if (r && r.catch) r.catch(() => { }); } catch (er) { } } lid = e.pointerId; lx = e.clientX; ly = e.clientY; return; }
-      if (e.clientX < innerWidth / 2 && jid == null) { jid = e.pointerId; jx = e.clientX; jy = e.clientY; joy.style.left = jx + 'px'; joy.style.top = jy + 'px'; joy.classList.add('on'); }
-      else if (lid == null) { lid = e.pointerId; lx = e.clientX; ly = e.clientY; }
-    });
-    d.addEventListener('pointermove', e => {
-      if (e.pointerType === 'mouse' && WK.lock) { wkLook(e.movementX, e.movementY); return; }
-      if (e.pointerId === jid) { const dx = e.clientX - jx, dy = e.clientY - jy, m = Math.min(1, Math.hypot(dx, dy) / 55), a = Math.atan2(dy, dx); WK.mv.x = Math.cos(a) * m; WK.mv.y = Math.sin(a) * m; knob.style.transform = 'translate(' + Math.cos(a) * m * 40 + 'px,' + Math.sin(a) * m * 40 + 'px)'; }
-      else if (e.pointerId === lid) { wkLook((e.clientX - lx) * (e.pointerType === 'mouse' ? 1 : 1.6), (e.clientY - ly) * (e.pointerType === 'mouse' ? 1 : 1.6)); lx = e.clientX; ly = e.clientY; }
-    });
-    const up = e => { if (e.pointerId === jid) { jid = null; WK.mv.x = WK.mv.y = 0; knob.style.transform = ''; joy.classList.remove('on'); } if (e.pointerId === lid) lid = null; };
-    d.addEventListener('pointerup', up); d.addEventListener('pointercancel', up);
-  }
-  function wkLook(dx, dy) { if (!S.walk) return; const s = .0022 * (+SET.walkSens || 1); S.walk.yaw -= dx * s; S.walk.pitch = Math.max(-1.35, Math.min(1.35, S.walk.pitch - dy * s)); }
-  document.addEventListener('pointerlockchange', () => { WK.lock = !!WK.hud && document.pointerLockElement === WK.hud; if (WK.hud) WK.hud.classList.toggle('locked', WK.lock); });
-  const wkKeys = { KeyW: 'f', ArrowUp: 'f', KeyS: 'b', ArrowDown: 'b', KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r', ShiftLeft: 'run', ShiftRight: 'run' };
-  addEventListener('keydown', e => { if (!S.walk) return; e.stopPropagation(); if (e.code === 'Escape' || e.code === 'KeyQ' && e.ctrlKey) { e.preventDefault(); walkEnd(); return; } const k = wkKeys[e.code]; if (k) { WK.keys[k] = 1; e.preventDefault(); } }, true);
-  addEventListener('keyup', e => { if (!S.walk) return; e.stopPropagation(); const k = wkKeys[e.code]; if (k) WK.keys[k] = 0; }, true);
-  addEventListener('blur', () => { WK.keys = {}; });
-  function walkStart() {
-    if (!S.on || S.walk) return false;
-    try { wkColliders(); } catch (e) { console.warn('walk colliders', e); WK.cols = WK.cols || {}; WK.hubCols = WK.hubCols || []; }
-    const f = S.look.clone().sub(cam.position);
-    S.travel = null; S.walk = { yaw: Math.atan2(-f.x, -f.z), pitch: Math.max(-.6, Math.min(.6, Math.atan2(f.y, Math.hypot(f.x, f.z)))), y: 1.75 };
-    cam.position.y = 1.75; let reg = wkRegion(cam.position);
-    if (!reg || !wkFree(cam.position.x, cam.position.z, reg)) { // the menu camera can sit inside a prop: step back toward the door until clear
-      const k = S.room || SHIPROOM[UI.top]; for (let i = 0; i < 40 && k; i++) { const p = rooms[k].localToWorld(new T.Vector3(0, 1.75, -1.2 - i * .25)); if (wkRegion(p) && wkFree(p.x, p.z)) { cam.position.copy(p); break; } }
-    }
-    WK.keys = {}; WK.mv.x = WK.mv.y = 0; WK.region = null; G.walk = true; document.body.classList.add('walking');
-    ui.style.opacity = 0; ui.style.pointerEvents = 'none'; wkHud(); if (tag) tag.classList.remove('on');
-    if (!matchMedia('(pointer: coarse)').matches && WK.hud.requestPointerLock) { try { const r = WK.hud.requestPointerLock(); if (r && r.catch) r.catch(() => { }); } catch (e) { } }
-    try { SFX.dash && SFX.dash(); } catch (e) { }
-    return true;
-  }
-  function walkEnd(quick) {
-    if (!S.walk) return; const hud = WK.hud;
-    const fin = () => { S.walk = null; G.walk = false; document.body.classList.remove('walking'); WK.keys = {}; try { if (document.pointerLockElement) document.exitPointerLock(); } catch (e) { } if (hud) hud.remove(); WK.hud = null;
-      const k = SHIPROOM[UI.top] || S.room; if (S.on && k) { S.room = k; showRooms(k, null); lightRoom(k, 0); lights[2].intensity = lights[3].intensity = 0; const v = viewOf(k); cam.position.copy(v.p); S.look.copy(v.l); S.fade = 0; } };
-    if (quick || !hud) { fin(); return; } hud.classList.add('out'); S.walk.leaving = 1; setTimeout(fin, 260);
-  }
-  function walkFrame(dt, rdt) {
-    const W = S.walk; ui.style.opacity = 0; ui.style.pointerEvents = 'none';
-    // gamepad: left stick moves, right stick looks, B leaves, L3 runs
-    let gx = 0, gy = 0, run = WK.keys.run; const gps = navigator.getGamepads ? navigator.getGamepads() : []; for (const gp of gps) { if (!gp || !gp.connected) continue; const dz = v => Math.abs(v) < .15 ? 0 : v; gx = dz(gp.axes[0]); gy = dz(gp.axes[1]); const lx = dz(gp.axes[2] || 0), ly = dz(gp.axes[3] || 0); if (lx || ly) wkLook(lx * 900 * rdt, ly * 700 * rdt); if (gp.buttons[1] && gp.buttons[1].pressed && !W.leaving) { walkEnd(); return; } if (gp.buttons[10] && gp.buttons[10].pressed) run = 1; break; }
-    let fx = (WK.keys.r ? 1 : 0) - (WK.keys.l ? 1 : 0) + gx + WK.mv.x, fz = (WK.keys.f ? 1 : 0) - (WK.keys.b ? 1 : 0) - gy - WK.mv.y; const m = Math.hypot(fx, fz); if (m > 1) { fx /= m; fz /= m; }
-    const sp = (run ? 5.2 : 2.9) * dt, sy = Math.sin(W.yaw), cy = Math.cos(W.yaw);
-    const dx = (-sy * fz + cy * fx) * sp, dz2 = (-cy * fz - sy * fx) * sp, p = cam.position, reg = wkRegion(p);
-    if (!W.leaving && (dx || dz2)) { if (wkFree(p.x + dx, p.z, reg)) p.x += dx; if (wkFree(p.x, p.z + dz2, reg)) p.z += dz2; WK.bob += Math.hypot(dx, dz2) * 2.4; }
-    p.y = W.y + Math.sin(WK.bob * 2) * .035;
-    // only draw what you can plausibly see: your room, plus rooms ahead of you when you are in the hub or a corridor
-    const g = wkRegion(p), here = g && g.room ? g.k : null, fwd = Math.atan2(-sy, -cy);
-    ORDER.forEach(k => { let vis = k === (g && g.k); if (!vis && !here) { const c = rooms[k].position, a = Math.atan2(c.x - p.x, c.z - p.z); let d = Math.abs(a - Math.atan2(-sy, -cy)); while (d > Math.PI) d = Math.abs(d - TAU); vis = d < .62; } rooms[k].visible = vis; });
-    const rk = g && g.k; if (rk !== WK.region) { WK.region = rk; if (rk) { lightRoom(rk, 0); if (WK.hud) { const el = WK.hud.querySelector('.wk-room'); el.textContent = NAMES[rk]; el.style.setProperty('--c', COLS[rk]); el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); } } else { lights[0].intensity = lights[1].intensity = 0; } lights[2].intensity = lights[3].intensity = 0; }
-    S.look.set(p.x - sy * Math.cos(W.pitch), p.y + Math.sin(W.pitch), p.z - cy * Math.cos(W.pitch));
-    cam.lookAt(S.look); cam.updateMatrixWorld(); camL.position.copy(p);
-  }
-  return { S, go, handoff, walk: walkStart, walkEnd, get walking() { return !!S.walk; }, get cam() { return cam; }, get rooms() { return rooms; }, get on() { return S.on; }, get room() { return S.room; }, get busy() { return !!S.travel || S.fade < 1 || (UI.top && SHIPROOM[UI.top] && SHIPROOM[UI.top] !== S.room); } };
+  return { S, go, handoff, get cam() { return cam; }, get rooms() { return rooms; }, get on() { return S.on; }, get room() { return S.room; }, get busy() { return !!S.travel || S.fade < 1 || (UI.top && SHIPROOM[UI.top] && SHIPROOM[UI.top] !== S.room); } };
 })();
 window.__SHIP = SHIP;
 
@@ -10283,7 +10196,7 @@ function pcClick(el) {
   requestAnimationFrame(loop);
   try {
     const dt = Math.min(.05, (now - (PCUR.last || now)) / 1000); PCUR.last = now;
-    if (SET.padCursor === false || G.cut || G.photo || G.padBind || G.walk) { if (G.walk && PCUR.on) { PCUR.on = false; PCUR.el.style.display = 'none'; } return; }
+    if (SET.padCursor === false || G.cut || G.photo || G.padBind) return;
     const inUI = !G.inCombat || G.paused || G.pick || G.brief; if (!inUI) { if (PCUR.on) { PCUR.on = false; PCUR.el.style.display = 'none'; } return; }
     const gps = navigator.getGamepads ? navigator.getGamepads() : []; let gp = null; for (const g of gps) if (g && g.connected) { gp = g; break; } if (!gp) return;
     const dz = Math.max(.15, SET.dead || .2), b = i => gp.buttons[i] && gp.buttons[i].pressed, ax = v => Math.abs(v) > dz ? (v - Math.sign(v) * dz) / (1 - dz) : 0;
