@@ -4,7 +4,7 @@ function boot() {
   try { if (window.THREE) { R3 = init3D(); layout(); R3.setView('menu'); } } catch (e) { console.error('3D init failed, using 2D fallback:', e); R3 = null; }
   buildBackdrop(0);
   G.scene = 'ui'; UI.show((!navigator.webdriver || window.__pick) && SET.pickSlot !== false ? 'scPick' : SAVE.tut ? 'scMenu' : 'scTut');
-  try { if ((SET.intro !== false && !navigator.webdriver) || window.__intro) introPlay(); } catch (e) { console.warn('intro', e); INTRO.on = false; }
+  try { if ((SET.intro !== false && SET.intro !== 'false' && !navigator.webdriver && (typeof qIntroOk !== 'function' || qIntroOk())) || window.__intro) introPlay(); } catch (e) { console.warn('intro', e); INTRO.on = false; }
   requestAnimationFrame(frame);
 }
 window.AET = {
