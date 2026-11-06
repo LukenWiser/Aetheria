@@ -23,7 +23,7 @@ const CARDS = {
   bst: { nm: 'Shield Burst', ds: 'A breaking shield blasts enemy fire away', rar: 1, max: 2, ic: 'ring', ap: p => { p.mod.burst++; } },
   vamp: { nm: 'Life Siphon', ds: 'Kills heal your hull', rar: 1, max: 3, ic: 'drop', ap: p => { p.mod.vamp++; } },
   orb: { nm: 'Orbit Drone', ds: 'A drone circles you, blocking shots', rar: 1, max: 3, ic: 'orbit', ap: p => { p.mod.orb++; } },
-  ramc: { nm: 'Ram Plating', ds: 'Ramming hurts 40% less and hits harder', rar: 1, max: 2, ic: 'ram', ap: p => { p.mod.ramc++; } },
+  ramc: { nm: 'Ram Plating', ds: 'Ramming hurts 25% less and hits harder', rar: 1, max: 2, ic: 'ram', ap: p => { p.mod.ramc++; } },
   sec: { nm: 'Second Wind', ds: 'Survive one lethal hit this run', rar: 2, max: 1, ic: 'heart', ap: p => { p.mod.second++; } },
   cdr: { nm: 'Chrono Core', ds: 'Ability recharges 25% faster', rar: 2, max: 3, ic: 'clock', ap: p => { p.mod.cdr *= .75; } },
   grz: { nm: 'Graze Reactor', ds: 'Grazing recharges your ability and plasma', rar: 2, max: 2, ic: 'graze', ap: p => { p.mod.graze++; } },

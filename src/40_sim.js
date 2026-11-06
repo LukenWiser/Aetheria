@@ -95,7 +95,7 @@ function fireP(p) {
     case 'spread': { const n = ev ? 3 : 2; for (let i = -n; i <= n; i++) { const a = i * (ev ? .13 : .17); pb(p, nx, p.y, Math.cos(a) * s, Math.sin(a) * s, 'spread', { d: ev ? d * 1.15 : d, r: 3.4, l: ev ? 70 : 55 }); } break; }
     case 'lancer': if (ev) { [-7, 7].forEach(q => pb(p, nx, p.y + q, s, 0, 'lancer', { d: d * .85, r: 7, pierce: 99, l: 80 })); } else pb(p, nx, p.y, s, 0, 'lancer', { d, r: 6, pierce: 99, l: 80 }); break;
     case 'ion': { const a = rnd(-.05, .05); pb(p, nx, p.y + rnd(-6, 6), Math.cos(a) * s, Math.sin(a) * s, 'ion', { d: ev ? d * 1.2 : d, r: 3.4 }); if (ev) { const a2 = rnd(-.07, .07); pb(p, nx, p.y + rnd(-10, 10), Math.cos(a2) * s, Math.sin(a2) * s, 'ion', { d: d * 1.2, r: 3.4 }); } break; }
-    case 'missile': (ev ? [-1, 1, -2, 2] : [-1, 1]).forEach(q => pb(p, nx - 6, p.y + q * 10, s, q * 2.4, 'missile', { d, r: 6, home: 1, blast: ev ? 80 : 62, l: 150 })); break;
+    case 'missile': (ev ? [-1, 1, -2, 2] : [-1, 1]).forEach(q => pb(p, nx - 6, p.y + q * 10, s, q * 2.4, 'missile', { d, r: 6, home: 1, hk: .05, blast: ev ? 56 : 42, l: 120 })); break;
     case 'orb': pb(p, nx + 6, p.y, s, 0, 'orb', ev ? { d: d * 1.25, r: 23, pierce: 99, crush: 1, l: 200, blast: 78 } : { d, r: 17, pierce: 99, crush: 1, l: 200 }); break;
     case 'arc': pb(p, nx, p.y, s, 0, 'arc', { d, r: 6, chain: ev ? 5 : 3, l: 70 }); break;
     case 'rail': pb(p, nx, p.y, s, 0, 'rail', { d, r: 5, pierce: 99, l: 60 }); if (ev) [-.05, .05].forEach(a => pb(p, nx, p.y, Math.cos(a) * s, Math.sin(a) * s, 'rail', { d: d * .5, r: 4, pierce: 99, l: 60 })); G.ent.bm.push({ k: 'trail', x: nx, y: p.y, l: 8, l0: 8 }); break;
@@ -252,7 +252,7 @@ function updPB() {
   const A = G.ent.pb, En = G.ent.en;
   for (let i = A.length - 1; i >= 0; i--) {
     const b = A[i]; let rm = false;
-    if (b.home) { const t = nearE(b.x, b.y, 460); if (t) { const want = Math.atan2(t.y - b.y, t.x - b.x), cur = Math.atan2(b.vy, b.vx); let df = want - cur; while (df > PI) df -= TAU; while (df < -PI) df += TAU; const na = cur + clamp(df, -.1, .1), sp = Math.hypot(b.vx, b.vy) * 1.012; b.vx = Math.cos(na) * Math.min(sp, 13); b.vy = Math.sin(na) * Math.min(sp, 13); } if (G.t % 2 === 0) pcl({ x: b.x - b.vx, y: b.y, vx: -1, vy: rnd(-.4, .4), l: 14, l0: 14, c: '#fb923c', r: 4, k: 0, fr: .9 }); }
+    if (b.home) { const t = nearE(b.x, b.y, b.hk ? 340 : 460); if (t) { const want = Math.atan2(t.y - b.y, t.x - b.x), cur = Math.atan2(b.vy, b.vx); let df = want - cur; while (df > PI) df -= TAU; while (df < -PI) df += TAU; const hk = b.hk || .1, na = cur + clamp(df, -hk, hk), sp = Math.hypot(b.vx, b.vy) * 1.012; b.vx = Math.cos(na) * Math.min(sp, 13); b.vy = Math.sin(na) * Math.min(sp, 13); } if (G.t % 2 === 0) pcl({ x: b.x - b.vx, y: b.y, vx: -1, vy: rnd(-.4, .4), l: 14, l0: 14, c: '#fb923c', r: 4, k: 0, fr: .9 }); }
     else if (b.hm2) { let t = null, bd = 330 * 330; for (const e of En) { if (e.dead || e.hide || e.x > V.W + 10 || e.x < b.x - 6) continue; const dd = (e.x - b.x) * (e.x - b.x) + (e.y - b.y) * (e.y - b.y); if (dd < bd) { bd = dd; t = e; } } if (t) { const sp = Math.hypot(b.vx, b.vy), want = Math.atan2(t.y - b.y, t.x - b.x), cur = Math.atan2(b.vy, b.vx); let df = want - cur; while (df > PI) df -= TAU; while (df < -PI) df += TAU; const na = cur + clamp(df, -.022 * b.hm2, .022 * b.hm2); b.vx = Math.cos(na) * sp; b.vy = Math.sin(na) * sp; } }
     b.x += b.vx; b.y += b.vy; b.l--;
     if (b.crush) { const eb = G.ent.eb; for (let j = eb.length - 1; j >= 0; j--) { const q = eb[j]; if ((q.x - b.x) * (q.x - b.x) + (q.y - b.y) * (q.y - b.y) < (b.r + q.r + 6) * (b.r + q.r + 6)) { spark(q.x, q.y, 3, '#c084fc', 3, 14, 2); eb.splice(j, 1); } } }
@@ -300,12 +300,13 @@ function ramCheck() {
     for (const e of G.ent.en) {
       if (e.dead || e.hide || e.x > V.W + 6) continue;
       const rr = 15 + e.r * .86; if ((p.x - e.x) * (p.x - e.x) + (p.y - e.y) * (p.y - e.y) > rr * rr) continue;
-      if (p.dashT > 0) { if (!e.boss && !(e.dhT > G.t)) { e.dhT = G.t + 30; spark(e.x, e.y, 8, '#e0f2fe', 5, 16, 2); hurtEnemy(e, 34 + e.mhp * .22, { own: p.id }); } continue; }
-      if (e.boss) { if (!e.rcd) { hurt(p, 26, 'ram'); e.rcd = 45; const a = Math.atan2(p.y - e.y, p.x - e.x); p.vx = Math.cos(a) * 8; p.vy = Math.sin(a) * 8; } continue; }
-      if (p.inv > 0 && p.od <= 0) continue;
-      const a = Math.atan2(p.y - e.y, p.x - e.x); p.vx += Math.cos(a) * 6; p.vy += Math.sin(a) * 6;
-      hurt(p, e.ram * (e.d.elite ? 1.4 : 1) * G.run.edm * (1 - .4 * p.mod.ramc), 'ram');
-      if (e.d.elite) { hurtEnemy(e, e.mhp * (.3 + .1 * p.mod.ramc), { own: p.id }); e.rcd = 30; } else { e.hp = 0; killEnemy(e, p.id); }
+      if (p.dashT > 0) { if (!e.boss && !(e.dhT > G.t)) { e.dhT = G.t + 30; spark(e.x, e.y, 8, '#e0f2fe', 5, 16, 2); hurtEnemy(e, 12 + e.mhp * .1, { own: p.id }); } continue; }
+      if (e.boss) { if (!e.rcd) { hurt(p, bulletDmg(p, 26), 'ram'); e.rcd = 45; const a = Math.atan2(p.y - e.y, p.x - e.x); p.vx = Math.cos(a) * 8; p.vy = Math.sin(a) * 8; } continue; }
+      if ((p.inv > 0 && p.od <= 0) || e.rcd > 0) continue;
+      const a = Math.atan2(p.y - e.y, p.x - e.x); p.vx += Math.cos(a) * 9; p.vy += Math.sin(a) * 9; e.x -= Math.cos(a) * 14; e.y -= Math.sin(a) * 14;
+      // V58: ramming hurts as much as a bullet (a third of your hull) and no longer one-shots enemies
+      hurt(p, bulletDmg(p, e.ram * (e.d.elite ? 1.4 : 1) * G.run.edm) * (1 - .25 * p.mod.ramc), 'ram');
+      hurtEnemy(e, e.mhp * (e.d.elite ? .15 + .08 * p.mod.ramc : .4 + .15 * p.mod.ramc), { own: p.id }); e.rcd = 40;
     }
   }
   for (const e of G.ent.en) if (e.rcd > 0) e.rcd--;

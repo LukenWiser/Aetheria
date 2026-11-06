@@ -228,7 +228,7 @@ const WPN = {
   spread: { nm: 'Scatter Fan', ds: '5-way shotgun spread. Great up close.', d: 3.2, r: 17, s: 11, am: 2.2, price: 600, c: '#a3e635' },
   lancer: { nm: 'Piercing Lancer', ds: 'Heavy bolts that punch through everything.', d: 14, r: 22, s: 17, am: 2.4, price: 900, c: '#f472b6', pierce: 99 },
   ion: { nm: 'Ion Repeater', ds: 'Rapid-fire stream. Lower damage per shot.', d: 2.6, r: 4, s: 14, am: .5, price: 1300, c: '#fde047' },
-  missile: { nm: 'Seeker Missiles', ds: 'Homing rockets with a blast radius.', d: 11, r: 28, s: 7, am: 3, price: 1800, c: '#fb923c', home: 1 },
+  missile: { nm: 'Seeker Missiles', ds: 'Homing rockets with a blast radius.', d: 7.5, r: 34, s: 7, am: 3.5, price: 1800, c: '#fb923c', home: 1 },
   orb: { nm: 'Plasma Orb', ds: 'Slow giant orb that crushes bullets and enemies.', d: 30, r: 46, s: 5, am: 5, price: 2400, c: '#c084fc', pierce: 99, big: 1 },
   arc: { nm: 'Arc Caster', ds: 'Lightning that chains between nearby enemies.', d: 8, r: 16, s: 15, am: 2, price: 3000, c: '#93c5fd', chain: 1 },
   rail: { nm: 'Rail Cannon', ds: 'Piercing hypersonic slug. Slow, ruinous.', d: 55, r: 54, s: 30, am: 6, price: 4000, c: '#f8fafc', pierce: 99 }

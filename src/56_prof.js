@@ -47,7 +47,6 @@ const ACH = [
   mkAch('hc20', 'Iron Will', 'Reach wave 20 in Hardcore.', 'bolt', 700, () => (SAVE.hi.hc || {}).wave | 0, 20),
   mkAch('gal4', 'Showoff', 'Win a boss rematch with 4 or more modifiers.', 'skull', 600, () => SAVE.flags.gal4 ? 1 : 0, 1),
   mkAch('routes', 'Off the Map', 'Clear 5 side routes.', 'map', 300, () => Object.keys(SAVE.flags.alt || {}).length, 5),
-  mkAch('parry', 'Untouchable', 'Parry 25 enemy shots.', 'sh', 300, () => SAVE.st.parry | 0, 25),
   mkAch('gold', 'Gold Rush', 'Hunt down 5 golden elites.', 'coin', 400, () => SAVE.st.gold | 0, 5),
   mkAch('super', 'Nova Beam', 'Unleash 10 super finishers.', 'bolt', 250, () => SAVE.st.supers | 0, 10),
   mkAch('hulls', 'Hangar Queen', 'Own all five standard hulls.', 'wing', 300, () => STDHULLS.filter(h => SAVE.pl[0].own.hull.indexOf(h) >= 0).length, 5),
@@ -110,7 +109,7 @@ function importCode(txt, i) {
 }
 
 // ---------- keyboard rebinding ----------
-const KACT = [['u', 'Move up'], ['d', 'Move down'], ['l', 'Move left'], ['r', 'Move right'], ['f', 'Fire'], ['a', 'Ability'], ['wl', 'Previous gun'], ['wr', 'Next gun'], ['c', 'Charge / secondary / parry'], ['v', 'Super finisher']];
+const KACT = [['u', 'Move up'], ['d', 'Move down'], ['l', 'Move left'], ['r', 'Move right'], ['f', 'Fire'], ['a', 'Ability'], ['wl', 'Previous gun'], ['wr', 'Next gun'], ['c', 'Charge / secondary'], ['v', 'Super finisher']];
 const KRES = ['Escape', 'KeyP', 'KeyN', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Tab', 'F5', 'F11', 'F12'];
 const KLAB = { ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', Space: 'SPACE', ShiftLeft: 'L-SHIFT', ShiftRight: 'R-SHIFT', ControlLeft: 'L-CTRL', ControlRight: 'R-CTRL', AltLeft: 'L-ALT', AltRight: 'R-ALT', Enter: 'ENTER', Comma: ',', Period: '.', Slash: '/', Semicolon: ';', Quote: "'", Semicolon: ';', Quote: "'", BracketLeft: '[', BracketRight: ']', Backslash: '\\', Minus: '-', Equal: '=', Backquote: '`', Backspace: 'BKSP', CapsLock: 'CAPS' };
 function keyLabel(c) { if (!c) return '-'; if (KLAB[c]) return KLAB[c]; if (c.indexOf('Key') === 0) return c.slice(3); if (c.indexOf('Digit') === 0) return c.slice(5); if (c.indexOf('Numpad') === 0) return 'NUM ' + c.slice(6).toUpperCase(); return c.toUpperCase(); }

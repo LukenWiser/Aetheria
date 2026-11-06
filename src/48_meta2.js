@@ -73,7 +73,7 @@ function randChal() { const n = Math.max(1, Math.min(SAVE.wu, WORLDS.length)), w
 
 // ---- gamepad remapping ----
 const PADB = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'SELECT', 'START', 'L-STICK', 'R-STICK'];
-const PADA = [['fire', 'Fire', [0, 7]], ['ab', 'Ability', [1, 3]], ['sec', 'Charge / secondary / parry', [6, 2]], ['sup', 'Super finisher', [10, 11, 8]], ['wl', 'Previous gun', [4]], ['wr', 'Next gun', [5]]];
+const PADA = [['fire', 'Fire', [0, 7]], ['ab', 'Ability', [1, 3]], ['sec', 'Charge / secondary', [6, 2]], ['sup', 'Super finisher', [10, 11, 8]], ['wl', 'Previous gun', [4]], ['wr', 'Next gun', [5]]];
 const padBtns = a => { const m = SET.padMap; if (m && m[a] !== undefined) return [m[a]]; const r = PADA.find(x => x[0] === a); return r ? r[2] : []; };
 const padDown = (gp, a) => padBtns(a).some(i => gp.buttons[i] && gp.buttons[i].pressed);
 const padLabel = a => padBtns(a).map(i => PADB[i] || '#' + i).join(' / ');

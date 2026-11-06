@@ -21,9 +21,8 @@ function addSup(p, v) { if (!p || !p.alive || p.supT > 0 || p.noSup) return; con
 function combatTick(p, o) {
   if (p.secCd > 0) p.secCd--; if (p.pcd > 0) p.pcd--; if (p.parT > 0) p.parT--;
   const held = secHeld(p), R = G.run;
-  if (held && !p.secH) { // fresh press: parry if a shot is about to hit, otherwise start charging
+  if (held && !p.secH) { // fresh press: start charging (parry removed in V58)
     p.secH = true; p.chg = 0; p.secLock = false;
-    if (p.pcd <= 0) { if (tryParry(p)) p.secLock = true; else p.pcd = 40; }
   } else if (held && !p.secLock) { p.chg = Math.min(80, p.chg + 1); p.vx *= .97; p.vy *= .97; if (p.chg >= 12 && p.chg % 10 === 0 && p.chg < 80) SFX.charge(p.chg / 80); if (p.chg === 80) SFX.power(); }
   else if (!held && p.secH) { // release
     p.secH = false;

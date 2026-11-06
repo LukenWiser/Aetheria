@@ -83,7 +83,6 @@ const MSN = [
   { id: 'kill', nm: n => 'Destroy ' + n + ' enemies', n: [60, 120, 200], v: R => R.kills },
   { id: 'clear', nm: n => 'Clear ' + n + ' campaign sectors', n: [2, 3, 5], v: (R, win) => R.mode === 'expedition' && !R.var && win ? 1 : 0 },
   { id: 'boss', nm: n => 'Defeat ' + n + (n > 1 ? ' bosses' : ' boss'), n: [1, 2], v: R => R.bossDown | 0 },
-  { id: 'parry', nm: n => 'Parry ' + n + ' shots', n: [5, 12, 20], v: R => R.parries | 0 },
   { id: 'super', nm: n => 'Fire ' + n + ' super finishers', n: [2, 4], v: R => R.supers | 0 },
   { id: 'combo', nm: n => 'Reach a ' + n + '-kill chain', n: [15, 25, 40], v: R => R.maxCombo, max: 1 },
   { id: 'cores', nm: n => 'Pick up ' + n + ' cores', n: [400, 900, 1500], v: R => R.cores },

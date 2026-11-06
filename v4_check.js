@@ -2533,7 +2533,7 @@ const WPN = {
   spread: { nm: 'Scatter Fan', ds: '5-way shotgun spread. Great up close.', d: 3.2, r: 17, s: 11, am: 2.2, price: 600, c: '#a3e635' },
   lancer: { nm: 'Piercing Lancer', ds: 'Heavy bolts that punch through everything.', d: 14, r: 22, s: 17, am: 2.4, price: 900, c: '#f472b6', pierce: 99 },
   ion: { nm: 'Ion Repeater', ds: 'Rapid-fire stream. Lower damage per shot.', d: 2.6, r: 4, s: 14, am: .5, price: 1300, c: '#fde047' },
-  missile: { nm: 'Seeker Missiles', ds: 'Homing rockets with a blast radius.', d: 11, r: 28, s: 7, am: 3, price: 1800, c: '#fb923c', home: 1 },
+  missile: { nm: 'Seeker Missiles', ds: 'Homing rockets with a blast radius.', d: 7.5, r: 34, s: 7, am: 3.5, price: 1800, c: '#fb923c', home: 1 },
   orb: { nm: 'Plasma Orb', ds: 'Slow giant orb that crushes bullets and enemies.', d: 30, r: 46, s: 5, am: 5, price: 2400, c: '#c084fc', pierce: 99, big: 1 },
   arc: { nm: 'Arc Caster', ds: 'Lightning that chains between nearby enemies.', d: 8, r: 16, s: 15, am: 2, price: 3000, c: '#93c5fd', chain: 1 },
   rail: { nm: 'Rail Cannon', ds: 'Piercing hypersonic slug. Slow, ruinous.', d: 55, r: 54, s: 30, am: 6, price: 4000, c: '#f8fafc', pierce: 99 }
@@ -2995,7 +2995,7 @@ function fireP(p) {
     case 'spread': { const n = ev ? 3 : 2; for (let i = -n; i <= n; i++) { const a = i * (ev ? .13 : .17); pb(p, nx, p.y, Math.cos(a) * s, Math.sin(a) * s, 'spread', { d: ev ? d * 1.15 : d, r: 3.4, l: ev ? 70 : 55 }); } break; }
     case 'lancer': if (ev) { [-7, 7].forEach(q => pb(p, nx, p.y + q, s, 0, 'lancer', { d: d * .85, r: 7, pierce: 99, l: 80 })); } else pb(p, nx, p.y, s, 0, 'lancer', { d, r: 6, pierce: 99, l: 80 }); break;
     case 'ion': { const a = rnd(-.05, .05); pb(p, nx, p.y + rnd(-6, 6), Math.cos(a) * s, Math.sin(a) * s, 'ion', { d: ev ? d * 1.2 : d, r: 3.4 }); if (ev) { const a2 = rnd(-.07, .07); pb(p, nx, p.y + rnd(-10, 10), Math.cos(a2) * s, Math.sin(a2) * s, 'ion', { d: d * 1.2, r: 3.4 }); } break; }
-    case 'missile': (ev ? [-1, 1, -2, 2] : [-1, 1]).forEach(q => pb(p, nx - 6, p.y + q * 10, s, q * 2.4, 'missile', { d, r: 6, home: 1, blast: ev ? 80 : 62, l: 150 })); break;
+    case 'missile': (ev ? [-1, 1, -2, 2] : [-1, 1]).forEach(q => pb(p, nx - 6, p.y + q * 10, s, q * 2.4, 'missile', { d, r: 6, home: 1, hk: .05, blast: ev ? 56 : 42, l: 120 })); break;
     case 'orb': pb(p, nx + 6, p.y, s, 0, 'orb', ev ? { d: d * 1.25, r: 23, pierce: 99, crush: 1, l: 200, blast: 78 } : { d, r: 17, pierce: 99, crush: 1, l: 200 }); break;
     case 'arc': pb(p, nx, p.y, s, 0, 'arc', { d, r: 6, chain: ev ? 5 : 3, l: 70 }); break;
     case 'rail': pb(p, nx, p.y, s, 0, 'rail', { d, r: 5, pierce: 99, l: 60 }); if (ev) [-.05, .05].forEach(a => pb(p, nx, p.y, Math.cos(a) * s, Math.sin(a) * s, 'rail', { d: d * .5, r: 4, pierce: 99, l: 60 })); G.ent.bm.push({ k: 'trail', x: nx, y: p.y, l: 8, l0: 8 }); break;
@@ -3152,7 +3152,7 @@ function updPB() {
   const A = G.ent.pb, En = G.ent.en;
   for (let i = A.length - 1; i >= 0; i--) {
     const b = A[i]; let rm = false;
-    if (b.home) { const t = nearE(b.x, b.y, 460); if (t) { const want = Math.atan2(t.y - b.y, t.x - b.x), cur = Math.atan2(b.vy, b.vx); let df = want - cur; while (df > PI) df -= TAU; while (df < -PI) df += TAU; const na = cur + clamp(df, -.1, .1), sp = Math.hypot(b.vx, b.vy) * 1.012; b.vx = Math.cos(na) * Math.min(sp, 13); b.vy = Math.sin(na) * Math.min(sp, 13); } if (G.t % 2 === 0) pcl({ x: b.x - b.vx, y: b.y, vx: -1, vy: rnd(-.4, .4), l: 14, l0: 14, c: '#fb923c', r: 4, k: 0, fr: .9 }); }
+    if (b.home) { const t = nearE(b.x, b.y, b.hk ? 340 : 460); if (t) { const want = Math.atan2(t.y - b.y, t.x - b.x), cur = Math.atan2(b.vy, b.vx); let df = want - cur; while (df > PI) df -= TAU; while (df < -PI) df += TAU; const hk = b.hk || .1, na = cur + clamp(df, -hk, hk), sp = Math.hypot(b.vx, b.vy) * 1.012; b.vx = Math.cos(na) * Math.min(sp, 13); b.vy = Math.sin(na) * Math.min(sp, 13); } if (G.t % 2 === 0) pcl({ x: b.x - b.vx, y: b.y, vx: -1, vy: rnd(-.4, .4), l: 14, l0: 14, c: '#fb923c', r: 4, k: 0, fr: .9 }); }
     else if (b.hm2) { let t = null, bd = 330 * 330; for (const e of En) { if (e.dead || e.hide || e.x > V.W + 10 || e.x < b.x - 6) continue; const dd = (e.x - b.x) * (e.x - b.x) + (e.y - b.y) * (e.y - b.y); if (dd < bd) { bd = dd; t = e; } } if (t) { const sp = Math.hypot(b.vx, b.vy), want = Math.atan2(t.y - b.y, t.x - b.x), cur = Math.atan2(b.vy, b.vx); let df = want - cur; while (df > PI) df -= TAU; while (df < -PI) df += TAU; const na = cur + clamp(df, -.022 * b.hm2, .022 * b.hm2); b.vx = Math.cos(na) * sp; b.vy = Math.sin(na) * sp; } }
     b.x += b.vx; b.y += b.vy; b.l--;
     if (b.crush) { const eb = G.ent.eb; for (let j = eb.length - 1; j >= 0; j--) { const q = eb[j]; if ((q.x - b.x) * (q.x - b.x) + (q.y - b.y) * (q.y - b.y) < (b.r + q.r + 6) * (b.r + q.r + 6)) { spark(q.x, q.y, 3, '#c084fc', 3, 14, 2); eb.splice(j, 1); } } }
@@ -3200,12 +3200,13 @@ function ramCheck() {
     for (const e of G.ent.en) {
       if (e.dead || e.hide || e.x > V.W + 6) continue;
       const rr = 15 + e.r * .86; if ((p.x - e.x) * (p.x - e.x) + (p.y - e.y) * (p.y - e.y) > rr * rr) continue;
-      if (p.dashT > 0) { if (!e.boss && !(e.dhT > G.t)) { e.dhT = G.t + 30; spark(e.x, e.y, 8, '#e0f2fe', 5, 16, 2); hurtEnemy(e, 34 + e.mhp * .22, { own: p.id }); } continue; }
-      if (e.boss) { if (!e.rcd) { hurt(p, 26, 'ram'); e.rcd = 45; const a = Math.atan2(p.y - e.y, p.x - e.x); p.vx = Math.cos(a) * 8; p.vy = Math.sin(a) * 8; } continue; }
-      if (p.inv > 0 && p.od <= 0) continue;
-      const a = Math.atan2(p.y - e.y, p.x - e.x); p.vx += Math.cos(a) * 6; p.vy += Math.sin(a) * 6;
-      hurt(p, e.ram * (e.d.elite ? 1.4 : 1) * G.run.edm * (1 - .4 * p.mod.ramc), 'ram');
-      if (e.d.elite) { hurtEnemy(e, e.mhp * (.3 + .1 * p.mod.ramc), { own: p.id }); e.rcd = 30; } else { e.hp = 0; killEnemy(e, p.id); }
+      if (p.dashT > 0) { if (!e.boss && !(e.dhT > G.t)) { e.dhT = G.t + 30; spark(e.x, e.y, 8, '#e0f2fe', 5, 16, 2); hurtEnemy(e, 12 + e.mhp * .1, { own: p.id }); } continue; }
+      if (e.boss) { if (!e.rcd) { hurt(p, bulletDmg(p, 26), 'ram'); e.rcd = 45; const a = Math.atan2(p.y - e.y, p.x - e.x); p.vx = Math.cos(a) * 8; p.vy = Math.sin(a) * 8; } continue; }
+      if ((p.inv > 0 && p.od <= 0) || e.rcd > 0) continue;
+      const a = Math.atan2(p.y - e.y, p.x - e.x); p.vx += Math.cos(a) * 9; p.vy += Math.sin(a) * 9; e.x -= Math.cos(a) * 14; e.y -= Math.sin(a) * 14;
+      // V58: ramming hurts as much as a bullet (a third of your hull) and no longer one-shots enemies
+      hurt(p, bulletDmg(p, e.ram * (e.d.elite ? 1.4 : 1) * G.run.edm) * (1 - .25 * p.mod.ramc), 'ram');
+      hurtEnemy(e, e.mhp * (e.d.elite ? .15 + .08 * p.mod.ramc : .4 + .15 * p.mod.ramc), { own: p.id }); e.rcd = 40;
     }
   }
   for (const e of G.ent.en) if (e.rcd > 0) e.rcd--;
@@ -3335,9 +3336,8 @@ function addSup(p, v) { if (!p || !p.alive || p.supT > 0 || p.noSup) return; con
 function combatTick(p, o) {
   if (p.secCd > 0) p.secCd--; if (p.pcd > 0) p.pcd--; if (p.parT > 0) p.parT--;
   const held = secHeld(p), R = G.run;
-  if (held && !p.secH) { // fresh press: parry if a shot is about to hit, otherwise start charging
+  if (held && !p.secH) { // fresh press: start charging (parry removed in V58)
     p.secH = true; p.chg = 0; p.secLock = false;
-    if (p.pcd <= 0) { if (tryParry(p)) p.secLock = true; else p.pcd = 40; }
   } else if (held && !p.secLock) { p.chg = Math.min(80, p.chg + 1); p.vx *= .97; p.vy *= .97; if (p.chg >= 12 && p.chg % 10 === 0 && p.chg < 80) SFX.charge(p.chg / 80); if (p.chg === 80) SFX.power(); }
   else if (!held && p.secH) { // release
     p.secH = false;
@@ -4031,7 +4031,6 @@ const MSN = [
   { id: 'kill', nm: n => 'Destroy ' + n + ' enemies', n: [60, 120, 200], v: R => R.kills },
   { id: 'clear', nm: n => 'Clear ' + n + ' campaign sectors', n: [2, 3, 5], v: (R, win) => R.mode === 'expedition' && !R.var && win ? 1 : 0 },
   { id: 'boss', nm: n => 'Defeat ' + n + (n > 1 ? ' bosses' : ' boss'), n: [1, 2], v: R => R.bossDown | 0 },
-  { id: 'parry', nm: n => 'Parry ' + n + ' shots', n: [5, 12, 20], v: R => R.parries | 0 },
   { id: 'super', nm: n => 'Fire ' + n + ' super finishers', n: [2, 4], v: R => R.supers | 0 },
   { id: 'combo', nm: n => 'Reach a ' + n + '-kill chain', n: [15, 25, 40], v: R => R.maxCombo, max: 1 },
   { id: 'cores', nm: n => 'Pick up ' + n + ' cores', n: [400, 900, 1500], v: R => R.cores },
@@ -4145,7 +4144,7 @@ function randChal() { const n = Math.max(1, Math.min(SAVE.wu, WORLDS.length)), w
 
 // ---- gamepad remapping ----
 const PADB = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'SELECT', 'START', 'L-STICK', 'R-STICK'];
-const PADA = [['fire', 'Fire', [0, 7]], ['ab', 'Ability', [1, 3]], ['sec', 'Charge / secondary / parry', [6, 2]], ['sup', 'Super finisher', [10, 11, 8]], ['wl', 'Previous gun', [4]], ['wr', 'Next gun', [5]]];
+const PADA = [['fire', 'Fire', [0, 7]], ['ab', 'Ability', [1, 3]], ['sec', 'Charge / secondary', [6, 2]], ['sup', 'Super finisher', [10, 11, 8]], ['wl', 'Previous gun', [4]], ['wr', 'Next gun', [5]]];
 const padBtns = a => { const m = SET.padMap; if (m && m[a] !== undefined) return [m[a]]; const r = PADA.find(x => x[0] === a); return r ? r[2] : []; };
 const padDown = (gp, a) => padBtns(a).some(i => gp.buttons[i] && gp.buttons[i].pressed);
 const padLabel = a => padBtns(a).map(i => PADB[i] || '#' + i).join(' / ');
@@ -4297,7 +4296,7 @@ const CARDS = {
   bst: { nm: 'Shield Burst', ds: 'A breaking shield blasts enemy fire away', rar: 1, max: 2, ic: 'ring', ap: p => { p.mod.burst++; } },
   vamp: { nm: 'Life Siphon', ds: 'Kills heal your hull', rar: 1, max: 3, ic: 'drop', ap: p => { p.mod.vamp++; } },
   orb: { nm: 'Orbit Drone', ds: 'A drone circles you, blocking shots', rar: 1, max: 3, ic: 'orbit', ap: p => { p.mod.orb++; } },
-  ramc: { nm: 'Ram Plating', ds: 'Ramming hurts 40% less and hits harder', rar: 1, max: 2, ic: 'ram', ap: p => { p.mod.ramc++; } },
+  ramc: { nm: 'Ram Plating', ds: 'Ramming hurts 25% less and hits harder', rar: 1, max: 2, ic: 'ram', ap: p => { p.mod.ramc++; } },
   sec: { nm: 'Second Wind', ds: 'Survive one lethal hit this run', rar: 2, max: 1, ic: 'heart', ap: p => { p.mod.second++; } },
   cdr: { nm: 'Chrono Core', ds: 'Ability recharges 25% faster', rar: 2, max: 3, ic: 'clock', ap: p => { p.mod.cdr *= .75; } },
   grz: { nm: 'Graze Reactor', ds: 'Grazing recharges your ability and plasma', rar: 2, max: 2, ic: 'graze', ap: p => { p.mod.graze++; } },
@@ -5061,7 +5060,6 @@ const ACH = [
   mkAch('hc20', 'Iron Will', 'Reach wave 20 in Hardcore.', 'bolt', 700, () => (SAVE.hi.hc || {}).wave | 0, 20),
   mkAch('gal4', 'Showoff', 'Win a boss rematch with 4 or more modifiers.', 'skull', 600, () => SAVE.flags.gal4 ? 1 : 0, 1),
   mkAch('routes', 'Off the Map', 'Clear 5 side routes.', 'map', 300, () => Object.keys(SAVE.flags.alt || {}).length, 5),
-  mkAch('parry', 'Untouchable', 'Parry 25 enemy shots.', 'sh', 300, () => SAVE.st.parry | 0, 25),
   mkAch('gold', 'Gold Rush', 'Hunt down 5 golden elites.', 'coin', 400, () => SAVE.st.gold | 0, 5),
   mkAch('super', 'Nova Beam', 'Unleash 10 super finishers.', 'bolt', 250, () => SAVE.st.supers | 0, 10),
   mkAch('hulls', 'Hangar Queen', 'Own all five standard hulls.', 'wing', 300, () => STDHULLS.filter(h => SAVE.pl[0].own.hull.indexOf(h) >= 0).length, 5),
@@ -5124,7 +5122,7 @@ function importCode(txt, i) {
 }
 
 // ---------- keyboard rebinding ----------
-const KACT = [['u', 'Move up'], ['d', 'Move down'], ['l', 'Move left'], ['r', 'Move right'], ['f', 'Fire'], ['a', 'Ability'], ['wl', 'Previous gun'], ['wr', 'Next gun'], ['c', 'Charge / secondary / parry'], ['v', 'Super finisher']];
+const KACT = [['u', 'Move up'], ['d', 'Move down'], ['l', 'Move left'], ['r', 'Move right'], ['f', 'Fire'], ['a', 'Ability'], ['wl', 'Previous gun'], ['wr', 'Next gun'], ['c', 'Charge / secondary'], ['v', 'Super finisher']];
 const KRES = ['Escape', 'KeyP', 'KeyN', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Tab', 'F5', 'F11', 'F12'];
 const KLAB = { ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', Space: 'SPACE', ShiftLeft: 'L-SHIFT', ShiftRight: 'R-SHIFT', ControlLeft: 'L-CTRL', ControlRight: 'R-CTRL', AltLeft: 'L-ALT', AltRight: 'R-ALT', Enter: 'ENTER', Comma: ',', Period: '.', Slash: '/', Semicolon: ';', Quote: "'", Semicolon: ';', Quote: "'", BracketLeft: '[', BracketRight: ']', Backslash: '\\', Minus: '-', Equal: '=', Backquote: '`', Backspace: 'BKSP', CapsLock: 'CAPS' };
 function keyLabel(c) { if (!c) return '-'; if (KLAB[c]) return KLAB[c]; if (c.indexOf('Key') === 0) return c.slice(3); if (c.indexOf('Digit') === 0) return c.slice(5); if (c.indexOf('Numpad') === 0) return 'NUM ' + c.slice(6).toUpperCase(); return c.toUpperCase(); }
@@ -5801,12 +5799,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V57';
+const GAME_VER = 'V58';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V58', 'No Shortcuts', ['Parry removed - the C button is now just charge shot and secondary weapon', 'Ramming nerfed: crashing into an enemy now costs a third of your hull (like a bullet) and only chunks it instead of killing it outright. Dash-ramming does less too', 'Seeker Missiles nerfed: less damage, slower fire, smaller blasts, wider turns and shorter lock-on range']],
   ['V57', 'Red Alert', ['Getting hit is now impossible to miss: a full-screen red flash, a heavy shake, a short freeze and a crunch sound (shield hits flash blue)', 'Big warnings in the middle of the screen: SHIELD DOWN, HULL BREACHED and ONE MORE HIT', 'When one more hit will kill you: pulsing red edges, a heartbeat, an alarm and a flashing CRITICAL - ONE HIT FROM DEATH banner', 'Turning off Screen flash on hit in Settings keeps the warnings but stops the strobing']],
   ['V56', 'Three Hits', ['Enemy bullets now hit hard: every bullet takes at least a third of your max hull (shields soak it first), so even World 1 can kill you', 'Upgrading hull no longer makes bullets tickle - it just gives you more to lose']],
   ['V55', 'Earn It', ['Shields no longer recharge on their own - grab shield pickups, cards or drones to top up', 'Threat scaling: if your ship is stronger than a sector expects, enemies get tougher and hit harder, so early levels stay a fight', 'Less starting health: 80 hull and 30 shield, and repair pickups are rarer and smaller', 'Cores are harder to earn: about half the income from kills, bosses, sector bonuses, the refinery and supply crates, and upgrades cost 20% more', 'New profile picker when you open the game - choose one of three save slots']],
@@ -6313,7 +6312,7 @@ Object.assign(SCR, {
     const hulls = Object.keys(S.hull || {}).map(k => [PARTS.hull[k] ? PARTS.hull[k].nm : k, S.hull[k], '#a78bfa']).sort((a, b) => b[1] - a[1]);
     const stars = WORLDS.map((W, w) => { const d = (prog(w).done[0] || []); return [(w + 1) + '. ' + W.nm, d.reduce((a, x) => a + (x | 0), 0), W.ac]; }).filter((r, w) => w < SAVE.wu);
     const tile = (k, v) => '<div class="st2"><b>' + v + '</b><span>' + k + '</span></div>';
-    return '<div class="card wide"><div class="row sp"><h2>Stats</h2>' + rankChip() + '</div><div class="statg2">' + tile('RUNS', fmt(S.runs)) + tile('WIN RATE', tot ? Math.round(wins / tot * 100) + '%' : '-') + tile('KILLS', fmt(S.kills)) + tile('BOSSES', fmt(S.bosses)) + tile('PARRIES', fmt(S.parry | 0)) + tile('SUPERS', fmt(S.supers | 0)) + tile('GOLDEN ELITES', fmt(S.gold | 0)) + tile('PLAY TIME', fmtT(S.time)) + '</div>' +
+    return '<div class="card wide"><div class="row sp"><h2>Stats</h2>' + rankChip() + '</div><div class="statg2">' + tile('RUNS', fmt(S.runs)) + tile('WIN RATE', tot ? Math.round(wins / tot * 100) + '%' : '-') + tile('KILLS', fmt(S.kills)) + tile('BOSSES', fmt(S.bosses)) + tile('SUPERS', fmt(S.supers | 0)) + tile('GOLDEN ELITES', fmt(S.gold | 0)) + tile('PLAY TIME', fmtT(S.time)) + '</div>' +
       '<div class="xs mut b" style="letter-spacing:.14em;margin:14px 0 6px">LAST ' + H0.length + ' RUNS - SCORE</div>' + svgRuns(H0) +
       '<div class="grid2" style="margin-top:12px;align-items:start"><div><div class="xs mut b" style="letter-spacing:.14em;margin-bottom:6px">KILLS BY GUN</div>' + (wpn.length ? svgBars(wpn) : '<div class="xs mut">-</div>') + '</div><div><div class="xs mut b" style="letter-spacing:.14em;margin-bottom:6px">RUNS BY SHIP</div>' + (hulls.length ? svgBars(hulls) : '<div class="xs mut">-</div>') + '</div></div>' +
       '<div class="xs mut b" style="letter-spacing:.14em;margin:12px 0 6px">STARS PER WORLD (MAX 39)</div>' + svgBars(stars, { lw: 150 }) +
