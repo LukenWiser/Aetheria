@@ -214,6 +214,6 @@ function frame(now) {
   if (n > 0) {
     if (SET.cap30) { skipR = !skipR; if (skipR) return; }
     render(); fpsN++;
-    if (now - fpsT > 1000) { const el = $('fps'); if (SET.fps) { el.style.display = 'block'; el.textContent = fpsN + ' FPS'; } else el.style.display = 'none'; fpsN = 0; fpsT = now; }
+    if (now - fpsT > 1000) { const el = $('fps'); if (!SET.fps) el.style.display = 'none'; fpsN = 0; fpsT = now; }
   }
 }

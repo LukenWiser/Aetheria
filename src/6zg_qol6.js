@@ -32,3 +32,9 @@ QPOST.push((id, el) => { if (id !== 'scModes' || !el) return; let m = null; try 
 
 try { const g = SETS.GRAPHICS, i = g.findIndex(r => r[0] === 'intro'); if (i >= 0) g[i] = ['intro', 'sel', 'Intro movie', 'Plays when the game loads', [[true, 'First 3 launches'], ['always', 'Every launch'], [false, 'Never']]]; } catch (e) { }
 const _applySetQ6 = applySet; applySet = function (k) { if (k === 'intro') { if (SET.intro === 'true') SET.intro = true; else if (SET.intro === 'false') SET.intro = false; try { saveSet(); } catch (e) { } return; } return _applySetQ6.apply(this, arguments); };
+
+// ================= V73: performance sweep =================
+// no live blur behind floating ship panels (the panels move every frame, so the blur was recomputed every frame)
+(function () { const st = document.createElement('style'); st.textContent = 'body.shipm #ui *,body.shipm #ui .scr{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}body.shipm #ui .scr.on>.card{background-color:rgba(4,9,20,.82)}#fps{font:800 10px var(--mono)!important;line-height:1.4;white-space:pre;background:rgba(0,0,0,.55);padding:3px 6px}'; document.head.appendChild(st); })();
+// FPS counter: frames per second, average frame time and the worst frame of the last second
+(function () { let n = 0, t0 = performance.now(), worst = 0, last = performance.now(); (function l(now) { requestAnimationFrame(l); const dt = now - last; last = now; n++; if (dt > worst) worst = dt; if (now - t0 >= 1000) { const el = document.getElementById('fps'); if (el && SET.fps) { el.style.display = 'block'; el.textContent = Math.round(n * 1000 / (now - t0)) + ' FPS  ' + ((now - t0) / n).toFixed(1) + 'ms  worst ' + worst.toFixed(0) + 'ms'; } n = 0; worst = 0; t0 = now; } })(last); })();

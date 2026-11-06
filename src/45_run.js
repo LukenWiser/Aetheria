@@ -295,9 +295,10 @@ function render() {
   if (!SET.reduce) { sx += G.kx || 0; sy += G.ky || 0; } G.kx = (G.kx || 0) * .78; G.ky = (G.ky || 0) * .78;
   G.sx = sx; G.sy = sy;
   bg.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr); const shipV = !play && R3 && R3.getView && R3.getView() === 'ship'; if (shipV) { if (!G._bgClr) { bg.clearRect(-50, -50, V.W + 100, V.H + 100); G._bgClr = 1; } } else if ((G._bgClr = 0) || !(R3 && R3.bgActive && (play || G.scene !== 'play'))) drawBackdrop(bg, G.t); else if (!play) bg.clearRect(0, 0, V.W, V.H); if (G.crash && play) drawDesktop(bg, G.t);
-  fx.setTransform(1, 0, 0, 1, 0, 0); fx.clearRect(0, 0, cvFx.width, cvFx.height); fx.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr);
+  const shipV0 = !play && R3 && R3.getView && R3.getView() === 'ship';
+  if (!(shipV0 && G._fxClr)) { fx.setTransform(1, 0, 0, 1, 0, 0); fx.clearRect(0, 0, cvFx.width, cvFx.height); } fx.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr);
   if (R3) { try { R3.draw(G, V); r3err = 0; } catch (e) { console.error('R3', e); if (++r3err > 6) { R3.on = false; R3 = null; } } }
-  const g = fx, t = G.t, use3 = R3 && R3.on; if (!play && !shipV) menuFx(g);
+  const g = fx, t = G.t, use3 = R3 && R3.on; if (shipV) { G._fxClr = 1; return; } G._fxClr = 0; if (!play) menuFx(g);
   if (play) {
     if (!SET.reduce && (G.world === 2 || G.world === 6)) { // heat shimmer: slow wavy bands of hot air rising off the ground
       g.save(); g.globalCompositeOperation = 'lighter'; g.lineWidth = 14; g.lineCap = 'round';

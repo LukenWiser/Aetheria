@@ -121,12 +121,13 @@ buildHud = function () {
 };
 const hxW = (id, f) => { const e = $(id); if (e) e.style.width = (clamp(f, 0, 1) * 100).toFixed(1) + '%'; };
 function hxCells(p) { const c = $('hc' + p.id); if (!c) return; const n = clamp(Math.round(p.mhp / Math.max(1, p.mhp / 3)), 1, 8); if (c._n !== n) { c._n = n; c.innerHTML = Array.from({ length: n }, () => '<div class="cell"><b class="g"></b><b class="f"></b></div>').join(''); } const per = p.mhp / n, cs = c.children; for (let k = 0; k < n; k++) { const f = clamp((p.hp - k * per) / per, 0, 1), cl = cs[k]; cl.children[1].style.width = (f * 100).toFixed(1) + '%'; cl.children[0].style.width = (f * 100).toFixed(1) + '%'; cl.classList.toggle('gone', f <= 0); } }
+const HXR = new Map(); let hxRT = 0; function hxRect(el) { const now = performance.now(); if (now - hxRT > 500) { HXR.clear(); hxRT = now; } let r = HXR.get(el); if (!r) { r = el.getBoundingClientRect(); HXR.set(el, r); } return r; }
 // map a game position to the screen, to fade panels the ship flies under
-function hxScr(x, y) { const cv = document.getElementById('cvFx') || document.getElementById('cvBg'); const r = cv.getBoundingClientRect(); return [r.left + x / V.W * r.width, r.top + y / V.H * r.height]; }
+function hxScr(x, y) { const cv = document.getElementById('cvFx') || document.getElementById('cvBg'); const r = hxRect(cv); return [r.left + x / V.W * r.width, r.top + y / V.H * r.height]; }
 hudTick = function () {
   const R = G.run; if (!R) return;
   const pos = G.players.filter(p => p.alive).map(p => hxScr(p.x, p.y));
-  const near = el => { if (!el || !el.offsetParent && el.id !== 'top') return false; const r = el.getBoundingClientRect(); return pos.some(([x, y]) => x > r.left - 30 && x < r.right + 30 && y > r.top - 30 && y < r.bottom + 30); };
+  const near = el => { if (!el || !el.offsetParent && el.id !== 'top') return false; const r = hxRect(el); return pos.some(([x, y]) => x > r.left - 30 && x < r.right + 30 && y > r.top - 30 && y < r.bottom + 30); };
   for (const p of G.players) {
     const c = p._hc, i = p.id, el = $('hp' + i); if (!el) continue;
     const hv = Math.round(p.hp), sv = Math.round(p.sh), av = Math.round(p.am), lv = wlvOf(p.pl, p.wpn), ev = wevOf(p.pl, p.wpn), wk = p.wpn + lv + (ev ? 'E' : '') + (p.alive ? '' : 'x');
@@ -154,5 +155,5 @@ hudTick = function () {
   if (R.stn) { const sn = R.stn, k = Math.round(sn.hp) + ':' + Math.round(sn.sh); if (R._sk !== k) { R._sk = k; $('stnH').style.width = sn.hp / sn.mhp * 100 + '%'; $('stnS').style.width = sn.sh / sn.msh * 100 + '%'; $('stnT').textContent = 'STATION ' + Math.round(sn.hp / sn.mhp * 100) + '%'; } }
   const tbt = $('tab'), p0 = G.players[0]; if (tbt && p0) { const f = p0.abMax ? 1 - p0.abCd / p0.abMax : 1, k = (p0.alive ? Math.round(f * 36) : 0) + (p0.abCd > 0 ? '' : 'r'); if (tbt._k !== k) { tbt._k = k; tbt.style.setProperty('--cd', (360 - Math.round(f * 360)) + 'deg'); tbt.classList.toggle('rdy', p0.alive && p0.abCd <= 0); } }
   const b = R.boss; if (b && !b.dead) { const pd = b.pods ? podOf(b) : null; $('boss').classList.add('on'); const nm = BOSSES[b.bi].nm.toUpperCase() + (b.stg > 0 ? ' - EXPOSED!' : pd ? ' - ARMORED' : ''), pc = Math.ceil(clamp(b.hp / b.mhp, 0, 1) * 100) + '%', bk = nm + pc; const bn = $('bossN'); if (bn._k !== bk) { bn._k = bk; bn.innerHTML = '<span>' + nm + '</span><span>' + pc + '</span>'; } $('bossF').style.width = clamp(b.hp / b.mhp, 0, 1) * 100 + '%'; const sp = pd && b.st === 1; $('bossPb').style.display = sp ? 'block' : 'none'; if (sp) $('bossP').style.width = clamp(pd.hp / pd.mhp, 0, 1) * 100 + '%'; } else $('boss').classList.remove('on');
-  const tp = $('top'); if (tp) { const r = tp.getBoundingClientRect(), dm = pos.some(([x, y]) => x > r.left - 30 && x < r.right + 30 && y < r.bottom + 30); if (tp._dm !== dm) { tp._dm = dm; tp.classList.toggle('dim', dm); } }
+  const tp = $('top'); if (tp) { const r = hxRect(tp), dm = pos.some(([x, y]) => x > r.left - 30 && x < r.right + 30 && y < r.bottom + 30); if (tp._dm !== dm) { tp._dm = dm; tp.classList.toggle('dim', dm); } }
 };

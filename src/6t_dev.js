@@ -58,7 +58,7 @@ const DVA = {
   slow() { G.devTs = (G.devTs || 1) === 1 ? .35 : (G.devTs === .35 ? 2 : 1); dvMsg('ENEMY SPEED x' + G.devTs); },
   hbox() { SET.hitbox = !SET.hitbox; saveSet(); dvMsg('HITBOXES ' + (SET.hitbox ? 'ON' : 'OFF')); },
   hud() { const h = $('hud'); h.style.visibility = h.style.visibility === 'hidden' ? '' : 'hidden'; },
-  fps() { const f = $('fps'); f.style.display = f.style.display === 'block' ? 'none' : 'block'; G.devFps = f.style.display === 'block'; },
+  fps() { SET.fps = !SET.fps; G.devFps = SET.fps; try { saveSet(); } catch (e) { } dvMsg('FPS COUNTER ' + (SET.fps ? 'ON' : 'OFF')); },
   info() { DEV.info = !DEV.info; }
 };
 DEV.HK = {

@@ -51,16 +51,16 @@ function dngTick() {
   const per = state === 'lethal' ? 520 : 900; let pulse = 0;
   if (state) { if (now - DNG.lastBeat > per) { DNG.lastBeat = now; dngBeat(); } const ph = (now - DNG.lastBeat) / per; pulse = Math.max(0, 1 - ph * 3.2) + Math.max(0, .7 - Math.abs(ph - .33) * 4); }
   const base = state === 'lethal' ? .75 : state === 'crit' ? .4 : 0, v = state ? Math.min(1, base + (fx ? pulse * .35 : 0)) : 0;
-  DNG.el.style.opacity = v.toFixed(2);
-  document.body.classList.toggle('dngShake', state === 'lethal');
+  const vs = v.toFixed(2); if (DNG._v !== vs) { DNG._v = vs; DNG.el.style.opacity = vs; }
+  if (DNG._sh !== (state === 'lethal')) { DNG._sh = state === 'lethal'; document.body.classList.toggle('dngShake', DNG._sh); }
   if (DNG.txt) {
     if (state) { DNG.txt.style.display = 'block'; const html = state === 'lethal' ? 'CRITICAL - ONE HIT FROM DEATH<small>GRAB A REPAIR OR SHIELD PICKUP</small>' : 'HULL DAMAGED<small>TWO HITS LEFT</small>'; if (DNG.txt._h !== html) { DNG.txt._h = html; DNG.txt.innerHTML = html; } DNG.txt.style.opacity = state === 'lethal' ? (fx ? (.55 + .45 * Math.abs(Math.sin(now / 140))).toFixed(2) : '1') : '.85'; DNG.txt.style.color = state === 'lethal' ? '#fecaca' : '#fed7aa'; }
-    else DNG.txt.style.display = 'none';
+    else if (DNG.txt.style.display !== 'none') DNG.txt.style.display = 'none';
   }
   // hit flash: solid tint that fades fast + thick edge
-  if (DNG.hitA > 0) { DNG.hit.style.opacity = DNG.hitA.toFixed(2); DNG.hit.style.background = 'radial-gradient(ellipse at 50% 50%,rgba(' + DNG.hitC + ',.18) 0%,rgba(' + DNG.hitC + ',.5) 60%,rgba(' + DNG.hitC + ',.95) 100%)'; DNG.hitA = Math.max(0, DNG.hitA - .06); } else if (DNG.hit.style.opacity !== '0') DNG.hit.style.opacity = '0';
+  if (DNG.hitA > 0) { DNG._h = 1; DNG.hit.style.opacity = DNG.hitA.toFixed(2); DNG.hit.style.background = 'radial-gradient(ellipse at 50% 50%,rgba(' + DNG.hitC + ',.18) 0%,rgba(' + DNG.hitC + ',.5) 60%,rgba(' + DNG.hitC + ',.95) 100%)'; DNG.hitA = Math.max(0, DNG.hitA - .06); } else if (DNG._h !== 0) { DNG._h = 0; DNG.hit.style.opacity = '0'; }
   if (!play) DNG.bigT = 0;
-  if (DNG.bigT > 0) { DNG.bigT--; const k = DNG.bigT / 50; DNG.big.style.opacity = Math.min(1, k * 2.5).toFixed(2); DNG.big.style.transform = 'scale(' + (1 + Math.max(0, k - .8) * 2).toFixed(2) + ')'; } else if (DNG.big.style.opacity !== '0') DNG.big.style.opacity = '0';
+  if (DNG.bigT > 0) { DNG._b = 1; DNG.bigT--; const k = DNG.bigT / 50; DNG.big.style.opacity = Math.min(1, k * 2.5).toFixed(2); DNG.big.style.transform = 'scale(' + (1 + Math.max(0, k - .8) * 2).toFixed(2) + ')'; } else if (DNG._b !== 0) { DNG._b = 0; DNG.big.style.opacity = '0'; }
 }
 (function dngLoop() { try { dngTick(); } catch (e) { } requestAnimationFrame(dngLoop); })();
 window.__DNG = DNG;
