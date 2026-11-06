@@ -5852,12 +5852,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V62';
+const GAME_VER = 'V63';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V63', 'Sound Check', ['New Warnings volume slider (Settings > Audio) for the heartbeat, alarm and hit sounds', 'Music dips out of the way when you get hit, when a boss appears and when a boss or your ship goes down', 'Music gets brighter the longer your combo runs', 'Cores climb a musical ladder when you grab them in a row', 'Shields shatter with a glassy crash when they break', 'New sounds for repair, shield and plasma pickups, wave starts, sector clears and an empty-gun click']],
   ['V62', 'Clean Lines', ['Menus restyled to match the new HUD: cut-corner buttons with a light sweep on hover, bracketed glass panels and sharp rows', 'Upright titles with ship-system tags (SORTIE, QUARTERMASTER, HANGAR BAY, COMMAND...) and accent strips', 'Main menu entries are numbered, with a sliding highlight bar', 'Screens open with a staged entrance - the panel wipes in and rows slide in one after another', 'Quiet hover ticks on buttons']],
   ['V61', 'Built Better', ['Every ship and enemy now has panel plating, rivets and worn metal instead of flat colour', 'A cool rim light outlines every hull so ships pop off busy backgrounds', 'Deeper cel-shading bands for more shape and shadow', 'New parts on enemy craft: cockpits, glowing engine nozzles, vents, antennas, turret wheels, barrel fins and armour plates', 'Blinking red and green navigation lights and a tail strobe on ships, plus white-hot engine cores', 'Model detail can be turned off in Settings > Graphics for slower devices']],
   ['V60', 'Feel It', ['Every hit on an enemy ticks with a sound pitched to your gun, and kills land with a punchier sound', 'Big enemies freeze time for a split second and burst into debris', 'Heavy guns (Lancer, Missiles, Plasma Orb, Rail) kick your ship and the camera back', 'Getting hit jolts the screen away from where the shot came from', 'Boss deaths: a chain of explosions, then a full-screen shockwave', 'New WHAT GOT YOU report when you die: who killed you, plus tips based on how you got hit', 'The results screen now stamps in and counts up', 'Press R on the results screen to retry instantly, ENTER for the next sector']],
@@ -9184,6 +9185,79 @@ document.addEventListener('pointerover', e => {
   const now = performance.now(); if (now - (vxT.t || 0) < 45) return; vxT.t = now;
   try { if (!AC || !sfxG || AC.state !== 'running') return; const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(2400, t); o.frequency.exponentialRampToValueAtTime(1600, t + .03); g.gain.setValueAtTime(.025, t); g.gain.exponentialRampToValueAtTime(.0001, t + .04); o.connect(g); g.connect(sfxG); o.start(t); o.stop(t + .05); } catch (er) { }
 }, true);
+
+// ================= V63: audio pass =================
+// Warnings bus with its own volume, music ducking on big moments, music that brightens with your combo,
+// a rising coin ladder for cores, shield-shatter, empty-gun clicks and wave stingers.
+const AUDX = { alert: null, duck: null, shelf: null, wired: null, ladder: 0, ladT: 0 };
+try { if (SETS.AUDIO && !SETS.AUDIO.some(r => r[0] === 'alertVol')) SETS.AUDIO.push(['alertVol', 'range', 'Warnings', 'Heartbeat, alarm and hit sounds', [0, 1, .05]]); if (SET.alertVol === undefined) SET.alertVol = .9; } catch (e) { }
+function audxWire() {
+  if (!AC || AUDX.wired === AC) return !!AUDX.alert; AUDX.wired = AC;
+  try {
+    AUDX.alert = AC.createGain(); AUDX.alert.connect(masterG);
+    AUDX.duck = AC.createGain(); AUDX.shelf = AC.createBiquadFilter(); AUDX.shelf.type = 'highshelf'; AUDX.shelf.frequency.value = 3200; AUDX.shelf.gain.value = 0;
+    musG.disconnect(); musG.connect(AUDX.duck); AUDX.duck.connect(AUDX.shelf); AUDX.shelf.connect(masterG);
+    audxVol();
+  } catch (e) { console.warn('audx', e); AUDX.alert = null; }
+  return !!AUDX.alert;
+}
+function audxVol() { try { if (AUDX.alert) AUDX.alert.gain.value = SET.alertVol === undefined ? .9 : SET.alertVol; } catch (e) { } }
+const _applyVolX = applyVol; applyVol = function () { const r = _applyVolX.apply(this, arguments); audxWire(); audxVol(); return r; };
+// sidechain-style dip in the music
+function duck(depth, ms) { if (!audxWire() || SET.reduce === 'audio') return; try { const t = AC.currentTime, g = AUDX.duck.gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(1 - depth, t + .04); g.linearRampToValueAtTime(1, t + .04 + ms / 1000); } catch (e) { } }
+function tone(f0, f1, dur, vol, type, bus, when) {
+  try { if (!audxWire()) return; const t = AC.currentTime + (when || 0), o = AC.createOscillator(), g = AC.createGain(); o.type = type || 'sine'; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .006); g.gain.exponentialRampToValueAtTime(.0001, t + dur); o.connect(g); g.connect(bus || sfxG); o.start(t); o.stop(t + dur + .03); } catch (e) { }
+}
+function noiseBurst(dur, vol, hp, bus) {
+  try { if (!audxWire()) return; const n = Math.floor(AC.sampleRate * dur), b = AC.createBuffer(1, n, AC.sampleRate), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.2); const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = b; f.type = 'highpass'; f.frequency.value = hp || 2000; g.gain.value = vol; s.connect(f); f.connect(g); g.connect(bus || sfxG); s.start(); } catch (e) { }
+}
+// route the danger sounds onto the warnings bus
+dngTone = function (f0, f1, dur, vol, type) { tone(f0, f1, dur, vol, type, AUDX.alert || sfxG); };
+
+// hits: duck the music; shield break: glassy shatter
+const _hurtX = hurt;
+hurt = function (p, dmg, kind) {
+  const sh0 = p.sh, hp0 = p.hp, r = _hurtX.apply(this, arguments);
+  try { if (r && G.run) { if (hp0 - p.hp > 0) duck(.55, 520); else duck(.25, 260); if (sh0 > 0 && p.sh <= 0) { noiseBurst(.35, .32, 3500, AUDX.alert); [2600, 3300, 4100].forEach((f, i) => tone(f, f * .6, .25, .05, 'triangle', AUDX.alert, i * .03)); } } } catch (e) { }
+  return r;
+};
+// pickups: cores climb a ladder when collected in a row, repairs get a warm chord
+const _collectX = collect;
+collect = function (p, k) {
+  const r = _collectX.apply(this, arguments);
+  try {
+    if (!p.remote) {
+      const now = performance.now();
+      if (k.k === 'core') { AUDX.ladder = now - AUDX.ladT < 450 ? Math.min(14, AUDX.ladder + 1) : 0; AUDX.ladT = now; const f = 880 * Math.pow(2, AUDX.ladder / 12); tone(f, f * 1.01, .09, .045, 'triangle'); }
+      else if (k.k === 'hp') [523, 659, 784].forEach((f, i) => tone(f, f, .32, .06, 'sine', null, i * .045));
+      else if (k.k === 'sh') [784, 988, 1319].forEach((f, i) => tone(f, f * 1.02, .28, .05, 'triangle', null, i * .04));
+      else if (k.k === 'ammo') tone(300, 900, .14, .06, 'square');
+    }
+  } catch (e) { }
+  return r;
+};
+// boss down / player down: big duck
+const _killBX = killBoss; killBoss = function (e) { const was = e.st === 2, r = _killBX.apply(this, arguments); if (!was) duck(.8, 2200); return r; };
+const _killPX = killPlayer; killPlayer = function (p) { const r = _killPX.apply(this, arguments); duck(.7, 1600); tone(220, 55, .9, .14, 'sawtooth', AUDX.alert); return r; };
+
+// live mix: combo brightens the music, empty gun clicks, wave stingers
+(function () {
+  let lastWave = -1, lastStage = '', lastAux = 0;
+  setInterval(() => {
+    try {
+      const R = G.run; if (!AC || AC.state !== 'running' || !audxWire()) return;
+      const play = G.scene === 'play' && R && !G.paused, cb = play ? Math.min(R.combo || 0, 20) : 0;
+      AUDX.shelf.gain.setTargetAtTime(cb >= 6 ? Math.min(6, (cb - 5) * .5) : 0, AC.currentTime, .3);
+      if (!play) { lastWave = -1; lastStage = ''; return; }
+      if (R.stage === 'wave' && R.wave !== lastWave && lastWave !== -1) [392, 523, 659].forEach((f, i) => tone(f, f, .18, .045, 'square', null, i * .07));
+      if (R.stage === 'clear' && lastStage !== 'clear') [523, 659, 784, 1047].forEach((f, i) => tone(f, f, .35, .06, 'triangle', null, i * .09));
+      if (R.stage === 'boss' && lastStage !== 'boss') { duck(.6, 1200); tone(80, 40, 1.4, .2, 'sawtooth', AUDX.alert); }
+      lastWave = R.wave; lastStage = R.stage;
+      const p = G.players[0], now = performance.now(); if (p && p.alive && p.am < (WPN[p.wpn] || WPN.twin).am && IN.keys && Object.keys(IN.keys).some(k => IN.keys[k]) && now - lastAux > 600) { lastAux = now; tone(1800, 1200, .03, .03, 'square'); }
+    } catch (e) { }
+  }, 100);
+})();
+window.__AUDX = AUDX;
 
 // ================= BOOT =================
 function boot() {
