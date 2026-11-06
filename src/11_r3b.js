@@ -228,9 +228,11 @@
     if (!m || !m.isMeshStandardMaterial) return m;
     let t = TOON.mats.get(m); if (t) return t;
     const met = m.metalness || 0, c = m.color.clone(); c.multiplyScalar(1 + met * .2); // metal leaned on reflections; toon needs the base colour lifted instead
-    t = new THREE.MeshToonMaterial({ color: c, map: m.map, gradientMap: toonGrad(), emissive: m.emissive.clone(), emissiveIntensity: m.emissiveIntensity, emissiveMap: m.emissiveMap, transparent: m.transparent, opacity: m.opacity, side: m.side, vertexColors: m.vertexColors, depthWrite: m.depthWrite });
+    t = new THREE.MeshToonMaterial({ color: c, map: m.map, gradientMap: m.userData && m.userData.rim ? shipGrad() : toonGrad(), emissive: m.emissive.clone(), emissiveIntensity: m.emissiveIntensity, emissiveMap: m.emissiveMap, transparent: m.transparent, opacity: m.opacity, side: m.side, vertexColors: m.vertexColors, depthWrite: m.depthWrite });
+    if (m.userData && m.userData.rim) rimify(t);
     TOON.mats.set(m, t); return t;
   }
+  let SG = null; function shipGrad() { if (SG) return SG; const d = new Uint8Array([46, 46, 46, 255, 112, 112, 112, 255, 190, 190, 190, 255, 255, 255, 255, 255]); SG = new THREE.DataTexture(d, 4, 1, THREE.RGBAFormat); SG.minFilter = SG.magFilter = THREE.NearestFilter; SG.generateMipmaps = false; SG.needsUpdate = true; return SG; }
   function outlineMat() {
     return TOON.om || (TOON.om = new THREE.ShaderMaterial({
       uniforms: { w: { value: 1.4 }, c: { value: new THREE.Color(0x04060c) } }, side: THREE.BackSide,
@@ -247,7 +249,7 @@
   }
   function toonify(root) {
     if (!SET.toon) return root;
-    const list = []; root.traverse(n => { if (n.isMesh && !n.userData.outline) list.push(n); });
+    const list = []; root.traverse(n => { if (n.isMesh && !n.userData.outline && !n.userData.nav) list.push(n); });
     for (const m of list) {
       const src = m.material; if (Array.isArray(src)) continue;
       const glow = src && src.emissive && src.emissiveIntensity >= 1 && (src.color.r + src.color.g + src.color.b) < .3; // pure light sources stay clean
@@ -258,10 +260,13 @@
     return root;
   }
   function measure(root) { root.updateMatrixWorld(true); bb.makeEmpty(); root.traverse(o => { if (o.isMesh) { b2.setFromObject(o); bb.union(b2); } }); return bb.getSize(tv).x || 1; }
+  const MECH = { dart: 1, saucer: 1, sniper: 1, elite: 1, gear: 0, tank: 1, manta: 1, cube: 0, clock: 0 };
   function T(id) {
     const tk = id + (SET.toon ? ':t' : ''); let t = tpl[tk]; if (t) return t;
     const d = EN[id], a = d.m, g = ARCH[a[0]](a[1] || {});
     if (d.elite) g.add(mesh(TO(2.3, .06, 8, 48), E(hx(a[1].e || 0xffffff), 2), [0, 0, 0], [H, 0, 0]));
+    if (KIT[a[0]] && SET.detail !== false) try { KIT[a[0]](g, a[1] || {}); } catch (er) { console.warn('kit', er); }
+    if (MECH[a[0]]) try { g.updateMatrixWorld(true); bb.setFromObject(g); const s = bb.getSize(tv).clone(), c = bb.getCenter(new THREE.Vector3()); navLights(g, bb.min.x + .05, bb.max.x - .05, c.y + s.y * .1, c.z + s.z * .2, bb.max.z - .05); } catch (er) { }
     toonify(g);
     const face = g.userData.face ? 1 : 0, inner = grp(g), root = grp(inner); root.rotation.x = .5; inner.rotation.y = face ? 0 : H;
     return tpl[tk] = { g, face, sc: d.w / measure(root) };
