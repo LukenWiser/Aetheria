@@ -285,7 +285,7 @@ function updEB() {
       if (!p.alive) continue;
       const dx = p.x - b.x, dy = p.y - b.y, d2 = dx * dx + dy * dy, rr = b.r + 11;
       if (p.inv > 0) { if (p.dashT > 0 && !b.gz && d2 < (rr + 18) * (rr + 18)) graze(p, b); continue; }
-      if (d2 < rr * rr) { hurt(p, bulletDmg(p, b.d), 'b'); if (b.ice) { p.slow = 100; ftext(p.x, p.y - 36, 'FROZEN', '#bae6fd', 11); } rm = true; break; }
+      if (d2 < rr * rr) { G.lastB = b; hurt(p, bulletDmg(p, b.d), 'b'); if (b.ice) { p.slow = 100; ftext(p.x, p.y - 36, 'FROZEN', '#bae6fd', 11); } rm = true; break; }
       if (!b.gz && d2 < (rr + 18) * (rr + 18)) graze(p, b);
     }
     if (!rm && G.run && G.run.stn && b.x < STN_X && b.vx < 0 && !b.mine) { stnHit(G.run, b.d * .3, b.x, b.y); rm = true; }
@@ -301,11 +301,11 @@ function ramCheck() {
       if (e.dead || e.hide || e.x > V.W + 6) continue;
       const rr = 15 + e.r * .86; if ((p.x - e.x) * (p.x - e.x) + (p.y - e.y) * (p.y - e.y) > rr * rr) continue;
       if (p.dashT > 0) { if (!e.boss && !(e.dhT > G.t)) { e.dhT = G.t + 30; spark(e.x, e.y, 8, '#e0f2fe', 5, 16, 2); hurtEnemy(e, 12 + e.mhp * .1, { own: p.id }); } continue; }
-      if (e.boss) { if (!e.rcd) { hurt(p, bulletDmg(p, 26), 'ram'); e.rcd = 45; const a = Math.atan2(p.y - e.y, p.x - e.x); p.vx = Math.cos(a) * 8; p.vy = Math.sin(a) * 8; } continue; }
+      if (e.boss) { if (!e.rcd) { G.lastB = e; hurt(p, bulletDmg(p, 26), 'ram'); e.rcd = 45; const a = Math.atan2(p.y - e.y, p.x - e.x); p.vx = Math.cos(a) * 8; p.vy = Math.sin(a) * 8; } continue; }
       if ((p.inv > 0 && p.od <= 0) || e.rcd > 0) continue;
       const a = Math.atan2(p.y - e.y, p.x - e.x); p.vx += Math.cos(a) * 9; p.vy += Math.sin(a) * 9; e.x -= Math.cos(a) * 14; e.y -= Math.sin(a) * 14;
       // V58: ramming hurts as much as a bullet (a third of your hull) and no longer one-shots enemies
-      hurt(p, bulletDmg(p, e.ram * (e.d.elite ? 1.4 : 1) * G.run.edm) * (1 - .25 * p.mod.ramc), 'ram');
+      G.lastB = e; hurt(p, bulletDmg(p, e.ram * (e.d.elite ? 1.4 : 1) * G.run.edm) * (1 - .25 * p.mod.ramc), 'ram');
       hurtEnemy(e, e.mhp * (e.d.elite ? .15 + .08 * p.mod.ramc : .4 + .15 * p.mod.ramc), { own: p.id }); e.rcd = 40;
     }
   }

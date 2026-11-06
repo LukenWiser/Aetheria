@@ -59,7 +59,8 @@ function dngTick() {
   }
   // hit flash: solid tint that fades fast + thick edge
   if (DNG.hitA > 0) { DNG.hit.style.opacity = DNG.hitA.toFixed(2); DNG.hit.style.background = 'radial-gradient(ellipse at 50% 50%,rgba(' + DNG.hitC + ',.18) 0%,rgba(' + DNG.hitC + ',.5) 60%,rgba(' + DNG.hitC + ',.95) 100%)'; DNG.hitA = Math.max(0, DNG.hitA - .06); } else if (DNG.hit.style.opacity !== '0') DNG.hit.style.opacity = '0';
-  if (DNG.bigT > 0 && play) { DNG.bigT--; const k = DNG.bigT / 50; DNG.big.style.opacity = Math.min(1, k * 2.5).toFixed(2); DNG.big.style.transform = 'scale(' + (1 + Math.max(0, k - .8) * 2).toFixed(2) + ')'; } else if (DNG.big.style.opacity !== '0') DNG.big.style.opacity = '0';
+  if (!play) DNG.bigT = 0;
+  if (DNG.bigT > 0) { DNG.bigT--; const k = DNG.bigT / 50; DNG.big.style.opacity = Math.min(1, k * 2.5).toFixed(2); DNG.big.style.transform = 'scale(' + (1 + Math.max(0, k - .8) * 2).toFixed(2) + ')'; } else if (DNG.big.style.opacity !== '0') DNG.big.style.opacity = '0';
 }
 (function dngLoop() { try { dngTick(); } catch (e) { } requestAnimationFrame(dngLoop); })();
 window.__DNG = DNG;
