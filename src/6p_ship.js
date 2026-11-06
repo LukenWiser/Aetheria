@@ -33,7 +33,7 @@ const SHIP = (() => {
   const EM = {}; const emi = (c, i = 1.6) => { const k = c + ':' + i; return EM[k] || (EM[k] = new T.MeshStandardMaterial({ color: 0x000000, emissive: new T.Color(c), emissiveIntensity: i })); };
   const std = (c, o) => new T.MeshStandardMaterial(Object.assign({ color: c, metalness: .7, roughness: .45 }, o || {}));
   const add = (p, o) => { p.add(o); return o; };
-  const mesh = (p, geo, mat, x, y, z, rx, ry, rz) => { if (mat && mat.userData && mat.userData.tile && geo.attributes.uv) { const P = geo.parameters || {}, tl = mat.userData.tile, uv = geo.attributes.uv; if (geo.type === 'BoxGeometry' && uv.count === 24) { const F = [[P.depth, P.height], [P.depth, P.height], [P.width, P.depth], [P.width, P.depth], [P.width, P.height], [P.width, P.height]]; for (let i = 0; i < 24; i++) { const f = F[i >> 2]; uv.setXY(i, uv.getX(i) * f[0] / tl, uv.getY(i) * f[1] / tl); } } else { const rr = P.radiusTop != null ? Math.max(P.radiusTop, P.radiusBottom) : P.radius, round = P.radiusTop != null || /Sphere|Torus/.test(geo.type), gw = (P.width || (round ? TAU * (rr || 1) : (rr || 1) * 2)) / tl, gh = (P.height || P.tube && TAU * P.tube || (rr || 1) * 2) / tl; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * gw, uv.getY(i) * gh); } } const m = new T.Mesh(geo, mat); m.position.set(x || 0, y || 0, z || 0); m.rotation.set(rx || 0, ry || 0, rz || 0); p.add(m); return m; };
+  const mesh = (p, geo, mat, x, y, z, rx, ry, rz) => { if (mat && mat.userData && mat.userData.tile && geo.attributes.uv) { const P = geo.parameters || {}, tl = mat.userData.tile, uv = geo.attributes.uv; if (geo.type === 'BoxGeometry' && uv.count === 24) { const F = [[P.depth, P.height], [P.depth, P.height], [P.width, P.depth], [P.width, P.depth], [P.width, P.height], [P.width, P.height]]; for (let i = 0; i < 24; i++) { const f = F[i >> 2]; uv.setXY(i, uv.getX(i) * f[0] / tl, uv.getY(i) * f[1] / tl); } } else if (geo.type === 'CylinderGeometry') { const rr = Math.max(P.radiusTop, P.radiusBottom), nT = (P.radialSegments + 1) * (P.heightSegments + 1), su = TAU * rr / tl, sv = P.height / tl, sc = 2 * rr / tl; for (let i = 0; i < uv.count; i++) { if (i < nT) uv.setXY(i, uv.getX(i) * su, uv.getY(i) * sv); else uv.setXY(i, uv.getX(i) * sc, uv.getY(i) * sc); } } else { const rr = P.radiusTop != null ? Math.max(P.radiusTop, P.radiusBottom) : P.radius, round = P.radiusTop != null || /Sphere|Torus/.test(geo.type), gw = (P.width || (round ? TAU * (rr || 1) : (rr || 1) * 2)) / tl, gh = (P.height || P.tube && TAU * P.tube || (rr || 1) * 2) / tl; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * gw, uv.getY(i) * gh); } } const m = new T.Mesh(geo, mat); m.position.set(x || 0, y || 0, z || 0); m.rotation.set(rx || 0, ry || 0, rz || 0); p.add(m); return m; };
   const box = (p, w, h, d, mat, x, y, z, ry) => mesh(p, new T.BoxGeometry(w, h, d), mat, x, y, z, 0, ry || 0, 0);
   let glowTex; const glow = (p, c, s, o = 1) => { const m = new T.Sprite(new T.SpriteMaterial({ map: glowTex, color: new T.Color(c), transparent: true, opacity: o, blending: T.AdditiveBlending, depthWrite: false })); m.scale.setScalar(s); p.add(m); return m; };
   const holoM = (c, o) => new T.MeshBasicMaterial({ color: new T.Color(c), transparent: true, opacity: o, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide });
@@ -312,6 +312,18 @@ const SHIP = (() => {
     baked(PART.metal, brushed(0x9aa3b2, 256), 1.6, { metalness: .7, roughness: .4 });
     const pT = paint(256); [PART.pipeC, PART.pipeB, PART.pipeG, PART.red, PART.yellow].forEach(m => use(m, pT, 1.2, { bumpMap: null }));
     baked(PART.wood, wood, 1.4); [PART.cloth, PART.cloth2].forEach(m => use(m, fabric, 1.4, { bumpScale: .004 })); use(PART.rubber, rubberT, .6);
+
+    // purpose-made surfaces, so a crate looks like a crate and a seat looks like a seat
+    const leather = ctex(256, 256, g => { g.fillStyle = '#2a3242'; g.fillRect(0, 0, 256, 256); for (let i = 0; i < 4000; i++) { g.fillStyle = 'rgba(' + (R() < .5 ? '255,255,255' : '0,0,0') + ',' + R() * .05 + ')'; g.fillRect(R() * 256, R() * 256, 2, 2); } for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) { const X = x * 128, Y = y * 128, gr = g.createRadialGradient(X + 64, Y + 54, 6, X + 64, Y + 64, 80); gr.addColorStop(0, 'rgba(255,255,255,.08)'); gr.addColorStop(1, 'rgba(0,0,0,.18)'); g.fillStyle = gr; g.fillRect(X, Y, 128, 128); g.strokeStyle = 'rgba(0,0,0,.28)'; g.lineWidth = 2; g.strokeRect(X + 1, Y + 1, 126, 126); g.strokeStyle = 'rgba(190,200,215,.22)'; g.setLineDash([5, 4]); g.lineWidth = 1.4; g.strokeRect(X + 8, Y + 8, 112, 112); g.setLineDash([]); g.fillStyle = 'rgba(0,0,0,.55)'; g.beginPath(); g.arc(X + 64, Y + 64, 3.5, 0, TAU); g.fill(); } });
+    const cargo = ctex(512, 512, g => { g.fillStyle = '#4a5a6e'; g.fillRect(0, 0, 512, 512); noise(g, 512, 3000, .07); for (let x = 70; x < 450; x += 34) { g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(x, 60, 10, 392); g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(x + 10, 60, 3, 392); }
+      g.fillStyle = '#2b3442'; g.fillRect(0, 0, 512, 56); g.fillRect(0, 456, 512, 56); g.fillRect(0, 0, 56, 512); g.fillRect(456, 0, 56, 512); bev(g, 0, 0, 512, 512, 6); bev(g, 56, 56, 400, 400, 4);
+      [[28, 28], [484, 28], [28, 484], [484, 484]].forEach(([x, y]) => { g.fillStyle = '#c99a2e'; g.fillRect(x - 26, y - 26, 52, 52); bev(g, x - 26, y - 26, 52, 52, 3); screw(g, x, y, 6); });
+      g.save(); g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(130, 190, 252, 132); g.font = '900 54px monospace'; g.fillStyle = 'rgba(245,245,240,.85)'; g.fillText('CARGO', 170, 252); g.font = '800 20px monospace'; g.fillStyle = 'rgba(250,204,21,.9)'; g.fillText('MAX 400 KG  /  C-' + (100 + (R() * 800 | 0)), 146, 296); g.restore();
+      for (let x = 0; x < 512; x += 32) { g.fillStyle = x / 32 % 2 ? '#111' : '#eab308'; g.fillRect(x, 430, 32, 16); } scratches(g, 512, 80); });
+    const door = ctex(512, 320, g => { g.fillStyle = '#3a4658'; g.fillRect(0, 0, 512, 320); for (let y = 10; y < 320; y += 22) { g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(0, y + 16, 512, 5); g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(0, y, 512, 3); } g.fillStyle = 'rgba(0,0,0,.7)'; g.fillRect(253, 0, 6, 320); [[60, 140], [452, 140]].forEach(([x, y]) => { g.fillStyle = '#1b2230'; g.fillRect(x - 22, y - 50, 44, 100); bev(g, x - 22, y - 50, 44, 100, 3); g.fillStyle = '#ef4444'; g.fillRect(x - 6, y - 30, 12, 12); }); g.font = '900 64px monospace'; g.fillStyle = 'rgba(240,240,240,.55)'; g.fillText('BAY', 140, 190); g.fillText('02', 290, 190); g.font = '800 16px monospace'; g.fillStyle = 'rgba(250,204,21,.8)'; g.fillText('PRESSURE DOOR - KEEP CLEAR WHEN LIGHT IS RED', 46, 262); scratches(g, 512, 60); noise(g, 512, 2000, .06); });
+    const deckPl = ctex(256, 256, g => { g.fillStyle = '#3a4659'; g.fillRect(0, 0, 256, 256); for (let y = 0; y < 256; y += 16) for (let x = (y / 16 % 2) * 8; x < 256; x += 16) { g.save(); g.translate(x, y); g.rotate(.6); g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(-5, -1.5, 10, 3); g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(-5, 1.5, 10, 1.5); g.restore(); } g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(0, 0, 256, 3); g.fillRect(0, 0, 3, 256); [[14, 14], [242, 14], [14, 242], [242, 242]].forEach(([x, y]) => screw(g, x, y, 4)); scratches(g, 256, 40); });
+    const mk = (t, tile, o) => { t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = 8; const m = std(0xffffff, Object.assign({ map: t, bumpMap: t, bumpScale: .015 }, o)); if (tile) m.userData.tile = tile; return m; };
+    M.seat = mk(leather, 1.3, { metalness: .05, roughness: .55 }); M.cargo = mk(cargo, 0, { metalness: .6, roughness: .5 }); M.door = mk(door, 0, { metalness: .6, roughness: .45 }); M.plate = mk(deckPl, 1.2, { metalness: .7, roughness: .45 });
   }
   // ---------- room contents ----------
   const BUILD = {
@@ -328,9 +340,9 @@ const SHIP = (() => {
       const atm = glow(sp, '#7dd3fc', 120, .35); atm.position.set(-34, -18, -150); G.userData.atm = atm;
       glow(sp, '#ffe8c2', 60, .9).position.set(60, 40, -260);
       // flight deck: raised platform, consoles in an arc, the captain's chair, side stations
-      mesh(G, new T.CylinderGeometry(4.6, 4.8, .25, 48, 1, false, -HP * 1.4, Math.PI * 1.4), M.mid, 0, .12, -d + 4.2);
+      mesh(G, new T.CylinderGeometry(4.6, 4.8, .25, 48, 1, false, -HP * 1.4, Math.PI * 1.4), M.plate, 0, .12, -d + 4.2);
       for (let i = 0; i < 7; i++) { const a = (i - 3) * .3, c = new T.Group(); c.position.set(Math.sin(a) * 5.4, 0, -d + 4.6 - Math.cos(a) * 3.2 + 3.2); c.rotation.y = -a; G.add(c); box(c, 1.6, 1, .9, M.dark, 0, .5, 0); plane(c, 1.4, .7, new T.MeshBasicMaterial({ map: screenT(['#22d3ee', '#fde047', '#f472b6', '#4ade80'][i % 4], i % 3) }), 0, 1.2, .1, -.6, 0); box(c, 1.5, .05, .1, emi(COLS.bridge, 1.6), 0, 1.02, .45); }
-      const ch = new T.Group(); ch.position.set(0, 0, -d + 8); G.add(ch); box(ch, 1.1, .5, 1, M.dark, 0, .55, 0); box(ch, 1.1, 1.5, .25, M.dark, 0, 1.35, .45); [-1, 1].forEach(s => { box(ch, .15, .55, .9, M.trim, s * .62, .85, 0); box(ch, .3, .06, .5, emi(COLS.bridge, 1.8), s * .62, 1.14, -.1); }); box(ch, .3, .5, .3, M.trim, 0, .2, 0);
+      const ch = new T.Group(); ch.position.set(0, 0, -d + 8); G.add(ch); box(ch, 1.1, .5, 1, M.seat, 0, .55, 0); box(ch, 1.1, 1.5, .25, M.seat, 0, 1.35, .45); [-1, 1].forEach(s => { box(ch, .15, .55, .9, M.trim, s * .62, .85, 0); box(ch, .3, .06, .5, emi(COLS.bridge, 1.8), s * .62, 1.14, -.1); }); box(ch, .3, .5, .3, M.trim, 0, .2, 0);
       // a holo of the ship's course above the flight deck
       const hol = new T.Group(); hol.position.set(0, 3.9, -d + 5); G.add(hol); for (let i = 0; i < 3; i++) { const r = mesh(hol, new T.TorusGeometry(.5 + i * .3, .015, 6, 64), holoM(COLS.bridge, .5), 0, 0, 0, HP + i * .3, 0, 0); anim.push(dt => { r.rotation.z += dt * (.3 + i * .2); }); }
       glow(hol, COLS.bridge, 1.6, .5);
@@ -347,7 +359,7 @@ const SHIP = (() => {
       anim.push((dt, c) => { holo.rotation.y += dt * .06; const sel = UI.w | 0; pl.forEach((o, i) => { o.a += o.sp * dt * .4; o.p.position.set(Math.cos(o.a) * o.r, 0, Math.sin(o.a) * o.r); const on = i === sel; o.p.scale.setScalar(on ? 2.4 + Math.sin(c * 5) * .25 : 1); o.g2.material.opacity = on ? 1 : .55; }); tr.material.emissiveIntensity = 1.6 + Math.sin(c * 2) * .4; });
       // wall charts
       [-1, 1].forEach(s => { const cht = plane(G, 3.2, 1.8, new T.MeshBasicMaterial({ map: screenT(COLS.map, 2) }), s * 3.2, 2.6, -d + .05, 0, 0); });
-      for (let i = 0; i < 4; i++) { const a = i / 4 * TAU + .4, c = new T.Group(); c.position.set(1.4 + Math.cos(a) * 3.6, 0, -7 + Math.sin(a) * 3.6); c.rotation.y = -a - HP; G.add(c); box(c, .6, .5, .6, M.mid, 0, .45, 0); box(c, .6, .8, .1, M.mid, 0, .95, .28); }
+      for (let i = 0; i < 4; i++) { const a = i / 4 * TAU + .4, c = new T.Group(); c.position.set(1.4 + Math.cos(a) * 3.6, 0, -7 + Math.sin(a) * 3.6); c.rotation.y = -a - HP; G.add(c); box(c, .6, .5, .6, M.seat, 0, .45, 0); box(c, .6, .8, .1, M.seat, 0, .95, .28); }
       G.userData.view = { p: [-2.6, 2.1, -1.8], l: [-2.6, 2.1, -9], yaw: -.05 };
       G.userData.lights = [[1.4, 4.3, -7, 0xfde047, 1.4, 12], [-3, 4.3, -3, 0xc7d2fe, 1, 12]];
     },
@@ -368,7 +380,7 @@ const SHIP = (() => {
       const gal = new T.Points(gg, new T.PointsMaterial({ size: .07, map: glowTex, vertexColors: true, transparent: true, blending: T.AdditiveBlending, depthWrite: false })); gal.position.y = 4.3; gal.rotation.x = .45; pr.add(gal); glow(pr, '#fff1d6', 1.6, .6).position.y = 4.3;
       anim.push(dt => { gal.rotation.y += dt * .12; });
       // observation benches
-      [-1, 1].forEach(s => { box(G, 3, .45, .8, M.mid, s * 4.5, .35, -9); box(G, 3, .05, .05, emi(COLS.deck, 1.6), s * 4.5, .6, -8.6); });
+      [-1, 1].forEach(s => { box(G, 3, .45, .8, M.seat, s * 4.5, .35, -9); box(G, 3, .05, .05, emi(COLS.deck, 1.6), s * 4.5, .6, -8.6); });
       G.userData.view = { p: [-2.4, 1.9, -1.8], l: [-2.6, 2.7, -9], yaw: -.05 };
       G.userData.lights = [[1.8, 5, -7, 0xa78bfa, 1.6, 12], [-3, 4, -3, 0xc7d2fe, .9, 12]];
     },
@@ -376,9 +388,9 @@ const SHIP = (() => {
       const w = 14, d = 15, h = 7; shell(G, w, d, h, { col: COLS.shop, noConsoles: 1 });
       // bay door on the far wall with hazard stripes
       const hz = ctex(256, 64, (g, w2, h2) => { g.fillStyle = '#111'; g.fillRect(0, 0, w2, h2); g.fillStyle = '#f59e0b'; for (let x = -64; x < w2 + 64; x += 64) { g.beginPath(); g.moveTo(x, h2); g.lineTo(x + 32, 0); g.lineTo(x + 64, 0); g.lineTo(x + 32, h2); g.fill(); } });
-      box(G, 8, 5, .3, M.mid, 0, 2.5, -d + .2); plane(G, 8, .5, new T.MeshBasicMaterial({ map: hz }), 0, 5.25, -d + .4, 0, 0); plane(G, 8, .3, new T.MeshBasicMaterial({ map: hz }), 0, .15, -d + .4, 0, 0); box(G, .08, 5, .34, M.dark, 0, 2.5, -d + .22);
+      box(G, 8, 5, .3, M.door, 0, 2.5, -d + .2); plane(G, 8, .5, new T.MeshBasicMaterial({ map: hz }), 0, 5.25, -d + .4, 0, 0); plane(G, 8, .3, new T.MeshBasicMaterial({ map: hz }), 0, .15, -d + .4, 0, 0); box(G, .08, 5, .34, M.dark, 0, 2.5, -d + .22);
       // the lift your real ship sits on
-      const lift = new T.Group(); lift.position.set(2.4, 0, -9); G.add(lift); box(lift, 5.6, .3, 5.6, M.dark, 0, .15, 0);
+      const lift = new T.Group(); lift.position.set(2.4, 0, -9); G.add(lift); box(lift, 5.6, .3, 5.6, M.plate, 0, .15, 0);
       const lr = mesh(lift, new T.TorusGeometry(2.7, .05, 8, 4), emi(COLS.shop, 2), 0, .32, 0, -HP, 0, Math.PI / 4); G.userData.liftRing = lr;
       [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { box(lift, .3, .7, .3, M.trim, a * 2.7, .65, b * 2.7); box(lift, .32, .08, .32, emi(COLS.shop, 1.8), a * 2.7, 1.02, b * 2.7); });
       shipGrp = new T.Group(); shipGrp.position.set(2.4, 1.9, -9); G.add(shipGrp);
@@ -387,7 +399,7 @@ const SHIP = (() => {
       sprayV = new Float32Array(240 * 3); spray = new T.Points(new T.BufferGeometry().setAttribute('position', new T.BufferAttribute(new Float32Array(240 * 3), 3)), new T.PointsMaterial({ color: 0xf472b6, size: .07, map: glowTex, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false })); G.add(spray);
       // tool wall + crates
       for (let i = 0; i < 5; i++) { const p = box(G, .2, 2.4, 1.6, M.dark, -w / 2 + .3, 1.8, -4 - i * 2); box(G, .04, 2, .04, emi(i % 2 ? COLS.shop : '#22d3ee', 1.6), -w / 2 + .45, 1.8, -4 - i * 2); }
-      [[-4.6, -12.5], [-3.4, -12.8], [-4.1, -11.4]].forEach(([x, z], i) => { box(G, 1.1, 1.1 - (i === 2 ? .4 : 0), 1.1, M.mid, x, i === 2 ? 1.1 + .35 : .55, z, rnd()); box(G, 1.12, .06, 1.12, emi('#f59e0b', 1), x, i === 2 ? 1.6 : .9, z, 0); });
+      [[-4.6, -12.5], [-3.4, -12.8], [-4.1, -11.4]].forEach(([x, z], i) => { box(G, 1.1, 1.1 - (i === 2 ? .4 : 0), 1.1, M.cargo, x, i === 2 ? 1.1 + .35 : .55, z, rnd()); box(G, 1.12, .06, 1.12, emi('#f59e0b', 1), x, i === 2 ? 1.6 : .9, z, 0); });
       G.userData.view = { p: [-3.4, 2.4, -2.2], l: [-1.7, 2.1, -10], yaw: -.05 };
       G.userData.lights = [[2.4, 6.2, -9, 0xfff1d6, 2, 16], [-3, 3, -5, 0xf472b6, 1, 12]];
     },
