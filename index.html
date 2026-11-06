@@ -6522,12 +6522,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V66';
+const GAME_VER = 'V67';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V67', 'Smoother', ['SHOP: Buy all affordable button, a preview of what each upgrade changes (Hull 80 -> 100), "need X more" on prices you can not afford yet, cores spent so far per upgrade, maxed upgrades sink to the bottom, and a RECOMMENDED tag based on how your last run went', 'SHOP: weapons show raw damage compared to your equipped gun, and can be filtered to owned / not owned', 'SHOP: Undo for 5 seconds after any purchase, hold a price to keep buying, keys 1-9 buy a row, and big purchases (over half your cores) ask to confirm', 'Right-click a shop item to pin it as a goal - it shows on the main menu with a progress bar', 'MENUS: Continue on the main menu jumps into your next sector. Hotkeys: C continue, P play, S shop, H hangar, Backspace goes back', 'MENUS: tabs, the selected world and tier are remembered between visits, a search box in Settings, tooltips on icon buttons and a small breadcrumb', 'New Ship walk speed setting (Normal / Fast / Instant) for moving between rooms', 'Swap guns right on the results screen. Esc on an expedition result goes back to the map', 'MAP: zoom with + / - or Ctrl+wheel, NEXT jumps to your next sector, a minimap, an UNFINISHED filter, stars under every cleared sector, boss names, your last sector highlighted, hover any sector for details and double-click to launch. Each world remembers where you scrolled', 'IN A RUN: arrows show enemies about to come on screen, a LAST ONE marker on the final enemy of a wave, an enemies-left counter, plasma cost per shot next to your gun, and repair / shield pickups flag themselves before they drift away', 'IN A RUN: ability and super ready cues, your magnet range flashes at the start, mouse wheel switches guns, and a damage-numbers-on-bosses-only option', 'PAUSE: shows this run\'s kills, cores, time and cards, plus a Restart sector button. The game pauses if a controller disconnects']],
   ['V66', 'Less Clicking', ['New MAX button on shop upgrades: buys as many levels as you can afford in one go (Shift+click a price does the same)', 'Buying or toggling something no longer throws you back to the top of the list - every scroll position is kept', 'Sector maps can be dragged around with the mouse or a finger, and the mouse wheel scrolls them sideways']],
   ['V65', 'Dialled In', ['New Graphics preset (Low / Medium / High) at the top of Settings > Graphics sets everything in one tap', 'On first launch the game picks a preset that suits your device', 'New Menu text size and HUD size options in Settings > Access', 'Playing on a controller? The HUD now shows your pad buttons for Ability and Super', 'The results screen always shows your next upgrade - UPGRADE READY with a Shop button, or how many cores you still need']],
   ['V64', 'Read the Room', ['Shot warnings: a glow charges up on an enemy right before it fires (can be turned off in Settings > Gameplay)', 'Elite enemies now have a signature volley every third shot, different in each world: FAN, RING, CROSS or SPIRAL - with a bigger red warning and the pattern name', 'The first three sectors of World 1 are gentler: enemies fire less often and threat scaling is off', 'In those learning sectors your hitbox glows, and a DODGING 101 tip explains it']],
@@ -9167,7 +9168,7 @@ const SHIP = (() => {
     if (!S.built || !rooms[k]) return;
     if (k === S.room && !how) return;
     const curve = pathTo(k, how === 'hub'), len = curve.getLength(), quick = SET.reduce;
-    S.travel = { curve, t: 0, d: quick ? .01 : Math.max(1.1, Math.min(2.3, len / 17)), from: S.look.clone(), to: viewOf(k).l, k };
+    S.travel = { curve, t: 0, d: quick ? .01 : Math.max(.01, Math.max(1.1, Math.min(2.3, len / 17)) * (+SET.shipTravel || 1)), from: S.look.clone(), to: viewOf(k).l, k };
     S.fade = 0; ui.style.opacity = 0; ui.style.pointerEvents = 'none';
     showRooms(S.room, k); lightRoom(k, 2); if (S.room) lightRoom(S.room, 0);
     tag.textContent = NAMES[k]; tag.style.setProperty('--c', COLS[k]); tag.classList.add('on');
@@ -10102,6 +10103,277 @@ UI.refresh = function () {
   // mouse wheel scrolls the map sideways too
   document.addEventListener('wheel', e => { const m = e.target.closest && e.target.closest('#mapScroll'); if (!m || e.ctrlKey) return; if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && m.scrollWidth > m.clientWidth && m.scrollHeight <= m.clientHeight + 4) { m.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false, capture: true });
 })();
+
+// ================= V67: QoL batch 1 - shop & menus =================
+// shared post-render hooks (run after every show/refresh)
+const QPOST = [];
+const _showQP = UI.show.bind(UI);
+UI.show = function (id) { const r = _showQP.apply(this, arguments); for (const f of QPOST) { try { f(this.top, document.getElementById(this.top)); } catch (e) { console.warn('qpost', e); } } return r; };
+(function () {
+  const st = document.createElement('style'); st.textContent = `
+.q-sub{display:block;font:700 10px var(--mono);letter-spacing:.06em;color:#7dd3fc;margin-top:3px}.q-sub.g{color:#86efac}.q-sub.r{color:#fca5a5}.q-sub.m{color:#94a3b8}
+.sh-row.q-max{opacity:.55}.sh-row.q-max .sh-tx b::after{content:" MAXED";font:900 9px var(--mono);letter-spacing:.2em;color:#04101f;background:#fbbf24;padding:1px 6px;margin-left:8px;vertical-align:middle}
+.sh-row.q-rec{box-shadow:inset 3px 0 0 #fbbf24}.q-rec-tag{font:900 9px var(--mono);letter-spacing:.2em;color:#04101f;background:#fbbf24;padding:1px 6px;margin-left:8px;vertical-align:middle}
+.q-need{display:block;font:700 9px var(--mono);opacity:.8;margin-top:2px}
+.q-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
+#qUndo{position:absolute;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:30;display:none}
+#qCrumb{position:absolute;left:calc(12px + env(safe-area-inset-left));top:calc(3px + env(safe-area-inset-top));z-index:14;pointer-events:none;font:800 9px var(--mono);letter-spacing:.24em;color:rgba(148,163,184,.75);text-transform:uppercase}
+#qCrumb b{color:var(--acc)}
+body.shipm #qCrumb,body.photo #qCrumb{display:none}
+#qWish{display:flex;align-items:center;gap:10px;font:700 10px var(--mono);letter-spacing:.12em;color:#fde68a;padding:6px 10px;border-left:3px solid #fbbf24;background:linear-gradient(90deg,rgba(251,191,36,.14),transparent);margin-top:8px}
+#qWish i{flex:1;height:3px;background:rgba(255,255,255,.12);display:block;min-width:60px}#qWish i b{display:block;height:100%;background:#fbbf24}
+.q-arm{animation:qarm .5s steps(2) infinite}@keyframes qarm{50%{filter:brightness(1.6)}}
+.q-search{width:100%;margin:10px 0 6px;padding:9px 10px;border-radius:3px;border:1px solid var(--line);background:rgba(4,12,26,.9);color:#e2e8f0;font:700 12px var(--mono);letter-spacing:.08em}
+`; document.head.appendChild(st);
+  const ui = document.getElementById('ui'); if (ui) { ui.insertAdjacentHTML('beforeend', '<button id="qUndo" class="btn gold" data-act="qundo">UNDO PURCHASE</button><div id="qCrumb"></div>'); }
+})();
+
+// ---------- 1, 2, 3, 5, 6, 7, 8, 10: a smarter shop ----------
+const SHOTN = { twin: 2, spread: 5, lancer: 1, ion: 1, missile: 2, orb: 1, arc: 1, rail: 1 };
+const wDps = (pl, id) => { const W = WPN[id], lv = wlvOf(pl, id); return W.d * (SHOTN[id] || 1) * 60 / W.r * (1 + .12 * lv) * (1 + .04 * lv) * (wevOf(pl, id) ? 1.3 : 1); };
+const upSpent = (k, lv) => { let s = 0; for (let i = 0; i < lv; i++) s += upPrice(k, i); return s; };
+function upDelta(pl, k) {
+  const a = shipStats(pl), up = Object.assign({}, pl.up); up[k]++; const b = shipStats(Object.assign({}, pl, { up }));
+  const m = { hp: ['Hull', 'hp'], sh: ['Shield', 'sh'], am: ['Plasma', 'am'], dmg: ['Damage', 'dmg', 1], rate: ['Fire rate', 'rate', 1], spd: ['Speed', 'spd', 1], mag: ['Magnet', 'mag', 1] }[k];
+  if (!m) return k === 'drn' ? 'Wingmen ' + pl.up.drn + ' -> ' + (pl.up.drn + 1) : k === 'drd' ? 'Wingman damage +25%' : '';
+  const f = v => m[2] ? 'x' + v.toFixed(2) : Math.round(v); return m[0] + ' ' + f(a[m[1]]) + ' -> ' + f(b[m[1]]);
+}
+function shopRec() { const r = SAVE.flags.qRec; return UPG[r] ? r : null; }
+const _scShopQ = SCR.scShop;
+SCR.scShop = function () {
+  const html = _scShopQ.apply(this, arguments), i = pi(), pl = SAVE.pl[i], cat = UI.shc === 'wpn' ? 'wpn' : 'up';
+  const bar = cat === 'up' ? '<div class="q-bar"><button class="btn sm gold" data-act="qbuyall">Buy all affordable</button><span class="xs mut">Hold a price to keep buying - Shift+click = MAX - keys 1-9 buy a row - right-click to pin a goal</span></div>'
+    : '<div class="q-bar"><div class="mm-seg">' + [['all', 'All'], ['own', 'Owned'], ['new', 'Not owned']].map(([k, n]) => '<button data-act="qwf:' + k + '" class="' + ((UI.qwf || 'all') === k ? 'on' : '') + '">' + n + '</button>').join('') + '</div></div>';
+  return html.replace('<section class="sh-list">', '<section class="sh-list">' + bar);
+};
+QPOST.push((id, el) => {
+  if (id !== 'scShop' || !el) return; const i = pi(), pl = SAVE.pl[i], rec = shopRec();
+  el.querySelectorAll('[data-act^="buy:"]').forEach(b => {
+    const k = b.dataset.act.split(':')[1], row = b.closest('.sh-row,.item'), U = UPG[k]; if (!row || !U) return; const lv = pl.up[k], tx = row.querySelector('.sh-tx') || row.querySelector('.fl');
+    if (lv >= U.max) { row.classList.add('q-max'); row.parentElement.appendChild(row); }
+    else { if (tx && !tx.querySelector('.q-sub')) tx.insertAdjacentHTML('beforeend', '<span class="q-sub g">' + upDelta(pl, k) + '</span>'); const pr = upPrice(k, lv); if (SAVE.cores < pr && !b.querySelector('.q-need')) b.insertAdjacentHTML('beforeend', '<span class="q-need">need ' + fmt(pr - SAVE.cores) + '</span>'); }
+    if (tx && lv > 0 && !tx.querySelector('.q-sub.m')) tx.insertAdjacentHTML('beforeend', '<span class="q-sub m">Spent so far: ' + fmt(upSpent(k, lv)) + ' cores</span>');
+    if (k === rec && lv < U.max) { row.classList.add('q-rec'); const nm = row.querySelector('.sh-tx b, .fl .b'); if (nm && !nm.querySelector('.q-rec-tag')) nm.insertAdjacentHTML('beforeend', '<span class="q-rec-tag">RECOMMENDED</span>'); }
+  });
+  if (UI.shc === 'wpn') {
+    const eq = pl.wpn, base = wDps(pl, eq);
+    el.querySelectorAll('[data-act^="wpn:"]').forEach(b => {
+      const wid = b.dataset.act.split(':')[1], row = b.closest('.sh-row'); if (!row || !WPN[wid]) return; const own = pl.wown.indexOf(wid) >= 0, f = UI.qwf || 'all';
+      if ((f === 'own' && !own) || (f === 'new' && own)) { row.style.display = 'none'; return; }
+      const tx = row.querySelector('.sh-tx'); if (tx && wid !== eq && !tx.querySelector('.q-sub')) { const d = Math.round((wDps(pl, wid) / base - 1) * 100); tx.insertAdjacentHTML('beforeend', '<span class="q-sub ' + (d >= 0 ? 'g' : 'r') + '">Raw damage vs ' + wName(pl, eq) + ': ' + (d >= 0 ? '+' : '') + d + '%' + (WPN[wid].pierce ? ' (pierces)' : WPN[wid].home ? ' (homing)' : '') + '</span>'); }
+      if (!own && SAVE.cores < WPN[wid].price && !b.querySelector('.q-need')) b.insertAdjacentHTML('beforeend', '<span class="q-need">need ' + fmt(WPN[wid].price - SAVE.cores) + '</span>');
+    });
+  }
+});
+Object.assign(ACT, {
+  qwf(a) { UI.qwf = a[0]; UI.refresh(); },
+  qbuyall() { const pl = SAVE.pl[pi()]; let n = 0, spent = 0; for (;;) { let best = null; for (const k in UPG) { const lv = pl.up[k]; if (lv >= UPG[k].max) continue; const pr = upPrice(k, lv); if (pr <= SAVE.cores && (!best || pr < best.pr)) best = { k, pr }; } if (!best) break; SAVE.cores -= best.pr; spent += best.pr; pl.up[best.k]++; n++; } if (!n) { SFX.no(); alertMsg('NOTHING AFFORDABLE'); return; } SFX.buy(); saveGame(); toast('BOUGHT ' + n + ' UPGRADE LEVEL' + (n > 1 ? 'S' : ''), fmt(spent) + ' cores spent on the cheapest upgrades first', '#fbbf24'); UI.refresh(); }
+});
+// ---------- 4: undo the last purchase for 5 seconds ----------
+const QU = { last: null, t: 0 };
+function qRemember(o) { QU.last = o; clearTimeout(QU.t); const b = $('qUndo'); if (b) { b.style.display = 'block'; b.textContent = 'UNDO - ' + o.nm + ' (' + fmt(o.pr) + ')'; } QU.t = setTimeout(() => { QU.last = null; if (b) b.style.display = 'none'; }, 5000); }
+const _buyUpQ = buyUp; buyUp = function (pl, k) { const lv = pl.up[k], c = SAVE.cores, r = _buyUpQ.apply(this, arguments); if (pl.up[k] > lv) qRemember({ t: 'up', pl, k, n: pl.up[k] - lv, pr: c - SAVE.cores, nm: UPG[k].nm }); return r; };
+const _buyMaxQ = buyMax; buyMax = function (pl, k) { const lv = pl.up[k], c = SAVE.cores, r = _buyMaxQ.apply(this, arguments); if (pl.up[k] > lv) qRemember({ t: 'up', pl, k, n: pl.up[k] - lv, pr: c - SAVE.cores, nm: UPG[k].nm + ' x' + (pl.up[k] - lv) }); return r; };
+const _wpnQ = ACT.wpn; ACT.wpn = function (a) { const pl = SAVE.pl[pi()], had = pl.wown.indexOf(a[0]) >= 0, prev = pl.wpn, c = SAVE.cores, r = _wpnQ.apply(this, arguments); if (!had && pl.wown.indexOf(a[0]) >= 0) qRemember({ t: 'w', pl, id: a[0], prev, pr: c - SAVE.cores, nm: WPN[a[0]].nm }); return r; };
+ACT.qundo = () => { const o = QU.last; if (!o) return; if (o.t === 'up') o.pl.up[o.k] = Math.max(0, o.pl.up[o.k] - o.n); else { o.pl.wown = o.pl.wown.filter(x => x !== o.id); o.pl.wpn = o.prev; } SAVE.cores += o.pr; QU.last = null; $('qUndo').style.display = 'none'; saveGame(); SFX.click(); toast('REFUNDED', fmt(o.pr) + ' cores back', '#22d3ee'); UI.refresh(); };
+const _shQU = UI.show.bind(UI); UI.show = function (id) { if (id !== 'scShop' && id !== this.top) { const b = $('qUndo'); if (b) b.style.display = 'none'; QU.last = null; } return _shQU.apply(this, arguments); };
+// ---------- 9: hold a price to keep buying; 14: confirm big purchases; 15: number keys ----------
+(function () {
+  let hold = null, fired = false;
+  document.addEventListener('pointerdown', e => { const b = e.target.closest && e.target.closest('[data-act^="buy:"]'); if (!b) return; const k = b.dataset.act.split(':')[1]; fired = false; clearTimeout(hold); hold = setTimeout(function rep() { fired = true; const pl = SAVE.pl[pi()]; if (pl.up[k] >= UPG[k].max || SAVE.cores < upPrice(k, pl.up[k])) return; ACT.buy([k]); hold = setTimeout(rep, 130); }, 450); }, true);
+  const stop = () => { clearTimeout(hold); hold = null; }; document.addEventListener('pointerup', stop, true); document.addEventListener('pointercancel', stop, true);
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('[data-act^="buy:"],[data-act^="wpn:"],[data-act^="wup:"]'); if (!b) return;
+    if (fired && b.dataset.act.startsWith('buy:')) { fired = false; e.preventDefault(); e.stopPropagation(); return; }
+    const [t, id] = b.dataset.act.split(':'), pl = SAVE.pl[pi()];
+    const pr = t === 'buy' ? (UPG[id] && pl.up[id] < UPG[id].max ? upPrice(id, pl.up[id]) : 0) : t === 'wpn' ? (pl.wown.indexOf(id) < 0 ? WPN[id].price : 0) : (typeof wupPrice === 'function' ? wupPrice(id, wlvOf(pl, id)) : 0);
+    if (pr >= 500 && pr <= SAVE.cores && pr > SAVE.cores * .5 && SET.qConfirm !== false) { if (b._arm && performance.now() - b._arm < 3000) return; b._arm = performance.now(); b.classList.add('q-arm'); const t0 = b.innerHTML; b.innerHTML = 'Confirm? ' + fmt(pr); setTimeout(() => { if (b.isConnected) { b.innerHTML = t0; b.classList.remove('q-arm'); b._arm = 0; } }, 3000); e.preventDefault(); e.stopPropagation(); }
+  }, true);
+  document.addEventListener('keydown', e => {
+    if (G.scene === 'play' || e.repeat) return; const t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'SELECT' || t.tagName === 'TEXTAREA')) return;
+    if (UI.top === 'scShop' && /^Digit[1-9]$/.test(e.code)) { const bs = [...document.querySelectorAll('#scShop [data-act^="buy:"],#scShop [data-act^="wpn:"]')].filter(b => b.offsetParent); const b = bs[+e.code.slice(5) - 1]; if (b) { b.click(); e.preventDefault(); } }
+  });
+})();
+// ---------- 13: pin a goal (right-click / long-press a shop item) ----------
+function qWishOf(el) { const b = el.closest && el.closest('[data-act^="buy:"],[data-act^="wpn:"]'); if (!b) return null; const [t, id] = b.dataset.act.split(':'), pl = SAVE.pl[pi()]; if (t === 'buy' && UPG[id] && pl.up[id] < UPG[id].max) return { nm: UPG[id].nm + ' LV' + (pl.up[id] + 1), pr: upPrice(id, pl.up[id]), t, id }; if (t === 'wpn' && pl.wown.indexOf(id) < 0) return { nm: WPN[id].nm, pr: WPN[id].price, t, id }; return null; }
+document.addEventListener('contextmenu', e => { if (UI.top !== 'scShop') return; const w = qWishOf(e.target); if (!w) return; e.preventDefault(); SAVE.flags.wish = w; saveGame(); toast('GOAL PINNED', w.nm + ' - shown on the main menu until you buy it', '#fbbf24'); });
+QPOST.push((id, el) => {
+  if (id !== 'scMenu' || !el) return; const w = SAVE.flags.wish; if (!w) return; const pl = SAVE.pl[0];
+  if ((w.t === 'buy' && (pl.up[w.id] | 0) + 1 > +w.nm.split('LV')[1]) || (w.t === 'wpn' && pl.wown.indexOf(w.id) >= 0)) { delete SAVE.flags.wish; saveGame(); return; }
+  const host = el.querySelector('.mm-card') || el.querySelector('.card'); if (!host || host.querySelector('#qWish')) return; const pc = Math.min(100, Math.round(SAVE.cores / w.pr * 100));
+  host.insertAdjacentHTML('beforeend', '<div id="qWish" data-act="shop"><span>GOAL: ' + escH(w.nm) + '</span><i><b style="width:' + pc + '%"></b></i><span>' + (pc >= 100 ? 'READY!' : fmt(w.pr - SAVE.cores) + ' to go') + '</span></div>');
+});
+// ---------- 8: remember what to recommend from your last result ----------
+const _resQ = UI.result.bind(UI);
+UI.result = function (d) { try { const pl = SAVE.pl[0]; if (!d.win && d.death) SAVE.flags.qRec = pl.up.sh < pl.up.hp ? 'sh' : 'hp'; else if (d.win && d.time > 120) SAVE.flags.qRec = pl.up.rate < pl.up.dmg ? 'rate' : 'dmg'; } catch (e) { } return _resQ(d); };
+// ---------- 11: swap guns right on the results screen ----------
+QPOST.push((id, el) => {
+  if (id !== 'scResult' || !el || el.querySelector('.q-guns')) return; const pl = SAVE.pl[0]; if (pl.wown.length < 2) return;
+  const st = el.querySelector('.rs-act') || el.querySelector('.stack'); if (!st) return;
+  st.insertAdjacentHTML('afterbegin', '<div class="q-guns q-bar"><span class="xs mut b" style="letter-spacing:.2em">GUN</span>' + pl.wown.map(w => '<button class="btn sm' + (w === pl.wpn ? ' on' : '') + '" data-act="wpn:' + w + '">' + escH(wName(pl, w)) + '</button>').join('') + '</div>');
+});
+
+// ---------- 16: Backspace goes back; 30: Esc on an expedition result goes to the map ----------
+document.addEventListener('keydown', e => {
+  const t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
+  if (e.code === 'Backspace' && G.scene !== 'play' && UI.top && UI.top !== 'scMenu') { e.preventDefault(); UI.escape ? UI.escape() : ACT.back(); }
+  if (e.code === 'Escape' && UI.top === 'scResult' && UI.res && UI.res.mode === 'expedition' && G.scene !== 'play') { e.preventDefault(); e.stopPropagation(); ACT.tomap(); }
+}, true);
+// ---------- 17, 18: remember tabs, world and tier between visits ----------
+(function () { try { const s = JSON.parse(localStorage.getItem('aetheria_ui') || '{}'); ['stab', 'shc', 'tier', 'cat', 'qwf'].forEach(k => { if (s[k] !== undefined) UI[k] = s[k]; }); if (s.w !== undefined && s.w < Math.max(1, SAVE.wu)) UI.w = s.w; } catch (e) { } })();
+QPOST.push(() => { try { localStorage.setItem('aetheria_ui', JSON.stringify({ stab: UI.stab, shc: UI.shc, w: UI.w, tier: UI.tier, cat: UI.cat, qwf: UI.qwf })); } catch (e) { } });
+// ---------- 19: CONTINUE on the main menu ----------
+function qNext() { const w = Math.max(0, Math.min(SAVE.wu, WORLDS.length) - 1); let lv = firstOpen(w, 1); return { w, lv }; }
+const _scMenuQ = SCR.scMenu;
+SCR.scMenu = function () {
+  const has = MAINNAV[0][0] === 'cont', fresh = SAVE.st.runs < 1;
+  if (!fresh) { const n = qNext(), d = 'World ' + (n.w + 1) + ' - Sector ' + (n.lv + 1) + ': ' + WORLDS[n.w].nm; if (has) MAINNAV[0][2] = d; else MAINNAV.unshift(['cont', 'Continue', d]); } else if (has) MAINNAV.shift();
+  return _scMenuQ.apply(this, arguments);
+};
+ACT.cont = () => { const n = qNext(); UI.w = n.w; UI.tier = 1; UI.sel = n.lv; UI.mode = 'expedition'; SFX.click(); startLevel(n.w, n.lv, 1); };
+// ---------- 20: search box in Settings ----------
+QPOST.push((id, el) => {
+  if (id !== 'scSettings' || !el) return; const rail = el.querySelector('.st-rail') || el.querySelector('.card'), body = el.querySelector('.st-body');
+  if (rail && !rail.querySelector('.q-search')) { rail.insertAdjacentHTML('beforeend', '<input class="q-search" id="qSetQ" placeholder="SEARCH SETTINGS" autocomplete="off" spellcheck="false" value="' + escH(UI.sq || '') + '">'); }
+  if (UI.sq && body) qSettingsFilter(body);
+});
+function qSettingsFilter(body) { const q = (UI.sq || '').toLowerCase().trim(); if (!q) { UI.refresh(); return; } const rows = []; Object.keys(SETS).forEach(t => SETS[t].forEach(r => { if ((r[2] + ' ' + (r[3] || '') + ' ' + t).toLowerCase().indexOf(q) >= 0) rows.push(setRow(r)); })); body.innerHTML = '<p class="xs mut" style="margin:0 0 8px">' + rows.length + ' match' + (rows.length === 1 ? '' : 'es') + ' for "' + escH(UI.sq) + '"</p>' + rows.join(''); }
+document.addEventListener('input', e => { if (e.target && e.target.id === 'qSetQ') { UI.sq = e.target.value; const b = document.querySelector('#scSettings .st-body'); if (b) qSettingsFilter(b); } }, true);
+// ---------- 21: tooltips on icon-only buttons; 22: breadcrumb ----------
+QPOST.push((id, el) => {
+  if (!el) return; el.querySelectorAll('button[aria-label]:not([title])').forEach(b => b.title = b.getAttribute('aria-label'));
+  const c = $('qCrumb'); if (!c) return; const nm = s => (s || '').replace(/^sc/, '').replace(/([a-z])([A-Z])/g, '$1 $2');
+  c.innerHTML = G.scene === 'play' || !id || id === 'scMenu' ? '' : ['Menu'].concat(UI.hist.filter(h => h !== 'scMenu').slice(-3).map(nm)).join(' / ') + ' / <b>' + nm(id) + '</b>';
+});
+// ---------- 25: faster ship travel ----------
+try { if (SETS.GRAPHICS && !SETS.GRAPHICS.some(r => r[0] === 'shipTravel')) SETS.GRAPHICS.push(['shipTravel', 'sel', 'Ship walk speed', 'How fast the camera moves between rooms', [[1, 'Normal'], [.55, 'Fast'], [.01, 'Instant']]]); if (SET.shipTravel === undefined) SET.shipTravel = 1; if (SETS.GAMEPLAY && !SETS.GAMEPLAY.some(r => r[0] === 'qConfirm')) SETS.GAMEPLAY.push(['qConfirm', 'tog', 'Confirm big purchases', 'Ask before spending over half your cores']); if (SET.qConfirm === undefined) SET.qConfirm = true; } catch (e) { }
+// ---------- 28: main-menu hotkeys ----------
+document.addEventListener('keydown', e => {
+  if (UI.top !== 'scMenu' || G.scene === 'play' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return; const t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+  const map = { KeyP: 'play', KeyS: 'shop', KeyH: 'hangar', KeyC: 'cont', KeyG: 'galaxy', KeyL: 'locker' }, a = map[e.code];
+  if (a && ACT[a] && !(a === 'cont' && MAINNAV[0][0] !== 'cont')) { e.preventDefault(); ACT[a]([]); }
+});
+QPOST.push((id, el) => { if (id !== 'scMenu' || !el || touchOn()) return; const k = el.querySelector('.mm-keys'); if (k && !k.querySelector('.q-hk')) k.insertAdjacentHTML('beforeend', '<span class="q-hk">' + (MAINNAV[0][0] === 'cont' ? 'C continue - ' : '') + 'P play - S shop - H hangar - Backspace back</span>'); });
+// ---------- 29: double-click a sector to launch it ----------
+document.addEventListener('dblclick', e => { const n = e.target.closest && e.target.closest('.node[data-act^="lvl:"]'); if (!n || n.classList.contains('lk')) return; const a = n.dataset.act.split(':').slice(1); ACT.lvl(a); if (UI.sel === +a[0]) ACT.start(); }, true);
+
+// ================= V68: QoL batch 2 - sector map & in-run =================
+(function () {
+  const st = document.createElement('style'); st.textContent = `
+.q-mapbar{position:absolute;right:10px;top:10px;z-index:5;display:flex;gap:6px}
+.wm-map{position:relative}
+.q-mini{position:absolute;right:10px;bottom:10px;z-index:5;width:150px;height:56px;background:rgba(4,10,22,.85);border:1px solid var(--line);cursor:pointer}
+.q-mini i{position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:#475569}.q-mini i.dn{background:#34d399}.q-mini i.av{background:#fbbf24}.q-mini i.bs{background:#f43f5e;width:6px;height:6px;margin:-3px 0 0 -3px}
+.q-mini b{position:absolute;top:0;bottom:0;border:1px solid #fff;background:rgba(255,255,255,.08)}
+.node .q-st{position:absolute;left:50%;top:100%;transform:translateX(-50%);font-size:9px;letter-spacing:-1px;color:#fbbf24;white-space:nowrap;pointer-events:none;text-shadow:0 1px 0 #000}
+.node .q-st s{text-decoration:none;color:#475569}
+.node .q-bl{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);font:900 8px var(--mono);letter-spacing:.14em;color:#fda4af;white-space:nowrap;pointer-events:none;margin-bottom:3px}
+.node.q-recent{box-shadow:0 0 0 3px rgba(255,255,255,.65),0 0 18px rgba(255,255,255,.4)!important}
+.wm-map.q-only .node.q-full{opacity:.25}
+#hud.on~#qCrumb{display:none}
+#qTip{position:fixed;z-index:40;pointer-events:none;display:none;padding:8px 10px;max-width:240px;background:rgba(4,10,22,.95);border:1px solid var(--line2);font:700 10px/1.5 var(--mono);color:#cbd5e1;letter-spacing:.04em}
+#qTip b{color:#fff;display:block;font-size:11px;letter-spacing:.08em}
+.q-pst{margin-top:10px;padding:10px 12px;border-left:3px solid var(--acc);background:rgba(8,20,40,.7);font:700 11px/1.6 var(--mono);color:#cbd5e1}
+.q-pst .xs{letter-spacing:.2em;color:var(--acc)}
+`; document.head.appendChild(st);
+  document.body.insertAdjacentHTML('beforeend', '<div id="qTip"></div>');
+})();
+// ---------- 31-40: sector map ----------
+UI.mapZ = UI.mapZ || 1; UI.mapPos = UI.mapPos || {};
+QPOST.push((id, el) => {
+  if (id !== 'scMap' || !el) return; const m = el.querySelector('#mapScroll'), inn = m && m.querySelector('.wm-in'); if (!m || !inn) return;
+  inn.style.zoom = UI.mapZ; const w = UI.w, tier = UI.tier || 1, arr = prog(w).done[tier - 1] || [], rec = SAVE.flags.lastLv;
+  if (UI.qOnly) m.classList.add('q-only');
+  inn.querySelectorAll('.node[data-act^="lvl:"]').forEach(n => {
+    const i = +n.dataset.act.split(':')[1], s = arr[i] | 0;
+    if (s && !n.querySelector('.q-st')) n.insertAdjacentHTML('beforeend', '<span class="q-st">' + '★'.repeat(s) + '<s>' + '★'.repeat(3 - s) + '</s></span>');
+    if (s >= 3) n.classList.add('q-full');
+    if (n.classList.contains('bs') && !n.querySelector('.q-bl')) n.insertAdjacentHTML('beforeend', '<span class="q-bl">' + escH(BOSSES[w].nm.toUpperCase()) + '</span>');
+    if (rec && rec.w === w && rec.i === i && rec.tier === tier) n.classList.add('q-recent');
+  });
+  const par = m.parentElement; if (getComputedStyle(par).position === 'static') par.style.position = 'relative';
+  if (!par.querySelector('.q-mapbar')) m.insertAdjacentHTML('afterend', '<div class="q-mapbar"><button class="btn sm" data-act="qmz:-1" title="Zoom out">-</button><button class="btn sm" data-act="qmz:1" title="Zoom in">+</button><button class="btn sm gold" data-act="qmnext" title="Jump to your next sector">NEXT</button><button class="btn sm' + (UI.qOnly ? ' on' : '') + '" data-act="qmonly" title="Fade sectors that already have 3 stars">UNFINISHED</button></div>');
+  qMini(m, inn); const place = () => { const bar = par.querySelector('.q-mapbar'), mm = par.querySelector('.q-mini'); if (bar) { bar.style.top = (m.offsetTop + 10) + 'px'; bar.style.left = 'auto'; bar.style.right = (par.clientWidth - m.offsetLeft - m.offsetWidth + 10) + 'px'; } if (mm) { mm.style.top = (m.offsetTop + m.offsetHeight - 66) + 'px'; mm.style.bottom = 'auto'; mm.style.right = (par.clientWidth - m.offsetLeft - m.offsetWidth + 10) + 'px'; } }; place(); requestAnimationFrame(place);
+  const pos = UI.mapPos[w + ':' + tier]; if (pos !== undefined && !m._qr) { m._qr = 1; requestAnimationFrame(() => { m.scrollLeft = pos[0]; m.scrollTop = pos[1]; }); }
+  if (!m._qs) { m._qs = 1; m.addEventListener('scroll', () => { UI.mapPos[UI.w + ':' + (UI.tier || 1)] = [m.scrollLeft, m.scrollTop]; UI._keepScroll = m.scrollLeft; qMiniView(m); }, { passive: true }); }
+});
+function qMini(m, inn) {
+  let mm = m.parentElement.querySelector('.q-mini'); const W = inn.offsetWidth || 1, H = inn.offsetHeight || 1;
+  if (!mm) { mm = document.createElement('div'); mm.className = 'q-mini'; mm.title = 'Click to jump'; m.after(mm); mm.addEventListener('click', e => { const r = mm.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height; m.scrollLeft = fx * m.scrollWidth - m.clientWidth / 2; m.scrollTop = fy * m.scrollHeight - m.clientHeight / 2; }); }
+  mm.innerHTML = [...inn.querySelectorAll('.node')].map(n => '<i class="' + (n.classList.contains('bs') ? 'bs' : n.classList.contains('dn') ? 'dn' : n.classList.contains('av') ? 'av' : '') + '" style="left:' + (n.offsetLeft / W * 100) + '%;top:' + (n.offsetTop / H * 100) + '%"></i>').join('') + '<b></b>';
+  qMiniView(m);
+}
+function qMiniView(m) { const mm = m.parentElement && m.parentElement.querySelector('.q-mini b'); if (!mm || !m.scrollWidth) return; mm.style.left = (m.scrollLeft / m.scrollWidth * 100) + '%'; mm.style.width = (m.clientWidth / m.scrollWidth * 100) + '%'; }
+Object.assign(ACT, {
+  qmz(a) { UI.mapZ = clamp(+(UI.mapZ + a[0] * .2).toFixed(2), .5, 1.6); UI.refresh(); },
+  qmnext() { const m = $('mapScroll'); if (!m) return; const n = m.querySelector('.node.av:not(.dn)') || m.querySelector('.node.sel'); if (!n) return; const r = n.getBoundingClientRect(), mr = m.getBoundingClientRect(); m.scrollBy({ left: r.left - mr.left - mr.width / 2, top: r.top - mr.top - mr.height / 2, behavior: 'smooth' }); },
+  qmonly() { UI.qOnly = !UI.qOnly; UI.refresh(); }
+});
+document.addEventListener('wheel', e => { const m = e.target.closest && e.target.closest('#mapScroll'); if (!m || !e.ctrlKey) return; e.preventDefault(); ACT.qmz([e.deltaY < 0 ? 1 : -1]); }, { passive: false, capture: true });
+// hover preview
+document.addEventListener('pointerover', e => {
+  const tip = $('qTip'), n = e.target.closest && e.target.closest('.node[data-act^="lvl:"]'); if (!n || e.pointerType === 'touch') { tip.style.display = 'none'; return; }
+  try { const i = +n.dataset.act.split(':')[1], w = UI.w, tier = UI.tier || 1, sp = levelSpec(w, i, tier), s = (prog(w).done[tier - 1] || [])[i] | 0, rk = (prog(w).rk || {})[(tier - 1) + ':' + i];
+    tip.innerHTML = '<b>' + escH(sp.name) + '</b>' + (sp.type === 'B' ? 'Boss: ' + escH(BOSSES[w].nm) : sp.waves + ' waves') + '<br>Stars: ' + (s ? '★'.repeat(s) + '☆'.repeat(3 - s) : 'not cleared') + (rk ? ' - best rank ' + rk : '') + (n.classList.contains('lk') ? '<br><span style="color:#fca5a5">Locked - clear a connected sector first</span>' : '<br><span style="color:#7dd3fc">Double-click to launch</span>');
+    const r = n.getBoundingClientRect(); tip.style.left = Math.min(innerWidth - 250, r.right + 8) + 'px'; tip.style.top = Math.max(8, r.top - 6) + 'px'; tip.style.display = 'block'; } catch (er) { tip.style.display = 'none'; }
+}, true);
+document.addEventListener('pointerout', e => { if (e.target.closest && e.target.closest('.node')) $('qTip').style.display = 'none'; }, true);
+const _shTip = UI.show.bind(UI); UI.show = function () { const t = $('qTip'); if (t) t.style.display = 'none'; return _shTip.apply(this, arguments); };
+// remember the last sector you played
+const _beginQ3 = beginRun; beginRun = function (o) { if (o && o.mode === 'expedition') { SAVE.flags.lastLv = { w: o.w | 0, i: o.lv | 0, tier: o.tier || 1 }; } return _beginQ3.apply(this, arguments); };
+
+function qtext(x, y, t, c) { const d = SET.dmgnum; SET.dmgnum = true; try { ftext(x, y, t, c, 12); } finally { SET.dmgnum = d; } }
+// ---------- 41: restart from pause; 59/60: run stats and your cards in the pause menu ----------
+QPOST.push((id, el) => {
+  if (id !== 'scPause' || !el || !G.run || el.querySelector('.q-pst')) return; const R = G.run, p = G.players[0];
+  const cards = p && p.cards ? Object.keys(p.cards).map(c => (CARDS[c] ? CARDS[c].nm : c) + (p.cards[c] > 1 ? ' x' + p.cards[c] : '')) : [];
+  const host = el.querySelector('aside') || el.querySelector('.card') || el; const can = R.mode !== 'tutorial' && !G.net && G.last;
+  host.insertAdjacentHTML('beforeend', '<div class="q-pst"><div class="xs">THIS RUN</div>Kills ' + R.kills + ' - Cores +' + fmt(R.cores | 0) + ' - ' + Math.floor((R.time | 0) / 60) + ':' + String((R.time | 0) % 60).padStart(2, '0') + ' - Best chain ' + (R.maxCombo | 0) + '<div class="xs" style="margin-top:6px">CARDS</div>' + (cards.length ? escH(cards.join(', ')) : 'None yet') + '</div>' + (can ? '<button class="btn sm warn" data-act="qrestart" style="margin-top:8px">Restart sector</button>' : ''));
+});
+ACT.qrestart = function () { const b = document.querySelector('[data-act="qrestart"]'); if (b && !b._arm) { b._arm = 1; b.textContent = 'Tap again to restart'; setTimeout(() => { if (b.isConnected) { b._arm = 0; b.textContent = 'Restart sector'; } }, 3000); return; } UI.hideAll(); G.paused = false; beginRun(G.last); };
+// ---------- 42: pause when a controller disconnects ----------
+window.addEventListener('gamepaddisconnected', () => { if (G.scene === 'play' && G.run && !G.paused) { togglePause(); alertMsg('CONTROLLER DISCONNECTED - PAUSED'); } });
+// ---------- 48: damage numbers on bosses only ----------
+try { if (SETS.GAMEPLAY && !SETS.GAMEPLAY.some(r => r[0] === 'dmgBoss')) SETS.GAMEPLAY.push(['dmgBoss', 'tog', 'Damage numbers on bosses only', 'Keeps the screen clean in normal waves']); } catch (e) { }
+const _hurtEnQ = hurtEnemy; hurtEnemy = function (e) { if (SET.dmgBoss && !e.boss && SET.dmgnum) { SET.dmgnum = false; try { return _hurtEnQ.apply(this, arguments); } finally { SET.dmgnum = true; } } return _hurtEnQ.apply(this, arguments); };
+// ---------- 50: mouse wheel switches guns ----------
+let qWh = 0; document.addEventListener('wheel', e => { if (G.scene !== 'play' || !G.run || G.paused || SET.wheelGun === false) return; const now = performance.now(); if (now - qWh < 180) return; qWh = now; const p = G.players[0]; if (p && p.alive) cycleWeapon(p, e.deltaY > 0 ? 1 : -1); }, { passive: true });
+// ---------- 52, 53: ability and super ready cues; 44: magnet range flash ----------
+// ---------- 45, 46, 47, 49: edge arrows, enemies left, last-enemy marker ----------
+(function () {
+  const prev = {};
+  const _r = render;
+  render = function () {
+    const r = _r.apply(this, arguments);
+    try {
+      if (G.scene !== 'play' || !G.run) return r; const R = G.run, g = fx, t = G.t;
+      for (const p of G.players) { const k = p.id, ab = p.abCd <= 0, su = (p.sup || 0) >= 100; const pv = prev[k] || (prev[k] = { ab, su }); if (p.alive && ab && !pv.ab) { tone(1200, 1800, .12, .05, 'triangle'); qtext(p.x, p.y - 40, 'ABILITY READY', '#fde047'); } if (p.alive && su && !pv.su) { [660, 880, 1320].forEach((f, i) => tone(f, f, .2, .05, 'sine', null, i * .06)); if (typeof DNG !== 'undefined' && SET.flash !== false) { DNG.hitA = .45; DNG.hitC = '232,121,249'; } qtext(p.x, p.y - 52, 'SUPER READY', '#e879f9'); } pv.ab = ab; pv.su = su; }
+      g.save(); g.globalCompositeOperation = 'source-over';
+      // arrows for enemies just off the right / top / bottom edges
+      for (const e of G.ent.en) { if (e.dead || e.hide) continue; const off = e.x > V.W + 4 || e.y < -4 || e.y > V.H + 4; if (!off || e.x > V.W + 420) continue; const x = clamp(e.x, 18, V.W - 18), y = clamp(e.y, 18, V.H - 18), a = Math.atan2(e.y - y, e.x - x) || 0; g.save(); g.translate(x, y); g.rotate(a); g.globalAlpha = .55 + .35 * Math.sin(t * .2); g.fillStyle = e.boss ? '#f43f5e' : e.d.elite ? '#fbbf24' : '#fb7185'; g.beginPath(); g.moveTo(10, 0); g.lineTo(-6, -7); g.lineTo(-3, 0); g.lineTo(-6, 7); g.closePath(); g.fill(); g.restore(); }
+      // repair / shield pickups drifting off the left edge
+      for (const k of G.ent.pk) { if ((k.k === 'hp' || k.k === 'sh') && k.x < 60) { g.globalAlpha = .6 + .4 * Math.sin(t * .3); g.fillStyle = k.k === 'hp' ? '#4ade80' : '#38bdf8'; g.font = '900 12px ui-monospace,monospace'; g.textAlign = 'left'; g.fillText('< ' + (k.k === 'hp' ? 'REPAIR' : 'SHIELD'), 6, clamp(k.y, 16, V.H - 8)); } }
+      // last enemy of a wave
+      if (R.stage === 'wave' && (!R.q || !R.q.length)) { const al = G.ent.en.filter(e => !e.dead && !e.minion); if (al.length === 1 && al[0].x < V.W) { const e = al[0], s = e.w * .7 + 6 + Math.sin(t * .2) * 4; g.globalAlpha = .9; g.strokeStyle = '#fde047'; g.lineWidth = 2; g.beginPath(); g.arc(e.x, e.y, s, 0, TAU); g.stroke(); g.font = '900 10px ui-monospace,monospace'; g.fillStyle = '#fde047'; g.textAlign = 'center'; g.fillText('LAST ONE', e.x, e.y - s - 6); } }
+      // magnet range shown for the first 2 seconds of a run
+      if (R.time < 2 && !R._mg) { for (const p of G.players) { if (!p.alive || !p.st) continue; g.globalAlpha = .35 * (1 - R.time / 2); g.strokeStyle = '#fbbf24'; g.setLineDash([6, 6]); g.lineWidth = 1.5; g.beginPath(); g.arc(p.x, p.y, 120 * p.st.mag, 0, TAU); g.stroke(); g.setLineDash([]); } }
+      g.restore();
+    } catch (er) { }
+    return r;
+  };
+})();
+// enemies left + gun ammo cost in the HUD
+const _hudTickQ = hudTick;
+hudTick = function () {
+  const r = _hudTickQ.apply(this, arguments);
+  try {
+    const R = G.run; if (!R) return r; const pe = $('hpips');
+    if (pe && R.stage === 'wave') { const n = G.ent.en.filter(e => !e.dead && !e.minion).length + (R.q ? R.q.length : 0), k = 'L' + n; if (pe._ql !== k) { pe._ql = k; let s = pe.parentElement.querySelector('.q-left'); if (!s) { s = document.createElement('span'); s.className = 'q-left'; s.style.cssText = 'font:800 9px var(--mono);letter-spacing:.16em;color:#94a3b8;margin-left:8px'; pe.parentElement.appendChild(s); } s.textContent = n + ' ENEMIES LEFT'; } }
+    else if (pe) { const s = pe.parentElement.querySelector('.q-left'); if (s && s.textContent) { s.textContent = ''; pe._ql = ''; } }
+    for (const p of G.players) { const h = $('hw' + p.id); if (!h || !p.alive) continue; const W = WPN[p.wpn], c = (W.am * (1 - .03 * wlvOf(p.pl, p.wpn))).toFixed(1).replace('.0', ''), k = p.wpn + c; let q = h.querySelector('.qa'); if (!q) { h.insertAdjacentHTML('beforeend', '<i class="qa" style="color:#5eead4;margin-left:6px"></i>'); q = h.querySelector('.qa'); } if (q.textContent !== c + '/SHOT') q.textContent = c + '/SHOT'; }
+  } catch (e) { }
+  return r;
+};
 
 // ================= BOOT =================
 function boot() {

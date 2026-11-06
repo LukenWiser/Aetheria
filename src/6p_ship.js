@@ -338,7 +338,7 @@ const SHIP = (() => {
     if (!S.built || !rooms[k]) return;
     if (k === S.room && !how) return;
     const curve = pathTo(k, how === 'hub'), len = curve.getLength(), quick = SET.reduce;
-    S.travel = { curve, t: 0, d: quick ? .01 : Math.max(1.1, Math.min(2.3, len / 17)), from: S.look.clone(), to: viewOf(k).l, k };
+    S.travel = { curve, t: 0, d: quick ? .01 : Math.max(.01, Math.max(1.1, Math.min(2.3, len / 17)) * (+SET.shipTravel || 1)), from: S.look.clone(), to: viewOf(k).l, k };
     S.fade = 0; ui.style.opacity = 0; ui.style.pointerEvents = 'none';
     showRooms(S.room, k); lightRoom(k, 2); if (S.room) lightRoom(S.room, 0);
     tag.textContent = NAMES[k]; tag.style.setProperty('--c', COLS[k]); tag.classList.add('on');
