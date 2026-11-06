@@ -3,7 +3,7 @@ function boot() {
   layout(); initInput(); initUI();
   try { if (window.THREE) { R3 = init3D(); layout(); R3.setView('menu'); } } catch (e) { console.error('3D init failed, using 2D fallback:', e); R3 = null; }
   buildBackdrop(0);
-  G.scene = 'ui'; UI.show(SAVE.tut ? 'scMenu' : 'scTut');
+  G.scene = 'ui'; UI.show((!navigator.webdriver || window.__pick) && SET.pickSlot !== false ? 'scPick' : SAVE.tut ? 'scMenu' : 'scTut');
   try { if ((SET.intro !== false && !navigator.webdriver) || window.__intro) introPlay(); } catch (e) { console.warn('intro', e); INTRO.on = false; }
   requestAnimationFrame(frame);
 }

@@ -283,7 +283,8 @@ const UPG = {
   drn: { nm: 'Wingman Bay', ds: '+1 AI wingman drone per level. They fly with you and shoot on their own.', b: 420, g: 1.75, max: 3, ic: 'drn' },
   drd: { nm: 'Wingman Tuning', ds: '+25% wingman damage per level', b: 160, g: 1.34, max: 6, ic: 'drd' }
 };
-const upPrice = (k, lv) => Math.round(UPG[k].b * Math.pow(UPG[k].g, lv));
+const ECON = .5; // V55: half the core income
+const upPrice = (k, lv) => Math.round(UPG[k].b * 1.2 * Math.pow(UPG[k].g, lv));
 
 // ---------- modes ----------
 const MODES = {
@@ -303,7 +304,7 @@ function shipStats(pl) {
   const c = pl.cfg, h = PARTS.hull[c.hull] || PARTS.hull.falcon, w = PARTS.wings[c.wings] || PARTS.wings.swept, e = PARTS.engine[c.engine] || PARTS.engine.twin, u = pl.up;
   const sum = k => (h[k] || 0) + (w[k] || 0) + (e[k] || 0);
   return {
-    hp: Math.round(100 + sum('hp') + u.hp * 20), sh: Math.round(40 + u.sh * 15), am: Math.round(100 + sum('am') + u.am * 20),
+    hp: Math.round(80 + sum('hp') + u.hp * 20), sh: Math.round(30 + u.sh * 15), am: Math.round(100 + sum('am') + u.am * 20),
     dmg: 1 + sum('dm') + u.dmg * .08, rate: 1 + sum('rd') + u.rate * .05, spd: (4.6 + sum('sp')) * (1 + u.spd * .04), mag: 1 + u.mag * .25
   };
 }

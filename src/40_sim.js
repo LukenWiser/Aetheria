@@ -66,7 +66,6 @@ function updPlayer(p) {
   if (p.remote) { if (p.dashT > 0) p.dashT--; } else if (p.dashT > 0) { p.dashT--; p.vx = p.dvx; p.vy = p.dvy; if (!p.dashT) { p.dvx *= .3; p.dvy *= .3; p.vx = p.dvx; p.vy = p.dvy; } }
   if (!p.remote) { p.x += p.vx; p.y += p.vy; const B = BOUND(); p.x = clamp(p.x, B.x0, B.x1); p.y = clamp(p.y, B.y0, B.y1); }
   if (p.inv > 0) p.inv--; if (p.slow > 0) p.slow--; if (p.od > 0) p.od--; p.lastHit++;
-  if (p.lastHit > 200 && p.sh < p.msh) p.sh = Math.min(p.msh, p.sh + .22);
   if (G.run && G.run.freeAmmo) p.am = p.mam;
   p.fcd--;
   if (o.fire && p.fcd <= 0 && !(p.supT > 0)) fireP(p);
@@ -216,14 +215,14 @@ function killEnemy(e, own) {
   if (d.split) for (let i = 0; i < 2; i++) { const c = mkEnemy(d.split, e.x, e.y + (i ? 26 : -26), { hpm: 1 }); c.vy = i ? 2 : -2; c.st = 9; }
 }
 function dropLoot(e) {
-  const d = e.d, R = G.run, E = G.ent.pk; let cv = Math.round((R.lootM || 1) * d.cr * (e.gold ? 3 : 1) * (1 + (R.w || 0) * .12) * (1 + (R.remix ? .3 * (R.remix - 1) : 0)) * (1 + G.players.reduce((a, q) => a + q.mod.loot, 0))); if (R.mode === 'training' || R.mode === 'tutorial') cv = Math.min(cv, 1);
-  const n = cv <= 4 ? 1 : cv <= 14 ? 3 : 6, each = Math.max(1, Math.round(cv / n));
+  const d = e.d, R = G.run, E = G.ent.pk; let cv = ECON * ((R.lootM || 1) * d.cr * (e.gold ? 3 : 1) * (1 + (R.w || 0) * .12) * (1 + (R.remix ? .3 * (R.remix - 1) : 0)) * (1 + G.players.reduce((a, q) => a + q.mod.loot, 0))); cv = Math.floor(cv) + (Math.random() < cv % 1 ? 1 : 0); if (R.mode === 'training' || R.mode === 'tutorial') cv = Math.min(cv, 1);
+  const n = cv <= 0 ? 0 : cv <= 4 ? 1 : cv <= 14 ? 3 : 6, each = Math.max(1, Math.round(cv / n));
   for (let i = 0; i < n; i++) E.push({ k: 'core', v: each, x: e.x + rnd(-14, 14), y: e.y + rnd(-14, 14), vx: rnd(-1.5, 1), vy: rnd(-1.5, 1.5), l: 700 });
   const lowAm = G.players.some(p => p.alive && p.am < p.mam * .55 && !(R.freeAmmo));
   const roll = () => Math.random();
   if (!R.freeAmmo && (roll() < (lowAm ? .38 : .17) * (R.ammoDrop || 1) || d.elite)) E.push({ k: 'ammo', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
-  if (roll() < (d.elite ? .6 : .05)) E.push({ k: 'hp', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
-  if (roll() < (d.elite ? .6 : .05)) E.push({ k: 'sh', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
+  if (roll() < (d.elite ? .45 : .03)) E.push({ k: 'hp', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
+  if (roll() < (d.elite ? .45 : .035)) E.push({ k: 'sh', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
   if (roll() < (d.elite ? .3 : .02)) E.push({ k: 'od', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
 }
 function updPickups() {
@@ -239,8 +238,8 @@ function collect(p, k) {
   const R = G.run; SFX.pick();
   if (k.k === 'core') { if (p.remote) { R.rCores = (R.rCores | 0) + k.v; ftext(p.x, p.y - 22, '+' + k.v, '#fbbf24', 12); } else { SAVE.cores += k.v; R.cores += k.v; } ftext(p.x, p.y - 22, '+' + k.v, '#fbbf24', 12); }
   else if (k.k === 'ammo') { const a = Math.max(30, p.mam * .4); p.am = Math.min(p.mam, p.am + a); ftext(p.x, p.y - 22, '+PLASMA', '#2dd4bf', 12); shock(p.x, p.y, '#2dd4bf', 50, 14); }
-  else if (k.k === 'hp') { const a = Math.max(30, p.mhp * .3); p.hp = Math.min(p.mhp, p.hp + a); ftext(p.x, p.y - 22, '+HULL', '#4ade80', 12); shock(p.x, p.y, '#4ade80', 56, 16); SFX.power(); if (R3) { if (p.hp > p.mhp * .9) R3.repair(p); } }
-  else if (k.k === 'sh') { p.sh = Math.min(p.msh, p.sh + Math.max(30, p.msh * .6)); ftext(p.x, p.y - 22, '+SHIELD', '#38bdf8', 12); shock(p.x, p.y, '#38bdf8', 56, 16); SFX.power(); }
+  else if (k.k === 'hp') { const a = Math.max(20, p.mhp * .2); p.hp = Math.min(p.mhp, p.hp + a); ftext(p.x, p.y - 22, '+HULL', '#4ade80', 12); shock(p.x, p.y, '#4ade80', 56, 16); SFX.power(); if (R3) { if (p.hp > p.mhp * .9) R3.repair(p); } }
+  else if (k.k === 'sh') { p.sh = Math.min(p.msh, p.sh + Math.max(20, p.msh * .4)); ftext(p.x, p.y - 22, '+SHIELD', '#38bdf8', 12); shock(p.x, p.y, '#38bdf8', 56, 16); SFX.power(); }
   else if (k.k === 'log') gotLog(p, k);
   else if (k.k === 'od') { p.od = 600; ftext(p.x, p.y - 22, 'OVERDRIVE!', '#fb923c', 13); shock(p.x, p.y, '#fb923c', 90, 20); SFX.power(); }
   if (R.tut) R.tut.picked[k.k] = true;
@@ -380,7 +379,7 @@ function killBoss(e) {
 function finalBossBlast(e) {
   const B = BOSSES[e.bi]; boom2D(e.x, e.y, 200, B.c); shock(e.x, e.y, '#fff', 380, 40); shock(e.x, e.y, B.c, 520, 50); shake(20, 50); G.flashT = 30; G.slowUntil = performance.now() + 700;
   if (R3) R3.boom(e.x, e.y, 40, hx(B.c), 12, 18);
-  const n = 14; for (let i = 0; i < n; i++) G.ent.pk.push({ k: 'core', v: Math.max(2, Math.round(B.rew / 60 * (e.gold ? 3 : 1))), x: e.x + rnd(-60, 60), y: e.y + rnd(-60, 60), vx: rnd(-4, 2), vy: rnd(-4, 4), l: 900 });
+  const n = 14; for (let i = 0; i < n; i++) G.ent.pk.push({ k: 'core', v: Math.max(2, Math.round(B.rew / 60 * ECON * (e.gold ? 3 : 1))), x: e.x + rnd(-60, 60), y: e.y + rnd(-60, 60), vx: rnd(-4, 2), vy: rnd(-4, 4), l: 900 });
   G.ent.pk.push({ k: 'hp', x: e.x, y: e.y, vx: -1, vy: 0, l: 900 }, { k: 'sh', x: e.x, y: e.y + 30, vx: -1, vy: 0, l: 900 });
   G.run.boss = null; G.run.bossDown = (G.run.bossDown | 0) + 1;
   if (G.run.mode !== 'tutorial') { if (!SAVE.bd[e.bi]) toast('BESTIARY: ' + B.nm.toUpperCase(), 'Boss entry added - see Profile > Bestiary', '#fbbf24'); SAVE.bd[e.bi] = (SAVE.bd[e.bi] || 0) + 1; }

@@ -2588,7 +2588,8 @@ const UPG = {
   drn: { nm: 'Wingman Bay', ds: '+1 AI wingman drone per level. They fly with you and shoot on their own.', b: 420, g: 1.75, max: 3, ic: 'drn' },
   drd: { nm: 'Wingman Tuning', ds: '+25% wingman damage per level', b: 160, g: 1.34, max: 6, ic: 'drd' }
 };
-const upPrice = (k, lv) => Math.round(UPG[k].b * Math.pow(UPG[k].g, lv));
+const ECON = .5; // V55: half the core income
+const upPrice = (k, lv) => Math.round(UPG[k].b * 1.2 * Math.pow(UPG[k].g, lv));
 
 // ---------- modes ----------
 const MODES = {
@@ -2608,7 +2609,7 @@ function shipStats(pl) {
   const c = pl.cfg, h = PARTS.hull[c.hull] || PARTS.hull.falcon, w = PARTS.wings[c.wings] || PARTS.wings.swept, e = PARTS.engine[c.engine] || PARTS.engine.twin, u = pl.up;
   const sum = k => (h[k] || 0) + (w[k] || 0) + (e[k] || 0);
   return {
-    hp: Math.round(100 + sum('hp') + u.hp * 20), sh: Math.round(40 + u.sh * 15), am: Math.round(100 + sum('am') + u.am * 20),
+    hp: Math.round(80 + sum('hp') + u.hp * 20), sh: Math.round(30 + u.sh * 15), am: Math.round(100 + sum('am') + u.am * 20),
     dmg: 1 + sum('dm') + u.dmg * .08, rate: 1 + sum('rd') + u.rate * .05, spd: (4.6 + sum('sp')) * (1 + u.spd * .04), mag: 1 + u.mag * .25
   };
 }
@@ -2965,7 +2966,6 @@ function updPlayer(p) {
   if (p.remote) { if (p.dashT > 0) p.dashT--; } else if (p.dashT > 0) { p.dashT--; p.vx = p.dvx; p.vy = p.dvy; if (!p.dashT) { p.dvx *= .3; p.dvy *= .3; p.vx = p.dvx; p.vy = p.dvy; } }
   if (!p.remote) { p.x += p.vx; p.y += p.vy; const B = BOUND(); p.x = clamp(p.x, B.x0, B.x1); p.y = clamp(p.y, B.y0, B.y1); }
   if (p.inv > 0) p.inv--; if (p.slow > 0) p.slow--; if (p.od > 0) p.od--; p.lastHit++;
-  if (p.lastHit > 200 && p.sh < p.msh) p.sh = Math.min(p.msh, p.sh + .22);
   if (G.run && G.run.freeAmmo) p.am = p.mam;
   p.fcd--;
   if (o.fire && p.fcd <= 0 && !(p.supT > 0)) fireP(p);
@@ -3115,14 +3115,14 @@ function killEnemy(e, own) {
   if (d.split) for (let i = 0; i < 2; i++) { const c = mkEnemy(d.split, e.x, e.y + (i ? 26 : -26), { hpm: 1 }); c.vy = i ? 2 : -2; c.st = 9; }
 }
 function dropLoot(e) {
-  const d = e.d, R = G.run, E = G.ent.pk; let cv = Math.round((R.lootM || 1) * d.cr * (e.gold ? 3 : 1) * (1 + (R.w || 0) * .12) * (1 + (R.remix ? .3 * (R.remix - 1) : 0)) * (1 + G.players.reduce((a, q) => a + q.mod.loot, 0))); if (R.mode === 'training' || R.mode === 'tutorial') cv = Math.min(cv, 1);
-  const n = cv <= 4 ? 1 : cv <= 14 ? 3 : 6, each = Math.max(1, Math.round(cv / n));
+  const d = e.d, R = G.run, E = G.ent.pk; let cv = ECON * ((R.lootM || 1) * d.cr * (e.gold ? 3 : 1) * (1 + (R.w || 0) * .12) * (1 + (R.remix ? .3 * (R.remix - 1) : 0)) * (1 + G.players.reduce((a, q) => a + q.mod.loot, 0))); cv = Math.floor(cv) + (Math.random() < cv % 1 ? 1 : 0); if (R.mode === 'training' || R.mode === 'tutorial') cv = Math.min(cv, 1);
+  const n = cv <= 0 ? 0 : cv <= 4 ? 1 : cv <= 14 ? 3 : 6, each = Math.max(1, Math.round(cv / n));
   for (let i = 0; i < n; i++) E.push({ k: 'core', v: each, x: e.x + rnd(-14, 14), y: e.y + rnd(-14, 14), vx: rnd(-1.5, 1), vy: rnd(-1.5, 1.5), l: 700 });
   const lowAm = G.players.some(p => p.alive && p.am < p.mam * .55 && !(R.freeAmmo));
   const roll = () => Math.random();
   if (!R.freeAmmo && (roll() < (lowAm ? .38 : .17) * (R.ammoDrop || 1) || d.elite)) E.push({ k: 'ammo', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
-  if (roll() < (d.elite ? .6 : .05)) E.push({ k: 'hp', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
-  if (roll() < (d.elite ? .6 : .05)) E.push({ k: 'sh', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
+  if (roll() < (d.elite ? .45 : .03)) E.push({ k: 'hp', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
+  if (roll() < (d.elite ? .45 : .035)) E.push({ k: 'sh', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
   if (roll() < (d.elite ? .3 : .02)) E.push({ k: 'od', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
 }
 function updPickups() {
@@ -3138,8 +3138,8 @@ function collect(p, k) {
   const R = G.run; SFX.pick();
   if (k.k === 'core') { if (p.remote) { R.rCores = (R.rCores | 0) + k.v; ftext(p.x, p.y - 22, '+' + k.v, '#fbbf24', 12); } else { SAVE.cores += k.v; R.cores += k.v; } ftext(p.x, p.y - 22, '+' + k.v, '#fbbf24', 12); }
   else if (k.k === 'ammo') { const a = Math.max(30, p.mam * .4); p.am = Math.min(p.mam, p.am + a); ftext(p.x, p.y - 22, '+PLASMA', '#2dd4bf', 12); shock(p.x, p.y, '#2dd4bf', 50, 14); }
-  else if (k.k === 'hp') { const a = Math.max(30, p.mhp * .3); p.hp = Math.min(p.mhp, p.hp + a); ftext(p.x, p.y - 22, '+HULL', '#4ade80', 12); shock(p.x, p.y, '#4ade80', 56, 16); SFX.power(); if (R3) { if (p.hp > p.mhp * .9) R3.repair(p); } }
-  else if (k.k === 'sh') { p.sh = Math.min(p.msh, p.sh + Math.max(30, p.msh * .6)); ftext(p.x, p.y - 22, '+SHIELD', '#38bdf8', 12); shock(p.x, p.y, '#38bdf8', 56, 16); SFX.power(); }
+  else if (k.k === 'hp') { const a = Math.max(20, p.mhp * .2); p.hp = Math.min(p.mhp, p.hp + a); ftext(p.x, p.y - 22, '+HULL', '#4ade80', 12); shock(p.x, p.y, '#4ade80', 56, 16); SFX.power(); if (R3) { if (p.hp > p.mhp * .9) R3.repair(p); } }
+  else if (k.k === 'sh') { p.sh = Math.min(p.msh, p.sh + Math.max(20, p.msh * .4)); ftext(p.x, p.y - 22, '+SHIELD', '#38bdf8', 12); shock(p.x, p.y, '#38bdf8', 56, 16); SFX.power(); }
   else if (k.k === 'log') gotLog(p, k);
   else if (k.k === 'od') { p.od = 600; ftext(p.x, p.y - 22, 'OVERDRIVE!', '#fb923c', 13); shock(p.x, p.y, '#fb923c', 90, 20); SFX.power(); }
   if (R.tut) R.tut.picked[k.k] = true;
@@ -3279,7 +3279,7 @@ function killBoss(e) {
 function finalBossBlast(e) {
   const B = BOSSES[e.bi]; boom2D(e.x, e.y, 200, B.c); shock(e.x, e.y, '#fff', 380, 40); shock(e.x, e.y, B.c, 520, 50); shake(20, 50); G.flashT = 30; G.slowUntil = performance.now() + 700;
   if (R3) R3.boom(e.x, e.y, 40, hx(B.c), 12, 18);
-  const n = 14; for (let i = 0; i < n; i++) G.ent.pk.push({ k: 'core', v: Math.max(2, Math.round(B.rew / 60 * (e.gold ? 3 : 1))), x: e.x + rnd(-60, 60), y: e.y + rnd(-60, 60), vx: rnd(-4, 2), vy: rnd(-4, 4), l: 900 });
+  const n = 14; for (let i = 0; i < n; i++) G.ent.pk.push({ k: 'core', v: Math.max(2, Math.round(B.rew / 60 * ECON * (e.gold ? 3 : 1))), x: e.x + rnd(-60, 60), y: e.y + rnd(-60, 60), vx: rnd(-4, 2), vy: rnd(-4, 4), l: 900 });
   G.ent.pk.push({ k: 'hp', x: e.x, y: e.y, vx: -1, vy: 0, l: 900 }, { k: 'sh', x: e.x, y: e.y + 30, vx: -1, vy: 0, l: 900 });
   G.run.boss = null; G.run.bossDown = (G.run.bossDown | 0) + 1;
   if (G.run.mode !== 'tutorial') { if (!SAVE.bd[e.bi]) toast('BESTIARY: ' + B.nm.toUpperCase(), 'Boss entry added - see Profile > Bestiary', '#fbbf24'); SAVE.bd[e.bi] = (SAVE.bd[e.bi] || 0) + 1; }
@@ -3753,6 +3753,7 @@ function finishRun(win) {
   else if (R.mode === 'endless') { if (G.mapX) { const hm = SAVE.hi.maps || (SAVE.hi.maps = {}); if (R.score > (hm[G.mapX.k] || 0)) hm[G.mapX.k] = Math.round(R.score); } d.bonus = R.wave * 12; if (R.score > SAVE.hi.endless.score) { SAVE.hi.endless.score = Math.round(R.score); d.best = true; } SAVE.hi.endless.wave = Math.max(SAVE.hi.endless.wave, R.wave); }
   else if (R.mode === 'blitz') { d.bonus = Math.round(R.score / 40); if (R.score > SAVE.hi.blitz.score) { SAVE.hi.blitz.score = Math.round(R.score); d.best = true; } }
   else if (R.mode === 'rush') { d.bonus = win ? 800 : R.ri * 150; const sec = d.time; if (win && (!SAVE.hi.rush.time || sec < SAVE.hi.rush.time)) { SAVE.hi.rush.time = sec; d.best = true; } SAVE.hi.rush.boss = Math.max(SAVE.hi.rush.boss, R.ri + (win ? 0 : 0)); }
+  d.bonus = Math.round((d.bonus || 0) * ECON);
   if (R.assist) d.bonus = Math.round(d.bonus * .6);
   afterRun(R, win, d); try { progAfter(R, win, d); } catch (e) { console.error('prog', e); }
   const endDue = win && R.mode === 'expedition' && !R.var && R.spec && R.spec.type === 'B' && R.w === 14, showEnd = endDue && SET.story !== 'off' && (SET.story === 'always' || !SAVE.flags.ending);
@@ -5798,12 +5799,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V54';
+const GAME_VER = 'V55';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V55', 'Earn It', ['Shields no longer recharge on their own - grab shield pickups, cards or drones to top up', 'Threat scaling: if your ship is stronger than a sector expects, enemies get tougher and hit harder, so early levels stay a fight', 'Less starting health: 80 hull and 30 shield, and repair pickups are rarer and smaller', 'Cores are harder to earn: about half the income from kills, bosses, sector bonuses, the refinery and supply crates, and upgrades cost 20% more', 'New profile picker when you open the game - choose one of three save slots']],
   ['V54', 'No Flicker', ['Fixed: a split-second flash of the old flat menu at the end of the intro - the ship now takes over the exact moment the intro starts to fade']],
   ['V53', 'Straight to the Bridge', ['Fixed: the intro ended on the old flat menu - it now glides straight onto the Bridge of your ship, with the menu fading in', 'The first-time tutorial prompt now appears on the Bridge too']],
   ['V52', 'Where Is Vex?', ['Fixed: Vex, the rival ace, could be skipped entirely - she was tied to one exact sector that the new random routes could fly around', 'Vex now finds you a few sectors into her world, on any route and any tier', 'Missed her? She catches up with you in the next world you play, so every save gets the whole story', 'She also shows up during the first wave of a long sector, not only after it']],
@@ -7373,7 +7375,7 @@ Object.assign(ACT, {
   gxjump(a) { gxJump(+a[0]); },
   gxhome() { GXV.sel = GXS().at; GXV.enc = null; gxPanel(); },
   gxjob(a) { const id = a.join(':'), w = +id.split(':')[1], m = gxMissions(w).find(x => x.id === id); if (m && !gxDone(id)) gxPlay(m); },
-  gxcrate() { const S = GXS(), w = S.at; S.crate = S.crate || {}; if (S.crate[w] === dayKey()) return; S.crate[w] = dayKey(); const c = Math.round((40 + 20 * w) * (1 + gxLv(w) * .25)); SAVE.cores += c; saveGame(); toast('SUPPLY CRATE', '+' + fmt(c) + ' cores from ' + GX_ST[w], '#fbbf24'); gxPanel(); },
+  gxcrate() { const S = GXS(), w = S.at; S.crate = S.crate || {}; if (S.crate[w] === dayKey()) return; S.crate[w] = dayKey(); const c = Math.round((40 + 20 * w) * (1 + gxLv(w) * .25) * ECON); SAVE.cores += c; saveGame(); toast('SUPPLY CRATE', '+' + fmt(c) + ' cores from ' + GX_ST[w], '#fbbf24'); gxPanel(); },
   gxfight() { const E = GXV.enc; if (!E) return; GXV.enc = null; gxPlay({ t: 'ambush', w: E.w, lv: Math.min(12, 4 + (E.w >> 1)), rew: E.rew, rep: 20, id: '', map: GXM[Math.floor(Math.random() * GXM.length)] }); },
   gxflee() { const E = GXV.enc; if (!E) return; SAVE.cores = Math.max(0, SAVE.cores - E.loss); saveGame(); alertMsg('ESCAPED - ' + fmt(E.loss) + ' CORES DROPPED'); GXV.enc = null; gxPanel(); }
 });
@@ -7397,7 +7399,7 @@ const bCost = k => Math.round(BMOD[k].cost * Math.pow(bLv(k) + 1, 1.6));
 const bTotal = () => BKEYS.reduce((a, k) => a + bLv(k), 0);
 function bTick() { // refinery output since you last looked, and raid timing
   const B = BS(), now = Date.now(), lv = bLv('refinery'), dt = Math.max(0, now - (B.t || now)) / 36e5; B.t = now;
-  if (lv) B.ore = Math.min(15 * lv * 8, (B.ore || 0) + 15 * lv * dt);
+  if (lv) B.ore = Math.min(8 * lv * 8, (B.ore || 0) + 8 * lv * dt);
   if (bTotal() >= 2) { if (!B.raidAt) B.raidAt = now + (18 + Math.random() * 12) * 36e5; else if (now > B.raidAt + 24 * 36e5) { const lost = Math.round((B.ore || 0) * .3); B.ore = Math.max(0, (B.ore || 0) - lost); B.raidAt = now + (18 + Math.random() * 12) * 36e5; B.lostRaid = lost; } }
 }
 const raidOn = () => { const B = BS(); return !!B.raidAt && Date.now() > B.raidAt && Date.now() < B.raidAt + 24 * 36e5; };
@@ -8515,12 +8517,64 @@ const SHIP = (() => {
 })();
 window.__SHIP = SHIP;
 
+// ================= balance pass (V55): threat scales with how upgraded you are =================
+// Each world has an "expected" amount of upgrades. If your ship is stronger than that,
+// enemies get tougher (hull) and hit harder, so early sectors stay a fight. Upgrades
+// still help: only part of the extra power is cancelled out.
+const BAL = {
+  // expected upgrade levels for a player arriving at world w
+  exp(w) { return { dmg: Math.min(12, w * 1.1), rate: Math.min(10, w * .9), wl: Math.min(WMAXLV, w * .45), ev: w >= 9 ? 1 : 0, hp: Math.min(12, w * 1.1), sh: Math.min(12, w * 1.1), drn: Math.min(3, w * .25) }; },
+  off(dmg, rate, wl, ev, drn) { return (1 + dmg * .08) * (1 + rate * .05) * (1 + .12 * wl) * (1 + .04 * wl) * (ev ? 1.4 : 1) * (1 + drn * .18); },
+  calc(pl, w) {
+    const u = pl.up || {}, e = BAL.exp(w), wl = wlvOf(pl, pl.wpn), ev = wevOf(pl, pl.wpn) ? 1 : 0, st = shipStats(pl);
+    const offA = BAL.off(u.dmg | 0, u.rate | 0, wl, ev, u.drn | 0) * st.dmg / (1 + (u.dmg | 0) * .08) * st.rate / (1 + (u.rate | 0) * .05);
+    const offE = BAL.off(e.dmg, e.rate, e.wl, e.ev, e.drn);
+    const defA = st.hp + st.sh, defE = 80 + e.hp * 20 + 30 + e.sh * 15 + w * 4;
+    const ro = offA / offE, rd = defA / defE;
+    return { hp: ro > 1.05 ? Math.min(3, Math.pow(ro, .75)) : 1, ed: rd > 1.05 ? Math.min(2.2, Math.pow(rd, .8)) : 1, ro, rd };
+  }
+};
+const _beginBal = beginRun;
+beginRun = function (o) {
+  const r = _beginBal.apply(this, arguments);
+  try {
+    const R = G.run;
+    if (R && R.mode === 'expedition' && !G.net && SET.scaleThreat !== false) {
+      // strongest local player decides
+      let best = { hp: 1, ed: 1 };
+      G.players.forEach(p => { const b = BAL.calc(p.pl, R.w); if (b.hp * b.ed > best.hp * best.ed) best = b; });
+      R.hpm *= best.hp; R.edm *= best.ed; R.bal = best;
+      if (best.hp > 1.15 || best.ed > 1.15) setTimeout(() => { if (G.run === R && typeof toast === 'function') toast('THREAT SCALED', 'Your ship outclasses this sector. Enemies +' + Math.round((best.hp - 1) * 100) + '% hull, +' + Math.round((best.ed - 1) * 100) + '% damage.', '#f87171'); }, 900);
+    }
+  } catch (e) { console.warn('bal', e); }
+  return r;
+};
+
+// ---------- startup profile picker ----------
+Object.assign(SCR, {
+  scPick: () => {
+    const cards = [0, 1, 2].map(i => {
+      const si = slotInfo(i);
+      return '<button class="item slot' + (i === SLOT ? ' act' : '') + '" data-act="pickslot:' + i + '" style="width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer"><span><b>PROFILE ' + (i + 1) + '</b>' + (i === SLOT ? ' <span class="good xs">LAST PLAYED</span>' : '') + '<br><span class="xs mut">' + (si && si.runs ? fmt(si.cores) + ' cores - ' + si.wu + '/' + WORLDS.length + ' worlds - ' + fmtT(si.time) + ' played' : 'Empty - start fresh') + '</span></span><span class="b acc">' + (si && si.runs ? 'CONTINUE' : 'NEW GAME') + '</span></button>';
+    }).join('');
+    return '<div class="card mid"><div class="title" style="font-size:clamp(20px,5vw,30px)">SELECT PROFILE</div><p class="xs mut tc" style="margin:6px 0 12px">Three separate saves. Manage, delete or transfer them in Settings.</p><div class="stack" style="gap:8px">' + cards + '</div></div>';
+  }
+});
+Object.assign(ACT, {
+  pickslot(a) {
+    const i = +a[0]; if (i !== SLOT) switchSlot(i); else SFX.click();
+    const si = slotInfo(i); if (!si || !store.get(SLOT_KEYS[i])) saveGame();
+    UI.hist = []; UI.show(SAVE.tut ? 'scMenu' : 'scTut', true);
+  }
+});
+try { if (typeof SHIPROOM !== 'undefined') SHIPROOM.scPick = 'bridge'; } catch (e) { }
+
 // ================= BOOT =================
 function boot() {
   layout(); initInput(); initUI();
   try { if (window.THREE) { R3 = init3D(); layout(); R3.setView('menu'); } } catch (e) { console.error('3D init failed, using 2D fallback:', e); R3 = null; }
   buildBackdrop(0);
-  G.scene = 'ui'; UI.show(SAVE.tut ? 'scMenu' : 'scTut');
+  G.scene = 'ui'; UI.show((!navigator.webdriver || window.__pick) && SET.pickSlot !== false ? 'scPick' : SAVE.tut ? 'scMenu' : 'scTut');
   try { if ((SET.intro !== false && !navigator.webdriver) || window.__intro) introPlay(); } catch (e) { console.warn('intro', e); INTRO.on = false; }
   requestAnimationFrame(frame);
 }

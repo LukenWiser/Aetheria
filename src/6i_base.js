@@ -14,7 +14,7 @@ const bCost = k => Math.round(BMOD[k].cost * Math.pow(bLv(k) + 1, 1.6));
 const bTotal = () => BKEYS.reduce((a, k) => a + bLv(k), 0);
 function bTick() { // refinery output since you last looked, and raid timing
   const B = BS(), now = Date.now(), lv = bLv('refinery'), dt = Math.max(0, now - (B.t || now)) / 36e5; B.t = now;
-  if (lv) B.ore = Math.min(15 * lv * 8, (B.ore || 0) + 15 * lv * dt);
+  if (lv) B.ore = Math.min(8 * lv * 8, (B.ore || 0) + 8 * lv * dt);
   if (bTotal() >= 2) { if (!B.raidAt) B.raidAt = now + (18 + Math.random() * 12) * 36e5; else if (now > B.raidAt + 24 * 36e5) { const lost = Math.round((B.ore || 0) * .3); B.ore = Math.max(0, (B.ore || 0) - lost); B.raidAt = now + (18 + Math.random() * 12) * 36e5; B.lostRaid = lost; } }
 }
 const raidOn = () => { const B = BS(); return !!B.raidAt && Date.now() > B.raidAt && Date.now() < B.raidAt + 24 * 36e5; };

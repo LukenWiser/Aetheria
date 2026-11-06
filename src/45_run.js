@@ -184,6 +184,7 @@ function finishRun(win) {
   else if (R.mode === 'endless') { if (G.mapX) { const hm = SAVE.hi.maps || (SAVE.hi.maps = {}); if (R.score > (hm[G.mapX.k] || 0)) hm[G.mapX.k] = Math.round(R.score); } d.bonus = R.wave * 12; if (R.score > SAVE.hi.endless.score) { SAVE.hi.endless.score = Math.round(R.score); d.best = true; } SAVE.hi.endless.wave = Math.max(SAVE.hi.endless.wave, R.wave); }
   else if (R.mode === 'blitz') { d.bonus = Math.round(R.score / 40); if (R.score > SAVE.hi.blitz.score) { SAVE.hi.blitz.score = Math.round(R.score); d.best = true; } }
   else if (R.mode === 'rush') { d.bonus = win ? 800 : R.ri * 150; const sec = d.time; if (win && (!SAVE.hi.rush.time || sec < SAVE.hi.rush.time)) { SAVE.hi.rush.time = sec; d.best = true; } SAVE.hi.rush.boss = Math.max(SAVE.hi.rush.boss, R.ri + (win ? 0 : 0)); }
+  d.bonus = Math.round((d.bonus || 0) * ECON);
   if (R.assist) d.bonus = Math.round(d.bonus * .6);
   afterRun(R, win, d); try { progAfter(R, win, d); } catch (e) { console.error('prog', e); }
   const endDue = win && R.mode === 'expedition' && !R.var && R.spec && R.spec.type === 'B' && R.w === 14, showEnd = endDue && SET.story !== 'off' && (SET.story === 'always' || !SAVE.flags.ending);

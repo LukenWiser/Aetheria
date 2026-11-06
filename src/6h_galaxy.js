@@ -134,7 +134,7 @@ Object.assign(ACT, {
   gxjump(a) { gxJump(+a[0]); },
   gxhome() { GXV.sel = GXS().at; GXV.enc = null; gxPanel(); },
   gxjob(a) { const id = a.join(':'), w = +id.split(':')[1], m = gxMissions(w).find(x => x.id === id); if (m && !gxDone(id)) gxPlay(m); },
-  gxcrate() { const S = GXS(), w = S.at; S.crate = S.crate || {}; if (S.crate[w] === dayKey()) return; S.crate[w] = dayKey(); const c = Math.round((40 + 20 * w) * (1 + gxLv(w) * .25)); SAVE.cores += c; saveGame(); toast('SUPPLY CRATE', '+' + fmt(c) + ' cores from ' + GX_ST[w], '#fbbf24'); gxPanel(); },
+  gxcrate() { const S = GXS(), w = S.at; S.crate = S.crate || {}; if (S.crate[w] === dayKey()) return; S.crate[w] = dayKey(); const c = Math.round((40 + 20 * w) * (1 + gxLv(w) * .25) * ECON); SAVE.cores += c; saveGame(); toast('SUPPLY CRATE', '+' + fmt(c) + ' cores from ' + GX_ST[w], '#fbbf24'); gxPanel(); },
   gxfight() { const E = GXV.enc; if (!E) return; GXV.enc = null; gxPlay({ t: 'ambush', w: E.w, lv: Math.min(12, 4 + (E.w >> 1)), rew: E.rew, rep: 20, id: '', map: GXM[Math.floor(Math.random() * GXM.length)] }); },
   gxflee() { const E = GXV.enc; if (!E) return; SAVE.cores = Math.max(0, SAVE.cores - E.loss); saveGame(); alertMsg('ESCAPED - ' + fmt(E.loss) + ' CORES DROPPED'); GXV.enc = null; gxPanel(); }
 });
