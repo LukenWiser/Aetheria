@@ -1075,6 +1075,49 @@ function buildArena(kind, X) {
       const petals = new T.Mesh(G.box, DM('#fbcfe8')); petals.scale.set(6, 1, 4); for (let i = 0; i < 24; i++) ride(mid, petals.clone(), rs() * mid.len, -400 + rs() * 900, 300 + rs() * 200, (o, t, df) => { o.position.x -= 1.4 * df; o.position.y -= .5 * df; o.rotation.x += .06 * df; o.rotation.z += .04 * df; if (o.position.y < -500) o.position.y += 900; if (o.position.x < -mid.len) o.position.x += mid.len * 3; });
     }
   });
+  Object.assign(DET, {
+    // Aetheria Skylines: a plaza on the near side of the avenue: planters with trees, a fountain, benches, a bus shelter, hydrants, bikes and rooftop clutter
+    city() {
+      const conc = DM('#9ca3af', { detail: 'rock' }), conc2 = DM('#78716c', { detail: 'rock' }), hedge = DM('#3f7d3a', { detail: 'organic' }), leaf = DM('#4d7c0f', { detail: 'organic' }), bark = DM('#4a3424', { detail: 'organic' }), wood = DM('#7c4a24', { detail: 'organic' }), metal = DM('#374151', { metalness: .7 }), red = DM('#dc2626', { metalness: .4 }), water = GLW('#7dd3fc', .9), glass = DM('#93c5fd', { transparent: true, opacity: .45, detail: 'glass' }), ad = GLW('#fbbf24', 1.4), yel = DM('#facc15', { metalness: .3 }), blue = DM('#2563eb', { metalness: .4 });
+      const plaza = layer(-820, lenFor(-820), put => { const L = lenFor(-820);
+        put(conc2, G.box, L / 2, gy() + 3, 0, L, 6, 140);
+        for (let x = 40; x < L; x += 300) { put(conc, G.box, x, gy() + 18, -20, 80, 30, 50); put(hedge, G.box, x, gy() + 40, -20, 74, 20, 44); put(bark, G.cyl6, x, gy() + 90, -20, 8, 120, 8); for (let c = 0; c < 3; c++) put(leaf, G.ico, x + (rs() - .5) * 40, gy() + 160 + rs() * 30, -20 + (rs() - .5) * 20, 80, 60, 70, 0, rs() * 3, 0, 1, 1, tint(1, .3)); }
+        for (let x = 190; x < L; x += 300) { put(wood, G.box, x, gy() + 20, 30, 70, 5, 20); put(wood, G.box, x, gy() + 32, 38, 70, 18, 4); put(metal, G.box, x - 30, gy() + 10, 30, 4, 20, 20); put(metal, G.box, x + 30, gy() + 10, 30, 4, 20, 20); }
+        const fx = L * .5; put(conc, G.cyl, fx, gy() + 14, 0, 220, 28, 220); put(water, G.cyl, fx, gy() + 29, 0, 200, 2, 200); put(conc, G.cyl, fx, gy() + 60, 0, 30, 80, 30); put(conc, G.cyl, fx, gy() + 100, 0, 90, 10, 90); put(water, G.cyl, fx, gy() + 106, 0, 80, 2, 80); put(conc, G.cyl, fx, gy() + 130, 0, 14, 50, 14);
+        const sx = L * .2; put(metal, G.box, sx - 50, gy() + 50, -40, 4, 100, 4); put(metal, G.box, sx + 50, gy() + 50, -40, 4, 100, 4); put(metal, G.box, sx, gy() + 102, -30, 110, 4, 50); put(glass, G.box, sx, gy() + 55, -60, 104, 90, 2); put(ad, G.box, sx + 52, gy() + 55, -40, 2, 80, 40); put(wood, G.box, sx, gy() + 20, -48, 80, 4, 16);
+        for (let i = 0; i < 6; i++) { const x = rs() * L; put(red, G.cyl6, x, gy() + 14, 60, 10, 28, 10); put(red, G.sph, x, gy() + 30, 60, 11, 10, 11); }
+        for (let i = 0; i < 4; i++) { const x = rs() * L; put(i % 2 ? blue : yel, G.box, x, gy() + 22, 60, 22, 44, 18); }
+        for (let r = 0; r < 3; r++) { const x = rs() * L; for (let b = 0; b < 4; b++) { put(DM('#111827'), G.tor, x + b * 22, gy() + 14, 50, 26, 26, 26, 0, Math.PI / 2, 0); put(DM('#111827'), G.tor, x + b * 22, gy() + 14, 78, 26, 26, 26, 0, Math.PI / 2, 0); put([red, blue, yel][b % 3], G.box, x + b * 22, gy() + 24, 64, 4, 4, 30); } } });
+      for (let x = 0; x < plaza.len; x += 300) { const s = new T.Sprite(glowM('#fde68a', .35)); s.scale.setScalar(90); ride(plaza, s, x + 40, gy() + 100, 0); }
+    },
+    // Neon Mainframe: data towers wrapped in cable, energy pylons with arcs, holo-trees, floating platforms and rows of blinking server racks
+    cyber() {
+      const dark = DM('#0b0717', { metalness: .7 }), dark2 = DM('#1e1b4b', { metalness: .7 }), g1 = GLW('#4ade80', 2.2), g2 = GLW('#e879f9', 2.2), g3 = GLW('#22d3ee', 2.2), cable = DM('#111827', { metalness: .4 }), holo = MAT({ color: '#000000', emissive: '#22d3ee', emissiveIntensity: 1.2, transparent: true, opacity: .5, vertexColors: false });
+      const mid = layer(-1250, lenFor(-1250), put => { const L = lenFor(-1250);
+        for (let i = 0; i < 7; i++) { const x = (i + rs() * .5) / 7 * L, h = 220 + rs() * 220, w = 90 + rs() * 50, zz = (rs() - .5) * 300; put(dark2, G.box, x, gy() + h / 2, zz, w, h, w); for (let b = 0; b < Math.floor(h / 40); b++) put([g1, g2, g3][(b + i) % 3], G.box, x, gy() + 20 + b * 40, zz + w / 2 + 1, w * .8, 3, 2); for (let c = 0; c < 6; c++) put(cable, G.cyl6, x - w / 2 - 4, gy() + h / 2, zz - w / 2 + 8 + c * (w - 16) / 5, 5, h, 5); put(g3, G.cyl, x, gy() + h + 20, zz, 6, 40, 6); }
+        for (let p = 0; p < 4; p++) { const x = (p + .5) / 4 * L; put(dark, G.cone4, x, gy() + 230, 180, 60, 460, 60, 0, Math.PI / 4, 0); for (let k = 0; k < 3; k++) put(g2, G.tor, x, gy() + 140 + k * 110, 180, 70 - k * 14, 70 - k * 14, 70 - k * 14, Math.PI / 2, 0, 0); }
+        for (let t = 0; t < 6; t++) { const x = rs() * L, zz = (rs() - .5) * 300; put(g1, G.cyl6, x, gy() + 60, zz, 6, 120, 6); for (let c = 0; c < 3; c++) put(holo, G.oct, x, gy() + 120 + c * 40, zz, 90 - c * 25, 50, 90 - c * 25); }
+        for (let f = 0; f < 4; f++) { const x = rs() * L, y = gy() + 260 + rs() * 260; put(dark2, G.cyl6, x, y, -100, 160, 14, 160); put(g3, G.cyl6, x, y - 8, -100, 140, 3, 140); put(dark, G.box, x, y + 30, -100, 40, 40, 40); } });
+      for (let p = 0; p < 4; p++) { const s = new T.Sprite(glowM('#e879f9', .7)); s.scale.setScalar(120); ride(mid, s, (p + .5) / 4 * mid.len, gy() + 470, 180, (o, t) => { o.material.opacity = Math.random() < .1 ? 1 : .4 + .2 * Math.sin(t * 9 + o.id); }); }
+      const near = layer(-560, lenFor(-560), put => { const L = lenFor(-560);
+        for (let r = 0; r < 4; r++) { const x0 = (r + .2) / 4 * L; for (let k = 0; k < 5; k++) { const x = x0 + k * 46; put(dark, G.box, x, gy() + 60, 0, 40, 120, 50); for (let l = 0; l < 8; l++) put([g1, g3, g2][(l + k) % 3], G.box, x - 10 + (l % 3) * 10, gy() + 12 + l * 14, 26, 4, 3, 1); } put(cable, G.cyl6, x0 + 92, gy() + 124, 0, 6, 230, 6, 0, 0, Math.PI / 2); }
+        for (let x = 0; x < L; x += 90) { put(dark2, G.box, x, gy() + 14, 70, 70, 28, 10); put(g2, G.box, x, gy() + 20, 76, 60, 3, 1); } });
+      const leds = new T.Mesh(G.box, GLW('#4ade80', 3)); leds.scale.set(6, 4, 2); for (let i = 0; i < 18; i++) ride(near, leds.clone(), rs() * near.len, gy() + 10 + rs() * 100, 26, (o, t) => { o.visible = Math.sin(t * (4 + o.id % 5) + o.id) > 0; });
+    },
+    // Heart of Aetheria: obelisks banded with glyphs, braziers, floating rings, statues, banners and reflecting pools
+    sanctum() {
+      const stone = DM('#0e2a33', { metalness: .5 }), stone2 = DM('#16404d', { detail: 'rock' }), band = GLW('#22d3ee', 2.2), white = GLW('#e0f2fe', 2), gold = DM('#c9a227', { metalness: .85 }), cloth = DM('#0e7490', { detail: 'organic' }), pool = GLW('#67e8f9', .8), crys = MAT({ color: '#a5f3fc', emissive: '#22d3ee', emissiveIntensity: 1.1, roughness: .2, detail: 'glass' });
+      const mid = layer(-1150, lenFor(-1150), put => { const L = lenFor(-1150);
+        for (let i = 0; i < 6; i++) { const x = (i + .5) / 6 * L, zz = -120; put(stone2, G.box, x, gy() + 20, zz, 120, 40, 120); put(stone, G.cone4, x, gy() + 260, zz, 70, 480, 70, 0, Math.PI / 4, 0); for (let b = 0; b < 5; b++) put(band, G.box, x, gy() + 80 + b * 70, zz + 26 - b * 3, 40 - b * 5, 6, 2); put(white, G.oct, x, gy() + 520, zz, 30, 50, 30); }
+        for (let i = 0; i < 4; i++) { const x = (i + .1) / 4 * L, zz = 60; put(stone2, G.box, x, gy() + 30, zz, 60, 60, 60); put(stone, G.cyl6, x, gy() + 110, zz, 40, 100, 30); put(stone, G.sph, x, gy() + 180, zz, 36, 40, 36); put(stone, G.box, x, gy() + 120, zz, 110, 20, 14, 0, 0, .15); put(gold, G.tor, x, gy() + 210, zz, 40, 40, 40, Math.PI / 2, 0, 0); }
+        for (let i = 0; i < 6; i++) { const x = rs() * L; put(gold, G.cyl6, x, gy() + 40, 120, 30, 80, 30); put(gold, G.cyl, x, gy() + 84, 120, 60, 10, 60); }
+        for (let i = 0; i < 5; i++) { const x = rs() * L; put(gold, G.box, x, gy() + 400, -60, 100, 6, 6); put(cloth, G.box, x, gy() + 300, -58, 80, 200, 2); put(band, G.box, x, gy() + 300, -56, 50, 4, 1); put(band, G.cone4, x, gy() + 230, -56, 30, 30, 1, Math.PI, Math.PI / 4, 0); }
+        for (let p = 0; p < 3; p++) { const x = (p + .6) / 3 * L; put(stone2, G.box, x, gy() + 4, 200, 360, 8, 120); put(pool, G.box, x, gy() + 9, 200, 340, 2, 100); }
+        for (let i = 0; i < 10; i++) { const x = rs() * L, zz = (rs() - .5) * 400; for (let c = 0; c < 4; c++) put(crys, G.oct, x + (rs() - .5) * 40, gy() + 30, zz + (rs() - .5) * 40, 18, 60 + rs() * 60, 18, (rs() - .5) * .5, rs(), (rs() - .5) * .5); } });
+      for (let i = 0; i < 6; i++) { const s = new T.Sprite(glowM('#fbbf24', .7)); s.scale.setScalar(90); ride(mid, s, rs() * mid.len, gy() + 100, 120, (o, t) => { o.scale.setScalar(80 + Math.sin(t * 8 + o.id) * 14 + Math.random() * 8); }); }
+      const rg = new T.Mesh(G.tor, GLW('#67e8f9', .7)); rg.scale.setScalar(110); for (let i = 0; i < 4; i++) ride(mid, rg.clone(), (i + .3) / 4 * mid.len, gy() + 700 + rs() * 200, -200, (o, t, df) => { o.rotation.x += .01 * df; o.rotation.y += .013 * df; o.position.y += Math.sin(t + o.id) * .3; });
+    }
+  });
   if (DET[kind]) { try { DET[kind](); } catch (e) { console.warn('arena detail failed', kind, e); } }
   // ---- sunset to night over a few minutes on outdoor maps: sky darkens, sun fades, windows and lamps glow brighter ----
   if (SET.daynight !== false && ['city', 'suburb', 'beach', 'desert', 'ice', 'islands', 'park', 'clock'].indexOf(kind) >= 0 && A.skyU) {
