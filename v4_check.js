@@ -5853,12 +5853,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V78';
+const GAME_VER = 'V79';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V79', 'No Plain Blocks', ['Every solid block on the ship now has a real surface: consoles, cabinets, pedestals, platforms and machinery get panel plates with seams, screws, vents, grilles, hatches and service labels', 'Frames, pillars and posts are brushed metal with bolt rows; pipes, tanks and tools are painted metal with scratches and wear', 'Workbenches and tables are wood grain, chairs and sofas are stitched fabric, cables are ribbed rubber', 'Details stay the same size on big and small parts instead of stretching']],
   ['V78', 'Special Delivery', ['The Fab Bay conveyor now carries real cardboard shipping boxes: kraft board, packing tape, printed shipping labels with barcodes, ink stamps and THIS SIDE UP marks, four different kinds', 'The conveyor itself is a ribbed rubber belt that scrolls with the boxes, with side rails, rollers and drum ends']],
   ['V77', 'The ship, fully furnished', ['Every wall, floor and ceiling has a new high-detail surface: riveted plates, vents, stencils, hazard kick plates, diamond-plate floors and grime', 'Every room is dressed: pipes with valves and flanges, cable trays, sagging cables, ceiling beams, lockers, extinguishers, posters, fans, status lights and drifting dust', 'Room extras: bridge desks and plants, a map table, a telescope and rug on the Star Deck, a workbench with welding sparks, barrels and a moving crane in the Workshop, a hydraulic press in the Fab Bay, tanks, a catwalk, gauges and spinning beacons in Engineering, server racks in Comms, a reading lounge and display cases in the Archive', 'Corridors now have handrails, pipes, wall lamps, a lit floor grate and terminals; the hub has benches, plants, hanging lamps and a cable ring', 'Workshop: the posts that blocked your ship are gone', 'Low graphics preset skips the extra detail to stay fast']],
   ['V76', 'Steady For Real', ['Fixed: going back to a tab on the left of the main menu made its tiles vanish and pulled the footer up. The slide-in animation for that direction shared a name with the click-spark ring, which pinned the tile area to the top of the screen']],
@@ -8205,7 +8206,7 @@ const SHIP = (() => {
   const EM = {}; const emi = (c, i = 1.6) => { const k = c + ':' + i; return EM[k] || (EM[k] = new T.MeshStandardMaterial({ color: 0x000000, emissive: new T.Color(c), emissiveIntensity: i })); };
   const std = (c, o) => new T.MeshStandardMaterial(Object.assign({ color: c, metalness: .7, roughness: .45 }, o || {}));
   const add = (p, o) => { p.add(o); return o; };
-  const mesh = (p, geo, mat, x, y, z, rx, ry, rz) => { if (mat && mat.userData && mat.userData.tile && geo.attributes.uv) { const P = geo.parameters || {}, tl = mat.userData.tile, gw = (P.width || (P.radius || 1) * 2) / tl, gh = (P.height || (P.radius || 1) * 2) / tl, uv = geo.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * gw, uv.getY(i) * gh); } const m = new T.Mesh(geo, mat); m.position.set(x || 0, y || 0, z || 0); m.rotation.set(rx || 0, ry || 0, rz || 0); p.add(m); return m; };
+  const mesh = (p, geo, mat, x, y, z, rx, ry, rz) => { if (mat && mat.userData && mat.userData.tile && geo.attributes.uv) { const P = geo.parameters || {}, tl = mat.userData.tile, uv = geo.attributes.uv; if (geo.type === 'BoxGeometry' && uv.count === 24) { const F = [[P.depth, P.height], [P.depth, P.height], [P.width, P.depth], [P.width, P.depth], [P.width, P.height], [P.width, P.height]]; for (let i = 0; i < 24; i++) { const f = F[i >> 2]; uv.setXY(i, uv.getX(i) * f[0] / tl, uv.getY(i) * f[1] / tl); } } else { const rr = P.radiusTop != null ? Math.max(P.radiusTop, P.radiusBottom) : P.radius, round = P.radiusTop != null || /Sphere|Torus/.test(geo.type), gw = (P.width || (round ? TAU * (rr || 1) : (rr || 1) * 2)) / tl, gh = (P.height || P.tube && TAU * P.tube || (rr || 1) * 2) / tl; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * gw, uv.getY(i) * gh); } } const m = new T.Mesh(geo, mat); m.position.set(x || 0, y || 0, z || 0); m.rotation.set(rx || 0, ry || 0, rz || 0); p.add(m); return m; };
   const box = (p, w, h, d, mat, x, y, z, ry) => mesh(p, new T.BoxGeometry(w, h, d), mat, x, y, z, 0, ry || 0, 0);
   let glowTex; const glow = (p, c, s, o = 1) => { const m = new T.Sprite(new T.SpriteMaterial({ map: glowTex, color: new T.Color(c), transparent: true, opacity: o, blending: T.AdditiveBlending, depthWrite: false })); m.scale.setScalar(s); p.add(m); return m; };
   const holoM = (c, o) => new T.MeshBasicMaterial({ color: new T.Color(c), transparent: true, opacity: o, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide });
@@ -8217,6 +8218,7 @@ const SHIP = (() => {
     const HT = hiTex(); kit();
     const wallT = HT.wall, floorT = HT.floor, ceilT = HT.ceil;
     M = { wallT, floorT, ceilT, trim: std(0x5b6b82, { metalness: .9, roughness: .3 }), dark: std(0x101722, { metalness: .85, roughness: .35 }), mid: std(0x2b3647, { metalness: .8, roughness: .4 }), gold: std(0xb98a2e, { metalness: 1, roughness: .28 }), glass: new T.MeshStandardMaterial({ color: 0x9be7ff, transparent: true, opacity: .12, metalness: .2, roughness: .05, side: T.DoubleSide, depthWrite: false }) };
+    try { surf(); } catch (e) { console.warn('surface detail', e); }
   }
   const TXM = {}; const texMat = (t, w, h, col, o) => { const k = t.uuid + (col || 0) + JSON.stringify(o || {}); return TXM[k] || (TXM[k] = std(col || 0xffffff, Object.assign({ map: t, bumpMap: t, bumpScale: .035, metalness: .6, roughness: .62 }, o || {}, { userData: { tile: (t.userData && t.userData.tile) || 3 } }))); };
   const plane = (p, w, h, mat, x, y, z, rx, ry) => mesh(p, new T.PlaneGeometry(w, h), mat, x, y, z, rx, ry, 0);
@@ -8435,6 +8437,55 @@ const SHIP = (() => {
     const mS = mk(side), mE = mk(end), mT = mk(top);
     return (CBM[v] = [mS, mS, mT, mT, mE, mE]);
   }
+
+  // ---- V79: every solid block gets a real surface. Panel maps are painted in the block's own colour and doubled as bump maps; UVs are scaled per face so detail stays the same size on big and small parts ----
+  function surf() {
+    const R = () => rnd();
+    const hex = c => '#' + c.toString(16).padStart(6, '0');
+    const shade = (c, f) => { const r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255, k = v => Math.max(0, Math.min(255, Math.round(v * f))); return 'rgb(' + k(r) + ',' + k(g) + ',' + k(b) + ')'; };
+    const screw = (g, x, y, r) => { g.fillStyle = 'rgba(0,0,0,.55)'; g.beginPath(); g.arc(x + 1, y + 1, r, 0, TAU); g.fill(); g.fillStyle = 'rgba(255,255,255,.28)'; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill(); g.strokeStyle = 'rgba(0,0,0,.6)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x - r * .7, y); g.lineTo(x + r * .7, y); g.stroke(); };
+    const bev = (g, x, y, w, h, lw) => { g.lineWidth = lw; g.strokeStyle = 'rgba(255,255,255,.16)'; g.beginPath(); g.moveTo(x, y + h); g.lineTo(x, y); g.lineTo(x + w, y); g.stroke(); g.strokeStyle = 'rgba(0,0,0,.6)'; g.beginPath(); g.moveTo(x + w, y); g.lineTo(x + w, y + h); g.lineTo(x, y + h); g.stroke(); };
+    const noise = (g, S, n, a) => { for (let i = 0; i < n; i++) { g.fillStyle = 'rgba(' + (R() < .5 ? '255,255,255' : '0,0,0') + ',' + (R() * a) + ')'; g.fillRect(R() * S, R() * S, 1 + R() * 2, 1 + R() * 2); } };
+    const scratches = (g, S, n) => { for (let i = 0; i < n; i++) { const x = R() * S, y = R() * S, l = 6 + R() * 40, a = R() * TAU; g.strokeStyle = 'rgba(255,255,255,' + (.04 + R() * .1) + ')'; g.lineWidth = .8; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); } };
+    const words = ['PWR', 'AUX', 'BUS 4', 'CTRL', 'SERV', 'MAINT', 'I/O', 'LINE B', 'GND', '24V', 'COOL', 'SYS'];
+    // machine panels: split into plates, each with bevels, screws and something on it (vents, a label, a grille, a hatch)
+    const panel = (c, S) => ctex(S, S, g => {
+      g.fillStyle = shade(c, 1); g.fillRect(0, 0, S, S); noise(g, S, 2500, .07);
+      const plates = [[0, 0, S, S]]; for (let k = 0; k < 4; k++) { const i = plates.length * R() | 0, [x, y, w, h] = plates[i]; if (w < S * .3 && h < S * .3) continue; plates.splice(i, 1); if (w > h) { const m = w * (.35 + R() * .3) | 0; plates.push([x, y, m, h], [x + m, y, w - m, h]); } else { const m = h * (.35 + R() * .3) | 0; plates.push([x, y, w, m], [x, y + m, w, h - m]); } }
+      plates.forEach(([x, y, w, h], i) => {
+        g.fillStyle = shade(c, .9 + R() * .25); g.fillRect(x + 3, y + 3, w - 6, h - 6); bev(g, x + 3, y + 3, w - 6, h - 6, 3);
+        g.fillStyle = 'rgba(0,0,0,.7)'; g.fillRect(x, y, w, 3); g.fillRect(x, y, 3, h);
+        [[x + 12, y + 12], [x + w - 12, y + 12], [x + 12, y + h - 12], [x + w - 12, y + h - 12]].forEach(([a, b]) => screw(g, a, b, 4));
+        const t = R(), cx = x + w / 2, cy = y + h / 2;
+        if (t < .3 && w > 80 && h > 60) { const n = Math.min(8, (h - 40) / 12 | 0); for (let k = 0; k < n; k++) { g.fillStyle = 'rgba(0,0,0,.75)'; g.fillRect(x + 26, y + 22 + k * 12, w - 52, 5); g.fillStyle = 'rgba(255,255,255,.1)'; g.fillRect(x + 26, y + 27 + k * 12, w - 52, 1.5); } }
+        else if (t < .5 && w > 70 && h > 50) { g.fillStyle = 'rgba(230,236,245,.75)'; g.fillRect(x + 20, y + 20, Math.min(110, w - 40), 22); g.fillStyle = '#111'; g.font = '800 14px monospace'; g.fillText(words[R() * words.length | 0] + ' ' + (R() * 90 + 10 | 0), x + 26, y + 36); g.fillStyle = 'rgba(250,204,21,.7)'; g.fillRect(x + 20, y + 46, Math.min(110, w - 40), 3); }
+        else if (t < .65 && w > 60 && h > 60) { const r = Math.min(w, h) * .3; g.fillStyle = 'rgba(0,0,0,.6)'; g.beginPath(); g.arc(cx, cy, r, 0, TAU); g.fill(); for (let a = -r; a < r; a += 6) { const hw = Math.sqrt(r * r - a * a); g.fillStyle = 'rgba(255,255,255,.08)'; g.fillRect(cx - hw, cy + a, hw * 2, 2); } g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, r, 0, TAU); g.stroke(); }
+        else if (t < .8 && w > 60 && h > 60) { g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x + 18, y + 18, w - 36, h - 36); bev(g, x + 18, y + 18, w - 36, h - 36, 2); g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(x + w - 34, cy - 12, 8, 24); }
+        else if (w > 50 && h > 40) { for (let yy = y + 20; yy < y + h - 20; yy += 9) for (let xx = x + 20; xx < x + w - 20; xx += 9) { g.fillStyle = 'rgba(0,0,0,.55)'; g.beginPath(); g.arc(xx, yy, 2.4, 0, TAU); g.fill(); } }
+      });
+      scratches(g, S, 50); for (let i = 0; i < 8; i++) { const x = R() * S, y = R() * S, r = 20 + R() * 70, gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, 'rgba(0,0,0,.14)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); }
+    });
+    // brushed and machined metal with seams and bolt rows, for trims, frames and posts
+    const brushed = (c, S) => ctex(S, S, g => {
+      g.fillStyle = shade(c, 1); g.fillRect(0, 0, S, S); for (let y = 0; y < S; y++) { g.fillStyle = 'rgba(' + (R() < .5 ? '255,255,255' : '0,0,0') + ',' + (R() * .07) + ')'; g.fillRect(0, y, S, 1); }
+      g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, S, 2); g.fillStyle = 'rgba(255,255,255,.18)'; g.fillRect(0, 2, S, 1.5); [12, S - 12].forEach(y => { for (let x = 20; x < S; x += 56) screw(g, x, y, 3); }); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(S * .2, S * .35, S * .6, S * .3); g.strokeStyle = 'rgba(255,255,255,.1)'; g.lineWidth = 1.5; g.strokeRect(S * .2, S * .35, S * .6, S * .3);
+      scratches(g, S, 70); noise(g, S, 1500, .06);
+    });
+    // painted metal with chipped edges and wear, multiplied by the part's paint colour
+    const paint = S => ctex(S, S, g => { g.fillStyle = '#e8e8e8'; g.fillRect(0, 0, S, S); noise(g, S, 3000, .08); for (let i = 0; i < 60; i++) { g.fillStyle = 'rgba(150,150,150,' + (.15 + R() * .2) + ')'; g.beginPath(); g.ellipse(R() * S, R() * S, 1 + R() * 3, 1 + R() * 1.5, R() * 3, 0, TAU); g.fill(); } g.fillStyle = 'rgba(0,0,0,.25)'; for (let x = 0; x < S; x += S / 2) g.fillRect(x, 0, 2, S); for (let y = 0; y < S; y += S / 2) { g.fillRect(0, y, S, 2); for (let x = 14; x < S; x += S / 4) screw(g, x, y + 10, 3); } scratches(g, S, 50); });
+    const wood = ctex(256, 256, g => { g.fillStyle = '#c69b6d'; g.fillRect(0, 0, 256, 256); for (let y = 0; y < 256; y += 1) { g.fillStyle = 'rgba(80,45,15,' + (.08 + .08 * Math.sin(y * .35 + Math.sin(y * .05) * 4)) + ')'; g.fillRect(0, y, 256, 1); } for (let k = 0; k < 4; k++) { const x = R() * 256, y = R() * 256; g.strokeStyle = 'rgba(70,40,10,.4)'; for (let r = 3; r < 16; r += 3) { g.beginPath(); g.ellipse(x, y, r * 2.4, r * .6, 0, 0, TAU); g.stroke(); } } for (let x = 0; x < 256; x += 64) { g.fillStyle = 'rgba(40,20,5,.5)'; g.fillRect(x, 0, 2, 256); } });
+    const fabric = ctex(256, 256, g => { g.fillStyle = '#e4e4e4'; g.fillRect(0, 0, 256, 256); for (let y = 0; y < 256; y += 3) { g.fillStyle = 'rgba(0,0,0,.07)'; g.fillRect(0, y, 256, 1); } for (let x = 0; x < 256; x += 3) { g.fillStyle = 'rgba(0,0,0,.05)'; g.fillRect(x, 0, 1, 256); } g.strokeStyle = 'rgba(0,0,0,.14)'; g.setLineDash([4, 3]); g.lineWidth = 1; g.strokeRect(6, 6, 244, 244); g.setLineDash([]); noise(g, 256, 1200, .05); });
+    const rubberT = ctex(128, 128, g => { g.fillStyle = '#d6d6d6'; g.fillRect(0, 0, 128, 128); for (let y = 0; y < 128; y += 8) { g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(0, y, 128, 3); } noise(g, 128, 600, .1); });
+    const use = (m, t, tile, o) => { if (!m) return; t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = 8; m.map = t; m.bumpMap = t; m.bumpScale = .02; m.userData.tile = tile; if (o) Object.assign(m, o); m.needsUpdate = true; };
+    // block colours are baked into their maps, so their tint goes white
+    const baked = (m, t, tile, o) => { if (!m) return; m.color.setHex(0xffffff); use(m, t, tile, o); };
+    baked(M.dark, panel(0x1a2333, 512), 1.4, { metalness: .55, roughness: .5 });
+    baked(M.mid, panel(0x334156, 512), 1.6, { metalness: .5, roughness: .52 });
+    baked(M.trim, brushed(0x6b7b92, 256), 2.2, { metalness: .75, roughness: .38 });
+    baked(PART.metal, brushed(0x9aa3b2, 256), 1.6, { metalness: .7, roughness: .4 });
+    const pT = paint(256); [PART.pipeC, PART.pipeB, PART.pipeG, PART.red, PART.yellow].forEach(m => use(m, pT, 1.2, { bumpMap: null }));
+    baked(PART.wood, wood, 1.4); [PART.cloth, PART.cloth2].forEach(m => use(m, fabric, 1.4, { bumpScale: .004 })); use(PART.rubber, rubberT, .6);
+  }
   // ---------- room contents ----------
   const BUILD = {
     bridge(G) {
@@ -8581,7 +8632,7 @@ const SHIP = (() => {
         const cr = mesh(tb, i === 0 ? new T.TetrahedronGeometry(.35) : i === 1 ? new T.DodecahedronGeometry(.3) : new T.TorusGeometry(.22, .08, 8, 20), holoM(['#4ade80', '#f472b6', '#38bdf8'][i], .7), 0, 1.6, 0); glow(tb, ['#4ade80', '#f472b6', '#38bdf8'][i], 1.4, .35).position.y = 1.6; anim.push((dt, c) => { cr.rotation.set(c * .7 + i, c + i, 0); cr.position.y = 1.6 + Math.sin(c * 1.5 + i) * .12; }); });
       // holo-theater screen on the left wall
       const th = plane(G, 4.2, 2.4, new T.MeshBasicMaterial({ map: screenT('#e2e8f0', 0) }), -w / 2 + .1, 2.6, -6.5, 0, HP); box(G, .1, 2.6, 4.4, M.dark, -w / 2 + .05, 2.6, -6.5);
-      box(G, 2.6, .45, .9, std(0x334155, { metalness: .3, roughness: .8 }), -3.2, .35, -6.5);
+      box(G, 2.6, .45, .9, PART.cloth, -3.2, .35, -6.5);
       G.userData.view = { p: [-1.9, 2.05, -1.7], l: [-2.1, 2.2, -9], yaw: -.05 };
       G.userData.lights = [[0, 4.6, -8, 0xfff1d6, 1.4, 12], [3.6, 3.4, -5, 0x86efac, .8, 10]];
     }
