@@ -17,11 +17,11 @@ ACT.msel = a => { if (UI.msel === a[0] && MODES[a[0]] && !(MODES[a[0]].secret &&
 
 // ---------- Pause: the run on the right, big choices on the left ----------
 SCR.scPause = () => {
-  const R = G.run, tr = R && R.mode === 'training', dev = SAVE.dev || G.god, W = R ? WORLDS[R.w] : null;
+  const R = G.run, tr = R && R.mode === 'training', dev = !!SAVE.dvx, W = R ? WORLDS[R.w] : null;
   const it = (act, label, cls) => '<button class="mm-nav' + (cls ? ' ' + cls : '') + '" data-act="' + act + '"><span class="mm-w">' + label + '</span></button>';
   return '<div class="lay lay-pause"><h1 class="lay-t">Paused</h1><nav class="mm-main ps-nav">' + it('resume', 'Resume', 'ps-first') + it('restart', 'Restart') + it('settings', 'Settings') + it('photo', 'Photo mode') + it('quit', 'Quit to menu', 'ps-quit') + '</nav>' +
     '<aside class="mm-card ps-run">' + (R ? '<div class="mm-who"><span class="mm-name">' + escH(objText(R)) + '</span></div><div class="xs mut" style="margin-top:4px">' + (W ? 'World ' + (R.w + 1) + ', ' + escH(W.nm) : '') + '</div><dl class="mm-stats" style="margin-top:12px"><div><dt>Score</dt><dd>' + fmt(Math.round(R.score)) + '</dd></div><div><dt>Kills</dt><dd>' + fmt(R.kills) + '</dd></div><div><dt>Cores</dt><dd class="gold">' + fmt(R.cores) + '</dd></div></dl>' : '') +
-    '<div class="row" style="gap:6px;margin-top:12px;flex-wrap:wrap"><button class="btn sm" data-act="fs">' + (document.fullscreenElement ? 'Exit full screen' : 'Full screen') + '</button>' + (tr ? '<button class="btn sm" data-act="spawnboss">Spawn boss</button><button class="btn sm" data-act="nextworld">Next world</button>' : '') + (dev ? '<button class="btn sm gold" data-act="cheat:win">Dev: win</button><button class="btn sm gold" data-act="cheat:god">Dev: god</button>' : '') + '</div></aside></div>';
+    '<div class="row" style="gap:6px;margin-top:12px;flex-wrap:wrap"><button class="btn sm" data-act="fs">' + (document.fullscreenElement ? 'Exit full screen' : 'Full screen') + '</button>' + (tr ? '<button class="btn sm" data-act="spawnboss">Spawn boss</button><button class="btn sm" data-act="nextworld">Next world</button>' : '') + (dev ? '<button class="btn sm gold" data-act="dvopen">Dev</button>' : '') + '</div></aside></div>';
 };
 
 // ---------- Shop: categories down the left, one clean list on the right ----------

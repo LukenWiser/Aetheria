@@ -56,7 +56,7 @@ const UPDATES = [
   ['V12', 'Cel Shading', ['Cartoon lighting with ink outlines on every ship, enemy and boss']],
   ['V11', 'Themed Arenas', ['Every world got its own 3D landscape: icy mountains, a cyber city, a rusty desert and more', 'Only the true space worlds keep the orbiting camera']],
   ['V10', '3D Backgrounds', ['3D parallax backgrounds', 'The camera orbits planets and the black hole', 'Full screen button', 'Dev panel unlock code']],
-  ['V9', 'Fix Pack', ['World select now fits on small screens', 'Dev option to unlock every sector', 'Fixed asteroid waves that could get stuck', 'Boss sectors now go straight to the boss']],
+  ['V9', 'Fix Pack', ['World select now fits on small screens', 'Fixed asteroid waves that could get stuck', 'Boss sectors now go straight to the boss']],
   ['V6-V8', 'Story Mode', ['Worlds 11 to 15 with five new bosses', 'Comic-style cutscenes with Aria and the pilots', 'A full ending', 'Boss stingers and world themes']],
   ['V5', 'More Ways to Play', ['Daily Challenge, Station Defense, No-Hit Runs and The Vault', 'Achievements and save slots', 'Key remapping and full gamepad menu control', 'Assist mode and save codes']],
   ['V1-V4', 'Launch', ['Aetheria: Quantum Strike takes off', 'Ten worlds, sector map, hangar and shop', 'Eight weapons with levels and evolutions', 'Upgrade cards, abilities, co-op, Endless, Boss Rush and Blitz', 'Flight School tutorial']]

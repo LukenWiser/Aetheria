@@ -408,7 +408,7 @@ function updBeams() {
     const h = H2[i], bolt = h.k === 'bolt';
     if (h.tel > 0) { h.tel--; if (bolt && h.tel === 0) { shake(5, 10); G.flashT = 5; SFX.boom(true); } } else { h.on--; for (const p of G.players) if (p.alive && p.inv <= 0 && Math.abs(p.x - h.x) < (bolt ? 24 : 30) && (bolt || (h.top ? p.y < V.H * .62 : p.y > V.H * .3))) hurt(p, Math.round((bolt ? 15 : 12) * G.run.edm), bolt ? 'bolt' : 'geyser'); if (h.on <= 0) H2.splice(i, 1); }
   }
-  G.ts = (hz === 'time' ? 1 + Math.sin(G.t * .004) * .26 : 1) * (G.abTs > 0 ? .4 : 1);
+  G.ts = (hz === 'time' ? 1 + Math.sin(G.t * .004) * .26 : 1) * (G.abTs > 0 ? .4 : 1) * (G.devTs || 1);
 }
 
 function curHz() { return G.mapX ? null : WORLDS[G.world | 0].hz; }

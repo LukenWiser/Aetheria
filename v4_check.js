@@ -2588,7 +2588,7 @@ const UPG = {
   drn: { nm: 'Wingman Bay', ds: '+1 AI wingman drone per level. They fly with you and shoot on their own.', b: 420, g: 1.75, max: 3, ic: 'drn' },
   drd: { nm: 'Wingman Tuning', ds: '+25% wingman damage per level', b: 160, g: 1.34, max: 6, ic: 'drd' }
 };
-const ECON = .5; // V55: half the core income
+let ECON = .5; // V55: half the core income
 const upPrice = (k, lv) => Math.round(UPG[k].b * 1.2 * Math.pow(UPG[k].g, lv));
 
 // ---------- modes ----------
@@ -3308,7 +3308,7 @@ function updBeams() {
     const h = H2[i], bolt = h.k === 'bolt';
     if (h.tel > 0) { h.tel--; if (bolt && h.tel === 0) { shake(5, 10); G.flashT = 5; SFX.boom(true); } } else { h.on--; for (const p of G.players) if (p.alive && p.inv <= 0 && Math.abs(p.x - h.x) < (bolt ? 24 : 30) && (bolt || (h.top ? p.y < V.H * .62 : p.y > V.H * .3))) hurt(p, Math.round((bolt ? 15 : 12) * G.run.edm), bolt ? 'bolt' : 'geyser'); if (h.on <= 0) H2.splice(i, 1); }
   }
-  G.ts = (hz === 'time' ? 1 + Math.sin(G.t * .004) * .26 : 1) * (G.abTs > 0 ? .4 : 1);
+  G.ts = (hz === 'time' ? 1 + Math.sin(G.t * .004) * .26 : 1) * (G.abTs > 0 ? .4 : 1) * (G.devTs || 1);
 }
 
 function curHz() { return G.mapX ? null : WORLDS[G.world | 0].hz; }
@@ -5461,12 +5461,12 @@ const SCR = {
     return '<div class="card wide"><div class="row sp"><h2>Shop</h2>' + tabsP + '<span class="gold b">' + fmt(SAVE.cores) + ' <span class="mut xs">CORES</span></span></div><p class="xs mut" style="margin:6px 0 10px">Upgrades get pricier with every level you buy. Prices shown are for the NEXT level.</p><div class="grid2">' + up + '</div><h2 style="margin-top:16px">Weapons</h2><div class="grid2" style="margin-top:8px">' + wp + '</div><div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button><button class="btn sm" data-act="hangar">HANGAR</button></div></div>';
   },
   scSettings: () => {
-    const tab = UI.stab, tabs = Object.keys(SETS).concat(['DATA']), body = tab === 'DATA' ? '<div class="stack"><button class="btn" data-act="slots">SAVE SLOTS & TRANSFER</button><button class="btn" data-act="profile">PROFILE & ACHIEVEMENTS</button>' + (!SAVE.dev ? '<div class="row" style="gap:8px"><input id="devCode" class="inp" placeholder="ENTER CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" style="flex:1;min-width:0;padding:10px;border-radius:9px;border:1px solid var(--line);background:rgba(4,12,26,.9);color:#e2e8f0;font:800 12px var(--mono);letter-spacing:.12em"><button class="btn sm" data-act="devcode">ENTER</button></div>' : '<button class="btn" data-act="cheat:cores">DEV: +1000 CORES</button><button class="btn" data-act="cheat:unlock">DEV: UNLOCK ALL WORLDS</button><button class="btn" data-act="cheat:sectors">DEV: UNLOCK ALL SECTORS ' + (SAVE.devAll ? '(ON)' : '(OFF)') + '</button><button class="btn" data-act="cheat:god">DEV: GOD MODE ' + (G.god ? '(ON)' : '(OFF)') + '</button><button class="btn sm" data-act="devoff">LOCK DEV TOOLS</button>') + '<button class="btn warn" data-act="resetset">RESET SETTINGS</button><button class="btn warn" data-act="wipe">WIPE SAVE DATA</button></div>' : SETS[tab].map(setRow).join('') + (tab === 'CONTROLS' ? '<div class="stack" style="margin-top:12px"><button class="btn" data-act="keys">KEYBOARD CONTROLS</button></div>' : '');
+    const tab = UI.stab, tabs = Object.keys(SETS).concat(['DATA']), body = tab === 'DATA' ? '<div class="stack"><button class="btn" data-act="slots">SAVE SLOTS & TRANSFER</button><button class="btn" data-act="profile">PROFILE & ACHIEVEMENTS</button>' + '<button class="btn warn" data-act="resetset">RESET SETTINGS</button><button class="btn warn" data-act="wipe">WIPE SAVE DATA</button></div>' : SETS[tab].map(setRow).join('') + (tab === 'CONTROLS' ? '<div class="stack" style="margin-top:12px"><button class="btn" data-act="keys">KEYBOARD CONTROLS</button></div>' : '');
     return '<div class="card mid"><h2>Settings</h2><div class="tabs wrap" style="margin:8px 0">' + tabs.map(t => '<div class="tab' + (tab === t ? ' on' : '') + '" data-act="stab:' + t + '">' + t + '</div>').join('') + '</div>' + body + '<div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button><span class="xs mut">Saved automatically</span></div></div>';
   },
   scPause: () => {
-    const R = G.run, tr = R && R.mode === 'training', dev = SAVE.dev || G.god;
-    return '<div class="card" style="width:min(400px,100%)"><h2 class="tc" style="font-size:20px">Paused</h2><div class="stack" style="margin-top:14px"><button class="btn big" data-act="resume">RESUME</button><button class="btn sm" data-act="photo">PHOTO MODE</button><button class="btn sm" data-act="fs">' + (document.fullscreenElement ? 'EXIT FULL SCREEN' : 'FULL SCREEN') + '</button>' + (tr ? '<div class="grid2"><button class="btn" data-act="spawnboss">SPAWN BOSS</button><button class="btn" data-act="nextworld">NEXT WORLD</button></div>' : '') + '<div class="grid2"><button class="btn" data-act="restart">RESTART</button><button class="btn" data-act="settings">SETTINGS</button></div><button class="btn warn" data-act="quit">QUIT TO MENU</button>' + (dev ? '<div class="grid2"><button class="btn sm gold" data-act="cheat:win">DEV: WIN</button><button class="btn sm gold" data-act="cheat:god">DEV: GOD</button></div>' : '') + '</div></div>';
+    const R = G.run, tr = R && R.mode === 'training', dev = !!SAVE.dvx;
+    return '<div class="card" style="width:min(400px,100%)"><h2 class="tc" style="font-size:20px">Paused</h2><div class="stack" style="margin-top:14px"><button class="btn big" data-act="resume">RESUME</button><button class="btn sm" data-act="photo">PHOTO MODE</button><button class="btn sm" data-act="fs">' + (document.fullscreenElement ? 'EXIT FULL SCREEN' : 'FULL SCREEN') + '</button>' + (tr ? '<div class="grid2"><button class="btn" data-act="spawnboss">SPAWN BOSS</button><button class="btn" data-act="nextworld">NEXT WORLD</button></div>' : '') + '<div class="grid2"><button class="btn" data-act="restart">RESTART</button><button class="btn" data-act="settings">SETTINGS</button></div><button class="btn warn" data-act="quit">QUIT TO MENU</button>' + (dev ? '<button class="btn sm gold" data-act="dvopen">DEV</button>' : '') + '</div></div>';
   },
   scResult: () => {
     const d = UI.res, win = d.win, m = d.mode, titles = { expedition: win ? 'SECTOR CLEARED' : 'STARFIGHTER DESTROYED', endless: 'RUN OVER', blitz: 'TIME!', rush: win ? 'BOSS RUSH COMPLETE' : 'DEFEATED', training: 'SESSION OVER', daily: win ? 'DAILY COMPLETE' : 'DAILY FAILED', nohit: win ? 'FLAWLESS' : 'YOU WERE HIT', vault: win ? 'VAULT CRACKED' : 'VAULT LOCKED', defense: win ? 'STATION SAVED' : d.lost ? 'STATION LOST' : 'SHIP LOST', hardcore: 'HARDCORE OVER', versus: d.vsWin ? ((d.vsNm && d.vsNm[d.vsWin - 1]) || 'PLAYER ' + d.vsWin).toUpperCase() + ' WINS' : 'DRAW', chal: d.beat ? 'CHALLENGE BEATEN' : win ? 'CHALLENGE DONE' : 'CHALLENGE FAILED', gallery: win ? 'REMATCH WON' : 'REMATCH LOST', retro: win ? 'GAME CLEAR!' : 'GAME OVER' };
@@ -5557,10 +5557,9 @@ const ACT = {
   spawnboss() { togglePause(); const R = G.run; if (R && !R.boss) { R.boss = spawnBoss(R.w, .6); } },
   nextworld() { const R = G.run; R.w = (R.w + 1) % WORLDS.length; G.world = R.w; buildBackdrop(R.w); R.q = []; G.ent.en.length = 0; togglePause(); },
   rotok() { G.rotOk = true; $('rot').style.display = 'none'; },
-  devcode() { const c = String(UI.devCodeVal || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, ''); if (c === 'AETHERIA' || c === 'DEVMODE' || c === 'QUANTUMSTRIKE') { SAVE.dev = true; saveGame(); SFX.buy(); alertMsg('DEV TOOLS UNLOCKED'); UI.devCodeVal = ''; UI.refresh(); } else { SFX.no(); alertMsg('INVALID CODE'); } },
   devoff() { SAVE.dev = false; SAVE.devAll = false; G.god = false; saveGame(); UI.refresh(); },
   fs() { toggleFS(); },
-  tap() { UI._taps = (UI._taps || 0) + 1; if (UI._taps === 7) { SAVE.dev = true; saveGame(); alertMsg('DEV TOOLS UNLOCKED (SETTINGS > DATA)'); } },
+  tap() { },
   cheat(a) { const k = a[0]; if (k === 'cores') { SAVE.cores += 1000; SFX.buy(); } else if (k === 'unlock') { SAVE.wu = WORLDS.length; WORLDS.forEach((_, i) => { prog(i).t = 3; }); } else if (k === 'sectors') { SAVE.devAll = !SAVE.devAll; alertMsg(SAVE.devAll ? 'ALL SECTORS OPEN' : 'SECTORS LOCKED AGAIN'); } else if (k === 'god') { G.god = !G.god; alertMsg(G.god ? 'GOD MODE ON' : 'GOD MODE OFF'); } else if (k === 'win') { togglePause(); if (G.run) { G.players.forEach(p => { p.inv = 99999; }); G.run.stage = 'clear'; G.run.st = 190; if (G.run.boss) { G.run.boss.hp = 1; } } } saveGame(); if (UI.top === 'scSettings') UI.refresh(); },
   resetset() { Object.assign(SET, SET_DEF); SET.keys = {}; applyKeys(); saveSet(); layout(); applyVol(); UI.refresh(); },
   wipe() { if (!window._wipeArm) { window._wipeArm = 1; alertMsg('TAP AGAIN TO WIPE EVERYTHING'); setTimeout(() => { window._wipeArm = 0; }, 3000); return; } store.del(SAVE_KEY); SAVE = loadSave(); saveGame(); UI.show('scMenu', true); }
@@ -5855,7 +5854,7 @@ const UPDATES = [
   ['V12', 'Cel Shading', ['Cartoon lighting with ink outlines on every ship, enemy and boss']],
   ['V11', 'Themed Arenas', ['Every world got its own 3D landscape: icy mountains, a cyber city, a rusty desert and more', 'Only the true space worlds keep the orbiting camera']],
   ['V10', '3D Backgrounds', ['3D parallax backgrounds', 'The camera orbits planets and the black hole', 'Full screen button', 'Dev panel unlock code']],
-  ['V9', 'Fix Pack', ['World select now fits on small screens', 'Dev option to unlock every sector', 'Fixed asteroid waves that could get stuck', 'Boss sectors now go straight to the boss']],
+  ['V9', 'Fix Pack', ['World select now fits on small screens', 'Fixed asteroid waves that could get stuck', 'Boss sectors now go straight to the boss']],
   ['V6-V8', 'Story Mode', ['Worlds 11 to 15 with five new bosses', 'Comic-style cutscenes with Aria and the pilots', 'A full ending', 'Boss stingers and world themes']],
   ['V5', 'More Ways to Play', ['Daily Challenge, Station Defense, No-Hit Runs and The Vault', 'Achievements and save slots', 'Key remapping and full gamepad menu control', 'Assist mode and save codes']],
   ['V1-V4', 'Launch', ['Aetheria: Quantum Strike takes off', 'Ten worlds, sector map, hangar and shop', 'Eight weapons with levels and evolutions', 'Upgrade cards, abilities, co-op, Endless, Boss Rush and Blitz', 'Flight School tutorial']]
@@ -6891,11 +6890,11 @@ ACT.msel = a => { if (UI.msel === a[0] && MODES[a[0]] && !(MODES[a[0]].secret &&
 
 // ---------- Pause: the run on the right, big choices on the left ----------
 SCR.scPause = () => {
-  const R = G.run, tr = R && R.mode === 'training', dev = SAVE.dev || G.god, W = R ? WORLDS[R.w] : null;
+  const R = G.run, tr = R && R.mode === 'training', dev = !!SAVE.dvx, W = R ? WORLDS[R.w] : null;
   const it = (act, label, cls) => '<button class="mm-nav' + (cls ? ' ' + cls : '') + '" data-act="' + act + '"><span class="mm-w">' + label + '</span></button>';
   return '<div class="lay lay-pause"><h1 class="lay-t">Paused</h1><nav class="mm-main ps-nav">' + it('resume', 'Resume', 'ps-first') + it('restart', 'Restart') + it('settings', 'Settings') + it('photo', 'Photo mode') + it('quit', 'Quit to menu', 'ps-quit') + '</nav>' +
     '<aside class="mm-card ps-run">' + (R ? '<div class="mm-who"><span class="mm-name">' + escH(objText(R)) + '</span></div><div class="xs mut" style="margin-top:4px">' + (W ? 'World ' + (R.w + 1) + ', ' + escH(W.nm) : '') + '</div><dl class="mm-stats" style="margin-top:12px"><div><dt>Score</dt><dd>' + fmt(Math.round(R.score)) + '</dd></div><div><dt>Kills</dt><dd>' + fmt(R.kills) + '</dd></div><div><dt>Cores</dt><dd class="gold">' + fmt(R.cores) + '</dd></div></dl>' : '') +
-    '<div class="row" style="gap:6px;margin-top:12px;flex-wrap:wrap"><button class="btn sm" data-act="fs">' + (document.fullscreenElement ? 'Exit full screen' : 'Full screen') + '</button>' + (tr ? '<button class="btn sm" data-act="spawnboss">Spawn boss</button><button class="btn sm" data-act="nextworld">Next world</button>' : '') + (dev ? '<button class="btn sm gold" data-act="cheat:win">Dev: win</button><button class="btn sm gold" data-act="cheat:god">Dev: god</button>' : '') + '</div></aside></div>';
+    '<div class="row" style="gap:6px;margin-top:12px;flex-wrap:wrap"><button class="btn sm" data-act="fs">' + (document.fullscreenElement ? 'Exit full screen' : 'Full screen') + '</button>' + (tr ? '<button class="btn sm" data-act="spawnboss">Spawn boss</button><button class="btn sm" data-act="nextworld">Next world</button>' : '') + (dev ? '<button class="btn sm gold" data-act="dvopen">Dev</button>' : '') + '</div></aside></div>';
 };
 
 // ---------- Shop: categories down the left, one clean list on the right ----------
@@ -8797,6 +8796,134 @@ hudTick = function () {
   const b = R.boss; if (b && !b.dead) { const pd = b.pods ? podOf(b) : null; $('boss').classList.add('on'); const nm = BOSSES[b.bi].nm.toUpperCase() + (b.stg > 0 ? ' - EXPOSED!' : pd ? ' - ARMORED' : ''), pc = Math.ceil(clamp(b.hp / b.mhp, 0, 1) * 100) + '%', bk = nm + pc; const bn = $('bossN'); if (bn._k !== bk) { bn._k = bk; bn.innerHTML = '<span>' + nm + '</span><span>' + pc + '</span>'; } $('bossF').style.width = clamp(b.hp / b.mhp, 0, 1) * 100 + '%'; const sp = pd && b.st === 1; $('bossPb').style.display = sp ? 'block' : 'none'; if (sp) $('bossP').style.width = clamp(pd.hp / pd.mhp, 0, 1) * 100 + '%'; } else $('boss').classList.remove('on');
   const tp = $('top'); if (tp) { const r = tp.getBoundingClientRect(), dm = pos.some(([x, y]) => x > r.left - 30 && x < r.right + 30 && y < r.bottom + 30); if (tp._dm !== dm) { tp._dm = dm; tp.classList.toggle('dim', dm); } }
 };
+
+// ================= hidden dev console =================
+// Type the word on the keyboard while on the main menu to open it. Nothing in the menus points here.
+const DEVW = 'devmode';
+const DEV = { buf: '', tab: 'run', on: () => !!SAVE.dvx };
+document.addEventListener('keydown', e => {
+  const t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+  if (e.key && e.key.length === 1) { DEV.buf = (DEV.buf + e.key.toLowerCase()).slice(-DEVW.length); if (DEV.buf === DEVW && UI.top === 'scMenu' && G.scene !== 'play') { DEV.buf = ''; const first = !SAVE.dvx; SAVE.dvx = 1; saveGame(); if (first) { SFX.buy(); toast('DEV MODE', 'Unlocked. Type the word again on the main menu to reopen, F1 in a run for hotkeys.', '#fbbf24'); } UI.show('scDev'); } }
+  if (!SAVE.dvx || G.scene !== 'play' || !G.run) return;
+  const hk = DEV.HK[e.code]; if (hk) { e.preventDefault(); try { hk[1](); } catch (er) { console.warn(er); } }
+}, true);
+
+// ---------- actions ----------
+const dvMsg = m => { alertMsg(m); SFX.click && SFX.click(); };
+const P0 = () => SAVE.pl[0];
+const DVA = {
+  // economy
+  c1k() { SAVE.cores += 1000; }, c10k() { SAVE.cores += 10000; }, c100k() { SAVE.cores += 100000; }, c0() { SAVE.cores = 0; },
+  econ(a) { const v = +a; ECON = v; SAVE.dvEcon = v; dvMsg('CORE INCOME x' + v); },
+  // ship
+  upmax() { SAVE.pl.forEach(pl => Object.keys(UPG).forEach(k => { pl.up[k] = UPG[k].max; })); dvMsg('ALL UPGRADES MAXED'); },
+  up0() { SAVE.pl.forEach(pl => Object.keys(UPG).forEach(k => { pl.up[k] = 0; })); dvMsg('UPGRADES RESET'); },
+  wall() { SAVE.pl.forEach(pl => { pl.wown = Object.keys(WPN); pl.wlv = pl.wlv || {}; pl.wevo = pl.wevo || {}; Object.keys(WPN).forEach(id => { pl.wlv[id] = WMAXLV; pl.wevo[id] = true; }); }); dvMsg('ALL GUNS OWNED, MAXED + EVOLVED'); },
+  w0() { SAVE.pl.forEach(pl => { pl.wown = ['twin']; pl.wpn = 'twin'; pl.wlv = {}; pl.wevo = {}; }); dvMsg('GUNS RESET TO TWIN PULSE'); },
+  parts() { SAVE.pl.forEach(pl => Object.keys(PARTS).forEach(k => { pl.own[k] = Object.keys(PARTS[k]); })); dvMsg('ALL HULLS + PARTS OWNED'); },
+  cos() { try { Object.keys(COS).forEach(c => Object.keys(COS[c]).forEach(id => grant(c, id))); } catch (e) { } dvMsg('ALL COSMETICS OWNED'); },
+  // progress
+  worlds() { SAVE.wu = WORLDS.length; WORLDS.forEach((_, i) => { prog(i).t = 3; }); dvMsg('ALL WORLDS + TIERS OPEN'); },
+  sectors() { SAVE.devAll = !SAVE.devAll; dvMsg(SAVE.devAll ? 'ALL SECTORS OPEN (BOSS SECTORS SKIP TO BOSS)' : 'SECTORS NORMAL'); },
+  stars() { WORLDS.forEach((_, w) => { const p = prog(w); for (let t = 0; t < 3; t++) { const a = p.done[t] || (p.done[t] = []); for (let i = 0; i < LV; i++) a[i] = 3; } p.t = 3; }); SAVE.wu = WORLDS.length; dvMsg('EVERY SECTOR CLEARED WITH 3 STARS'); },
+  ach() { ACH.forEach(a => { SAVE.ach[a.id] = SAVE.ach[a.id] || Date.now(); }); dvMsg('ALL ACHIEVEMENTS'); },
+  vex() { const S = ST(); S.vex = {}; S.riv = 0; dvMsg('VEX MEETINGS RESET'); },
+  tut() { SAVE.tut = false; G._tutAsked = 0; dvMsg('TUTORIAL WILL ASK AGAIN'); },
+  // balance switches (V55-V58)
+  scale() { SET.scaleThreat = SET.scaleThreat === false; saveSet(); dvMsg('THREAT SCALING ' + (SET.scaleThreat !== false ? 'ON' : 'OFF')); },
+  floor() { SAVE.dvNoFloor = !SAVE.dvNoFloor; dvMsg('BULLET 1/3 HULL RULE ' + (SAVE.dvNoFloor ? 'OFF' : 'ON')); },
+  regen() { SAVE.dvRegen = !SAVE.dvRegen; dvMsg('OLD SHIELD REGEN ' + (SAVE.dvRegen ? 'ON' : 'OFF')); },
+  // screens
+  intro() { UI.hideAll(); try { introPlay(); } catch (e) { } },
+  pick() { UI.show('scPick'); },
+  slots() { UI.show('scSlots'); },
+  lock() { SAVE.dvx = 0; SAVE.devAll = false; G.god = false; G.devOHK = 0; G.devTs = 1; saveGame(); UI.hist = []; UI.show('scMenu', true); dvMsg('DEV MODE HIDDEN'); return 1; },
+  // in-run
+  god() { G.god = !G.god; dvMsg('GOD MODE ' + (G.god ? 'ON' : 'OFF')); },
+  ohk() { G.devOHK = !G.devOHK; G.pdm = G.devOHK ? 999 : 1; dvMsg('ONE-HIT KILLS ' + (G.devOHK ? 'ON' : 'OFF')); },
+  ammo() { if (G.run) { G.run.freeAmmo = !G.run.freeAmmo; dvMsg('INFINITE PLASMA ' + (G.run.freeAmmo ? 'ON' : 'OFF')); } },
+  heal() { G.players.forEach(p => { if (!p.alive) return; p.hp = p.mhp; p.sh = p.msh; p.am = p.mam; }); dvMsg('FULL REPAIR'); },
+  last() { G.players.forEach(p => { if (!p.alive) return; p.sh = 0; p.hp = Math.max(1, Math.round(p.mhp * .1)); }); dvMsg('ONE HIT FROM DEATH'); },
+  hit() { const p = G.players[0]; if (p && p.alive) { const g = G.god; G.god = false; p.inv = 0; hurt(p, bulletDmg(p, 5), 'b'); G.god = g; } },
+  power() { G.players.forEach(p => { p.sup = 100; p.abCd = 0; p.od = 600; }); dvMsg('SUPER + ABILITY + OVERDRIVE'); },
+  kill() { G.ent.en.slice().forEach(e => { if (!e.dead && !e.boss) { e.hp = 0; killEnemy(e, 0); } }); G.ent.eb.length = 0; dvMsg('ENEMIES CLEARED'); },
+  wave() { const R = G.run; if (!R) return; DVA.kill(); R.q = []; if (R.stage === 'wave') { R.wave++; nextStage(R, R.wave >= R.waves ? (R.spec && R.spec.type === 'B' ? 'boss' : 'clear') : 'wave', true); } dvMsg('WAVE SKIPPED'); },
+  boss() { if (G.run && !G.run.boss) { G.run.stage = 'boss'; spawnBoss(G.run.w); dvMsg('BOSS SPAWNED'); } },
+  bosshp() { const b = G.run && G.run.boss; if (b && !b.dead) { b.hp = Math.max(1, b.mhp * .1); dvMsg('BOSS AT 10%'); } },
+  win() { const R = G.run; if (!R) return; G.players.forEach(p => { p.inv = 99999; }); if (R.boss) R.boss.hp = 1; R.stage = 'clear'; R.st = 190; if (G.paused) togglePause(); dvMsg('LEVEL WON'); },
+  elite() { const R = G.run; if (!R) return; const ro = WORLDS[R.w].ro, e = mkEnemy(ro[ro.length - 1], V.W - 60, V.H / 2, { elite: 1 }); if (e && G.ent.en.indexOf(e) < 0) G.ent.en.push(e); dvMsg('ELITE SPAWNED'); },
+  drops() { const p = G.players[0]; if (!p) return; ['hp', 'sh', 'ammo', 'od', 'core', 'core', 'core'].forEach((k, i) => G.ent.pk.push({ k, v: 25, x: p.x + 120 + i * 30, y: p.y + (i % 2 ? 30 : -30), vx: -.4, vy: 0, l: 900 })); dvMsg('PICKUPS DROPPED'); },
+  cards() { if (G.run && offerCards()) { dvMsg('CARD PICK'); } },
+  slow() { G.devTs = (G.devTs || 1) === 1 ? .35 : (G.devTs === .35 ? 2 : 1); dvMsg('ENEMY SPEED x' + G.devTs); },
+  hbox() { SET.hitbox = !SET.hitbox; saveSet(); dvMsg('HITBOXES ' + (SET.hitbox ? 'ON' : 'OFF')); },
+  hud() { const h = $('hud'); h.style.visibility = h.style.visibility === 'hidden' ? '' : 'hidden'; },
+  fps() { const f = $('fps'); f.style.display = f.style.display === 'block' ? 'none' : 'block'; G.devFps = f.style.display === 'block'; },
+  info() { DEV.info = !DEV.info; }
+};
+DEV.HK = {
+  F1: ['Hotkey list', () => toast('DEV HOTKEYS', Object.entries(DEV.HK).map(([k, v]) => k + ' ' + v[0]).join(' / '), '#fbbf24')],
+  F2: ['God mode', DVA.god], F3: ['Full repair', DVA.heal], F4: ['Kill all', DVA.kill], F6: ['Skip wave', DVA.wave], F7: ['Spawn boss', DVA.boss],
+  F8: ['Super + ability', DVA.power], F9: ['Enemy speed', DVA.slow], F10: ['Win level', DVA.win], Backquote: ['Live stats', DVA.info], Backslash: ['One-hit kills', DVA.ohk]
+};
+
+// ---------- the screen ----------
+const dvB = (act, lbl, on) => '<button class="btn sm' + (on ? ' gold' : '') + '" data-act="dv:' + act + '">' + lbl + (on === undefined ? '' : on ? ' - ON' : ' - OFF') + '</button>';
+const dvSec = (t, b) => '<div class="xs b" style="letter-spacing:.2em;color:#fbbf24;margin:12px 0 6px">' + t + '</div><div class="row wrap" style="gap:6px">' + b + '</div>';
+Object.assign(SCR, {
+  scDev: () => {
+    const tabs = [['run', 'IN-RUN'], ['eco', 'ECONOMY'], ['ship', 'SHIP'], ['prog', 'PROGRESS'], ['bal', 'BALANCE'], ['misc', 'MISC']], T = DEV.tab, inRun = G.scene === 'play' && !!G.run;
+    let b = '';
+    if (T === 'run') b = (inRun ? '' : '<p class="xs mut">Start a run, pause, and open DEV from the pause menu - or use the F-key hotkeys while playing.</p>')
+      + dvSec('PLAYER', dvB('god', 'GOD MODE', !!G.god) + dvB('ohk', 'ONE-HIT KILLS', !!G.devOHK) + dvB('ammo', 'INFINITE PLASMA', !!(G.run && G.run.freeAmmo)) + dvB('heal', 'FULL REPAIR') + dvB('power', 'SUPER + ABILITY + OVERDRIVE'))
+      + dvSec('TEST THE NEW STUFF', dvB('hit', 'TAKE A BULLET') + dvB('last', 'SET TO ONE HIT LEFT') + dvB('drops', 'DROP PICKUPS') + dvB('cards', 'OFFER CARDS'))
+      + dvSec('LEVEL', dvB('kill', 'KILL ALL') + dvB('wave', 'SKIP WAVE') + dvB('elite', 'SPAWN ELITE') + dvB('boss', 'SPAWN BOSS') + dvB('bosshp', 'BOSS TO 10%') + dvB('win', 'WIN LEVEL'))
+      + dvSec('VIEW', dvB('slow', 'ENEMY SPEED x' + (G.devTs || 1)) + dvB('hbox', 'HITBOXES', !!SET.hitbox) + dvB('hud', 'HIDE HUD') + dvB('fps', 'FPS', !!G.devFps) + dvB('info', 'LIVE STATS', !!DEV.info));
+    if (T === 'eco') b = dvSec('CORES (' + fmt(SAVE.cores) + ')', dvB('c1k', '+1,000') + dvB('c10k', '+10,000') + dvB('c100k', '+100,000') + dvB('c0', 'SET TO 0'))
+      + dvSec('CORE INCOME MULTIPLIER (NOW x' + ECON + ', SHIPPED x0.5)', [.25, .5, 1, 2, 5].map(v => dvB('econ:' + v, 'x' + v, ECON === v ? true : undefined)).join(''));
+    if (T === 'ship') b = dvSec('UPGRADES', dvB('upmax', 'MAX ALL') + dvB('up0', 'RESET ALL')) + dvSec('GUNS', dvB('wall', 'OWN + MAX + EVOLVE ALL') + dvB('w0', 'RESET TO TWIN')) + dvSec('UNLOCKS', dvB('parts', 'ALL HULLS + PARTS') + dvB('cos', 'ALL COSMETICS'))
+      + dvSec('YOUR SHIP RIGHT NOW', '<div class="xs mut" style="line-height:1.7">' + (() => { const s = shipStats(P0()); return 'HULL ' + s.hp + ' / SHIELD ' + s.sh + ' / DMG x' + s.dmg.toFixed(2) + ' / RATE x' + s.rate.toFixed(2) + '<br>Each bullet takes at least ' + Math.round(s.hp / 3) + ' (one third of hull)'; })() + '</div>');
+    if (T === 'prog') b = dvSec('UNLOCK', dvB('worlds', 'ALL WORLDS + TIERS') + dvB('sectors', 'ALL SECTORS', !!SAVE.devAll) + dvB('stars', '3-STAR EVERYTHING') + dvB('ach', 'ALL ACHIEVEMENTS'))
+      + dvSec('RESET', dvB('vex', 'VEX MEETINGS') + dvB('tut', 'TUTORIAL PROMPT'));
+    if (T === 'bal') b = dvSec('V55-V58 RULES', dvB('scale', 'THREAT SCALING', SET.scaleThreat !== false) + dvB('floor', 'BULLET = 1/3 HULL', !SAVE.dvNoFloor) + dvB('regen', 'OLD SHIELD REGEN', !!SAVE.dvRegen))
+      + dvSec('THREAT SCALING PREVIEW (YOUR SHIP)', '<div class="xs mut" style="line-height:1.7;columns:2">' + WORLDS.map((W, w) => { const c = BAL.calc(P0(), w); return 'W' + (w + 1) + ' hull x' + c.hp.toFixed(2) + ' dmg x' + c.ed.toFixed(2); }).join('<br>') + '</div>');
+    if (T === 'misc') b = dvSec('SCREENS', dvB('intro', 'REPLAY INTRO') + dvB('pick', 'PROFILE PICKER') + dvB('slots', 'SAVE SLOTS')) + dvSec('HOTKEYS IN A RUN', '<div class="xs mut" style="line-height:1.7">' + Object.entries(DEV.HK).map(([k, v]) => '<b style="color:#fbbf24">' + k.replace('Backquote', '`').replace('Backslash', '\\') + '</b> ' + v[0]).join('<br>') + '</div>') + dvSec('HIDE', dvB('lock', 'HIDE DEV MODE AGAIN'));
+    return '<div class="card wide" style="border-color:rgba(251,191,36,.5)"><div class="row sp wrap"><h2 style="color:#fbbf24">Dev Console</h2><span class="xs mut">PROFILE ' + (SLOT + 1) + '</span></div><div class="seg" style="margin:8px 0">' + tabs.map(([k, n]) => '<button class="' + (k === T ? 'on' : '') + '" data-act="dvtab:' + k + '">' + n + '</button>').join('') + '</div>' + b + '<div class="row" style="gap:8px;margin-top:14px"><button class="btn" data-act="back">BACK</button></div></div>';
+  }
+});
+Object.assign(ACT, {
+  dv(a) { if (!SAVE.dvx) return; const f = DVA[a[0]]; if (!f) return; const stop = f(a[1]); saveGame(); if (!stop && UI.top === 'scDev') UI.refresh(); },
+  dvtab(a) { DEV.tab = a[0]; UI.refresh(); },
+  dvopen() { if (SAVE.dvx) UI.show('scDev'); }
+});
+try { SHIPROOM.scDev = 'eng'; } catch (e) { }
+
+// remembered income multiplier
+if (SAVE.dvx && SAVE.dvEcon) ECON = SAVE.dvEcon;
+const _sw = switchSlot; switchSlot = function () { const r = _sw.apply(this, arguments); ECON = SAVE.dvx && SAVE.dvEcon ? SAVE.dvEcon : .5; return r; };
+
+// bullet floor switch
+const _bd = bulletDmg; bulletDmg = function (p, d) { return SAVE.dvx && SAVE.dvNoFloor ? d : _bd(p, d); };
+
+// live loop: old shield regen, enemy speed, stats readout, DEV tag
+(function () {
+  const tag = document.createElement('div'); tag.style.cssText = 'position:absolute;left:50%;bottom:calc(6px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:13;pointer-events:none;font:800 9px var(--mono);letter-spacing:.18em;color:#fbbf24;text-shadow:0 1px 0 #000;display:none;text-align:center;white-space:pre';
+  const hookUI = () => { const u = document.getElementById('ui'); if (u && !tag.parentNode) u.appendChild(tag); };
+  let last = 0;
+  (function loop(now) {
+    requestAnimationFrame(loop); hookUI();
+    const play = SAVE.dvx && G.scene === 'play' && G.run;
+    if (play && !G.paused) {
+      if (SAVE.dvRegen) G.players.forEach(p => { if (p.alive && p.lastHit > 200 && p.sh < p.msh) p.sh = Math.min(p.msh, p.sh + .22); });
+      if (G.devOHK) G.pdm = 999;
+    }
+    if (now - last < 200) return; last = now;
+    if (!play) { tag.style.display = 'none'; return; }
+    const on = [G.god && 'GOD', G.devOHK && 'OHK', G.run.freeAmmo && 'INF', G.devTs && G.devTs !== 1 && 'SPD x' + G.devTs, SAVE.dvNoFloor && 'NO-FLOOR', SAVE.dvRegen && 'REGEN', SET.scaleThreat === false && 'NO-SCALE', ECON !== .5 && 'ECON x' + ECON].filter(Boolean);
+    let s = 'DEV' + (on.length ? ' | ' + on.join(' | ') : '') + '  (F1 HOTKEYS)';
+    if (DEV.info) { const R = G.run, p = G.players[0], b = R.bal || { hp: 1, ed: 1 }; s += '\nW' + (R.w + 1) + ' S' + (R.lv + 1) + ' T' + R.tier + ' ' + R.stage.toUpperCase() + ' wave ' + (R.wave + 1) + '/' + R.waves + ' | enemy hp x' + (R.hpm || 1).toFixed(2) + ' dmg x' + (R.edm || 1).toFixed(2) + ' (scaling ' + b.hp.toFixed(2) + '/' + b.ed.toFixed(2) + ')' + '\nenemies ' + G.ent.en.length + ' bullets ' + G.ent.eb.length + ' pickups ' + G.ent.pk.length + ' | hits left ' + (p ? hitsLeft(p) : '-') + ' | run cores ' + (R.cores | 0); }
+    tag.textContent = s; tag.style.display = 'block';
+  })(performance.now());
+})();
 
 // ================= BOOT =================
 function boot() {

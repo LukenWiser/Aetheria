@@ -283,7 +283,7 @@ const UPG = {
   drn: { nm: 'Wingman Bay', ds: '+1 AI wingman drone per level. They fly with you and shoot on their own.', b: 420, g: 1.75, max: 3, ic: 'drn' },
   drd: { nm: 'Wingman Tuning', ds: '+25% wingman damage per level', b: 160, g: 1.34, max: 6, ic: 'drd' }
 };
-const ECON = .5; // V55: half the core income
+let ECON = .5; // V55: half the core income
 const upPrice = (k, lv) => Math.round(UPG[k].b * 1.2 * Math.pow(UPG[k].g, lv));
 
 // ---------- modes ----------
