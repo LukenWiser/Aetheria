@@ -124,8 +124,8 @@ document.addEventListener('keydown', e => {
 // LB / RB switch main-menu tabs. Mouse or keyboard input hides it again.
 const PCUR = { x: innerWidth / 2, y: innerHeight / 2, on: false, el: null, hov: null, prev: {}, last: 0 };
 (function () {
-  const c = document.createElement('div'); c.id = 'padCur'; c.innerHTML = '<svg viewBox="0 0 24 24" width="30" height="30"><path d="M4 2l15 9-6.5 1.6L16 20l-3 1.4-3.4-7.4L4 18z" fill="#fff" stroke="#04101f" stroke-width="1.6" stroke-linejoin="round"/></svg>'; document.body.appendChild(c); PCUR.el = c;
-  const st = document.createElement('style'); st.textContent = '#padCur{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;display:none;filter:drop-shadow(0 0 6px rgba(34,211,238,.9)) drop-shadow(0 2px 3px rgba(0,0,0,.6));transition:transform .06s linear}#padCur.click svg{transform:scale(.85)}.pc-hover{outline:2px solid var(--acc)!important;outline-offset:2px;filter:brightness(1.18)}'; document.head.appendChild(st);
+  const c = document.createElement('div'); c.id = 'padCur'; c.innerHTML = '<svg viewBox="-20 -20 40 40" width="40" height="40"><g class="pc-rot"><circle r="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="12 5.3"/></g><g class="pc-tk" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M0-18v5M0 13v5M-18 0h5M13 0h5"/></g><circle r="2.2" fill="#fff"/><circle r="4.5" fill="none" stroke="#04101f" stroke-width="1" opacity=".6"/></svg>'; document.body.appendChild(c); PCUR.el = c;
+  const st = document.createElement('style'); st.textContent = '#padCur{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;display:none;color:var(--pa,#22d3ee);filter:drop-shadow(0 0 5px currentColor) drop-shadow(0 1px 2px rgba(0,0,0,.8))}#padCur svg{display:block;transition:transform .15s cubic-bezier(.2,.9,.3,1.4)}#padCur .pc-rot{animation:pcRot 4s linear infinite;transform-origin:0 0}@keyframes pcRot{to{transform:rotate(360deg)}}#padCur .pc-tk{transition:transform .15s}#padCur.on .pc-tk{transform:scale(.7)}#padCur.on svg{transform:scale(1.18)}#padCur.on{color:#fbbf24}#padCur.click svg{transform:scale(.75)}.pc-hover{outline:2px solid var(--acc)!important;outline-offset:2px;filter:brightness(1.18)}'; document.head.appendChild(st);
   const hide = () => { if (PCUR.on) { PCUR.on = false; c.style.display = 'none'; if (PCUR.hov) PCUR.hov.classList.remove('pc-hover'); PCUR.hov = null; } };
   window.addEventListener('mousemove', e => { if (Math.abs(e.movementX) + Math.abs(e.movementY) > 2) hide(); }, true);
   window.addEventListener('keydown', hide, true);
@@ -157,8 +157,8 @@ function pcClick(el) {
     if (PCUR.on) {
       const tgt = pcTarget(), slow = tgt ? .55 : 1, sp = (900 + 900 * Math.min(1, Math.hypot(mx, my))) * slow * (Math.min(innerWidth, innerHeight) / 900);
       PCUR.x = clamp(PCUR.x + Math.sign(mx) * mx * mx * sp * dt, 2, innerWidth - 2); PCUR.y = clamp(PCUR.y + Math.sign(my) * my * my * sp * dt, 2, innerHeight - 2);
-      PCUR.el.style.transform = 'translate(' + (PCUR.x - 4) + 'px,' + (PCUR.y - 3) + 'px)';
-      const h = pcTarget(); if (h !== PCUR.hov) { if (PCUR.hov) PCUR.hov.classList.remove('pc-hover'); PCUR.hov = h; if (h) h.classList.add('pc-hover'); }
+      PCUR.el.style.transform = 'translate(' + (PCUR.x - 20) + 'px,' + (PCUR.y - 20) + 'px)';
+      const h = pcTarget(); if (h !== PCUR.hov) { if (PCUR.hov) PCUR.hov.classList.remove('pc-hover'); PCUR.hov = h; if (h) h.classList.add('pc-hover'); PCUR.el.classList.toggle('on', !!h); if (h) try { tone(2600, 2200, .03, .02, 'sine'); } catch (e) { } }
       if (sx || sy) { let s = document.elementFromPoint(PCUR.x, PCUR.y); while (s && s !== document.body && !(s.scrollHeight > s.clientHeight + 2 && /auto|scroll/.test(getComputedStyle(s).overflowY)) && !(s.scrollWidth > s.clientWidth + 2 && /auto|scroll/.test(getComputedStyle(s).overflowX))) s = s.parentElement; if (s && s !== document.body) { s.scrollTop += sy * 900 * dt; s.scrollLeft += sx * 900 * dt; } }
       if (A && !P.A) pcClick(h);
       if (B && !P.B) { try { navBack(); } catch (e) { ACT.back && ACT.back(); } }

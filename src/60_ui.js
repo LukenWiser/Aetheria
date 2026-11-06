@@ -178,7 +178,7 @@ const UI = {
     if (id !== 'scHangar' && id.slice(0, 2) === 'sc') { const c = e.querySelector('.card'); if (c) c.scrollTop = 0; }
     if (!noHist && this.top && this.top !== id && !['scPause', 'scResult', 'scTut'].includes(this.top)) this.hist.push(this.top);
     this.top = id; G.showCfg = id === 'scHangar' ? prevCfg() : null; if (id !== 'scKeys') G.rebind = null;
-    if (G.scene !== 'play' && R3) R3.setView(id === 'scHangar' ? 'hangar' : id === 'scBestiary' ? 'model' : 'menu');
+    if (G.scene !== 'play' && R3 && !(typeof SHIP !== 'undefined' && SHIPROOM[id] && (SHIP.on || (SET.shipMenu !== false && SET.models && !R3.shipFail && !R3.lost && G.scene !== 'play')))) R3.setView(id === 'scHangar' ? 'hangar' : id === 'scBestiary' ? 'model' : 'menu');
     if (id === 'scBestiary') bstShow();
     const mp = e.querySelector('#mapScroll'); if (mp) { const n = mp.querySelector('.node.av:last-of-type, .node.sel'); const av = mp.querySelectorAll('.node.av'); const t = av[av.length - 1] || mp.querySelector('.node'); if (t && !this._keepScroll) mp.scrollLeft = Math.max(0, t.offsetLeft - mp.clientWidth / 2 + 30); if (this._keepScroll) mp.scrollLeft = this._keepScroll; this._keepScroll = 0; }
     if (this.gpfOn) navRestore();

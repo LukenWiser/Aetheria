@@ -199,7 +199,7 @@ function finishRun(win) {
 function exitToMenu(to) {
   G.mapX = null; retroOff(); crashOff(); BOSSES.length = BASE_BOSSES;
   G.pick = null; G.abTs = 0; G.slowUntil = 0; IN.ab = [0, 0]; clearMsgs(); document.body.classList.remove('lb'); G.inCombat = false; G.scene = 'ui'; G.paused = false; G.run = null; G.players = []; G.ent = { en: [], pb: [], eb: [], pk: [], pa: [], fl: [], bm: [], hz: [] }; $('hud').classList.remove('on'); $('touch').classList.remove('on'); $('coach').classList.remove('on'); $('hl').style.display = 'none'; $('boss').classList.remove('on');
-  music.stop(); if (R3) { R3.reset(); R3.setView('menu'); } G.showCfg = null; saveGame(); UI.show(to || 'scMenu');
+  music.stop(); const shipNext = typeof SHIPROOM !== 'undefined' && SET.shipMenu !== false && SHIPROOM[to || 'scMenu']; if (R3) { R3.reset(); if (!shipNext) R3.setView('menu'); } G.showCfg = null; saveGame(); UI.show(to || 'scMenu'); if (shipNext) try { SHIP.handoff(); } catch (e) { }
 }
 function togglePause() { if (G.net) { netPauseKey(); return; } if (!G.inCombat || !G.run || G.run.over || G.pick || G.cut || G.brief) return; G.paused = !G.paused; if (G.paused) { UI.pause(); SFX.click(); } else UI.resume(); }
 
@@ -294,10 +294,10 @@ function render() {
   let sx = 0, sy = 0; if (G.shake > 0 && !SET.reduce) { const a = G.shakeA * Math.min(1, G.shake / 8); sx = (Math.random() - .5) * 2 * a; sy = (Math.random() - .5) * 2 * a; } else G.shakeA = 0;
   if (!SET.reduce) { sx += G.kx || 0; sy += G.ky || 0; } G.kx = (G.kx || 0) * .78; G.ky = (G.ky || 0) * .78;
   G.sx = sx; G.sy = sy;
-  bg.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr); if (!(R3 && R3.bgActive && (play || G.scene !== 'play'))) drawBackdrop(bg, G.t); else if (!play) bg.clearRect(0, 0, V.W, V.H); if (G.crash && play) drawDesktop(bg, G.t);
+  bg.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr); const shipV = !play && R3 && R3.getView && R3.getView() === 'ship'; if (shipV) { if (!G._bgClr) { bg.clearRect(-50, -50, V.W + 100, V.H + 100); G._bgClr = 1; } } else if ((G._bgClr = 0) || !(R3 && R3.bgActive && (play || G.scene !== 'play'))) drawBackdrop(bg, G.t); else if (!play) bg.clearRect(0, 0, V.W, V.H); if (G.crash && play) drawDesktop(bg, G.t);
   fx.setTransform(1, 0, 0, 1, 0, 0); fx.clearRect(0, 0, cvFx.width, cvFx.height); fx.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr);
   if (R3) { try { R3.draw(G, V); r3err = 0; } catch (e) { console.error('R3', e); if (++r3err > 6) { R3.on = false; R3 = null; } } }
-  const g = fx, t = G.t, use3 = R3 && R3.on; if (!play) menuFx(g);
+  const g = fx, t = G.t, use3 = R3 && R3.on; if (!play && !shipV) menuFx(g);
   if (play) {
     if (!SET.reduce && (G.world === 2 || G.world === 6)) { // heat shimmer: slow wavy bands of hot air rising off the ground
       g.save(); g.globalCompositeOperation = 'lighter'; g.lineWidth = 14; g.lineCap = 'round';

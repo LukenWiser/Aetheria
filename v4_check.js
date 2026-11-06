@@ -3823,7 +3823,7 @@ function finishRun(win) {
 function exitToMenu(to) {
   G.mapX = null; retroOff(); crashOff(); BOSSES.length = BASE_BOSSES;
   G.pick = null; G.abTs = 0; G.slowUntil = 0; IN.ab = [0, 0]; clearMsgs(); document.body.classList.remove('lb'); G.inCombat = false; G.scene = 'ui'; G.paused = false; G.run = null; G.players = []; G.ent = { en: [], pb: [], eb: [], pk: [], pa: [], fl: [], bm: [], hz: [] }; $('hud').classList.remove('on'); $('touch').classList.remove('on'); $('coach').classList.remove('on'); $('hl').style.display = 'none'; $('boss').classList.remove('on');
-  music.stop(); if (R3) { R3.reset(); R3.setView('menu'); } G.showCfg = null; saveGame(); UI.show(to || 'scMenu');
+  music.stop(); const shipNext = typeof SHIPROOM !== 'undefined' && SET.shipMenu !== false && SHIPROOM[to || 'scMenu']; if (R3) { R3.reset(); if (!shipNext) R3.setView('menu'); } G.showCfg = null; saveGame(); UI.show(to || 'scMenu'); if (shipNext) try { SHIP.handoff(); } catch (e) { }
 }
 function togglePause() { if (G.net) { netPauseKey(); return; } if (!G.inCombat || !G.run || G.run.over || G.pick || G.cut || G.brief) return; G.paused = !G.paused; if (G.paused) { UI.pause(); SFX.click(); } else UI.resume(); }
 
@@ -3918,10 +3918,10 @@ function render() {
   let sx = 0, sy = 0; if (G.shake > 0 && !SET.reduce) { const a = G.shakeA * Math.min(1, G.shake / 8); sx = (Math.random() - .5) * 2 * a; sy = (Math.random() - .5) * 2 * a; } else G.shakeA = 0;
   if (!SET.reduce) { sx += G.kx || 0; sy += G.ky || 0; } G.kx = (G.kx || 0) * .78; G.ky = (G.ky || 0) * .78;
   G.sx = sx; G.sy = sy;
-  bg.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr); if (!(R3 && R3.bgActive && (play || G.scene !== 'play'))) drawBackdrop(bg, G.t); else if (!play) bg.clearRect(0, 0, V.W, V.H); if (G.crash && play) drawDesktop(bg, G.t);
+  bg.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr); const shipV = !play && R3 && R3.getView && R3.getView() === 'ship'; if (shipV) { if (!G._bgClr) { bg.clearRect(-50, -50, V.W + 100, V.H + 100); G._bgClr = 1; } } else if ((G._bgClr = 0) || !(R3 && R3.bgActive && (play || G.scene !== 'play'))) drawBackdrop(bg, G.t); else if (!play) bg.clearRect(0, 0, V.W, V.H); if (G.crash && play) drawDesktop(bg, G.t);
   fx.setTransform(1, 0, 0, 1, 0, 0); fx.clearRect(0, 0, cvFx.width, cvFx.height); fx.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr);
   if (R3) { try { R3.draw(G, V); r3err = 0; } catch (e) { console.error('R3', e); if (++r3err > 6) { R3.on = false; R3 = null; } } }
-  const g = fx, t = G.t, use3 = R3 && R3.on; if (!play) menuFx(g);
+  const g = fx, t = G.t, use3 = R3 && R3.on; if (!play && !shipV) menuFx(g);
   if (play) {
     if (!SET.reduce && (G.world === 2 || G.world === 6)) { // heat shimmer: slow wavy bands of hot air rising off the ground
       g.save(); g.globalCompositeOperation = 'lighter'; g.lineWidth = 14; g.lineCap = 'round';
@@ -5544,7 +5544,7 @@ const UI = {
     if (id !== 'scHangar' && id.slice(0, 2) === 'sc') { const c = e.querySelector('.card'); if (c) c.scrollTop = 0; }
     if (!noHist && this.top && this.top !== id && !['scPause', 'scResult', 'scTut'].includes(this.top)) this.hist.push(this.top);
     this.top = id; G.showCfg = id === 'scHangar' ? prevCfg() : null; if (id !== 'scKeys') G.rebind = null;
-    if (G.scene !== 'play' && R3) R3.setView(id === 'scHangar' ? 'hangar' : id === 'scBestiary' ? 'model' : 'menu');
+    if (G.scene !== 'play' && R3 && !(typeof SHIP !== 'undefined' && SHIPROOM[id] && (SHIP.on || (SET.shipMenu !== false && SET.models && !R3.shipFail && !R3.lost && G.scene !== 'play')))) R3.setView(id === 'scHangar' ? 'hangar' : id === 'scBestiary' ? 'model' : 'menu');
     if (id === 'scBestiary') bstShow();
     const mp = e.querySelector('#mapScroll'); if (mp) { const n = mp.querySelector('.node.av:last-of-type, .node.sel'); const av = mp.querySelectorAll('.node.av'); const t = av[av.length - 1] || mp.querySelector('.node'); if (t && !this._keepScroll) mp.scrollLeft = Math.max(0, t.offsetLeft - mp.clientWidth / 2 + 30); if (this._keepScroll) mp.scrollLeft = this._keepScroll; this._keepScroll = 0; }
     if (this.gpfOn) navRestore();
@@ -5852,12 +5852,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V71';
+const GAME_VER = 'V72';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V72', 'Locked On', ['Fixed: the old main menu background flashed for a split second when switching tabs, opening screens, leaving a run and at the end of the intro - the ship now stays on screen the whole time', 'The old menu background no longer keeps drawing behind the ship, which saves some power', 'The controller cursor is now a spinning targeting reticle in your accent colour - it tightens and turns gold when it locks onto a button, with a soft tick']],
   ['V71', 'Little Things', ['ONLINE: Copy invite link in a room - anyone who opens the link joins you', 'A loading line shows while the game starts up instead of a blank screen', 'WHAT\'S NEW: the first time you open a new version, a pop-up lists every update since your last visit', 'NOTIFICATIONS: a bell on the main menu keeps the last 20 pop-ups so you can read anything you missed', 'Full screen is remembered between visits, and a low-battery hint suggests the Low preset', 'Quitting a run you are more than 20 seconds into asks you to tap again first', 'The intro movie plays on your first 3 launches, then skips itself (Settings > Graphics > Intro movie to change)', 'All modes highlights the mode you played last', 'SETTINGS > DATA: Copy bug report puts your version, device and settings on the clipboard']],
   ['V70', 'Make It Yours', ['HANGAR: three loadout presets (ship, gun and cosmetics) you can save and load in one tap, a Randomise look button, and ship codes to copy a look to a friend', 'HANGAR: custom colour pickers for hull and accent, plus your recent colours', 'LOCKER: right-click a cosmetic to favourite it - favourites go to the front with a star', 'SETTINGS: every tab has a Reset to defaults button, plus new Easy-read font, High-contrast HUD, Effects during bosses, Vibration strength and Quiet hours options', 'SETTINGS > DATA: copy your settings as a code and paste them on another device', 'SAVES: rename profiles and give them a colour, copy one profile into another slot, see when the game last saved, and a deleted profile can be restored for 24 hours', 'A weekly reminder to back up your save with an export code', 'Fixed: the Hangar still mentioned parrying']],
   ['V69', 'Fresh Start', ['Brand-new main menu with five tabs along the top: PLAY, SHIP, STATION, CAREER and ONLINE. Each tab is a handful of big tiles with a one-line explanation, so it is clear what everything does', 'PLAY puts Continue (or Start the story for new pilots) front and centre, next to the map, all modes, galaxy, daily challenge, flight school and local co-op', 'The Forge is now easy to find: it has its own tile on both the SHIP and STATION tabs, next to Drones and Station modules', 'Cores and Flux are always shown top-right, with Settings and Full screen beside them. Switch tabs with 1-5, [ and ], or LB / RB on a controller', 'Controllers now get a real cursor in menus: move it with the left stick or d-pad, A clicks, B goes back, the right stick scrolls lists. It slows down over buttons so it is easy to aim. Turn it off in Settings > Controls to go back to jumping between buttons']],
@@ -9921,8 +9922,8 @@ document.addEventListener('keydown', e => {
 // LB / RB switch main-menu tabs. Mouse or keyboard input hides it again.
 const PCUR = { x: innerWidth / 2, y: innerHeight / 2, on: false, el: null, hov: null, prev: {}, last: 0 };
 (function () {
-  const c = document.createElement('div'); c.id = 'padCur'; c.innerHTML = '<svg viewBox="0 0 24 24" width="30" height="30"><path d="M4 2l15 9-6.5 1.6L16 20l-3 1.4-3.4-7.4L4 18z" fill="#fff" stroke="#04101f" stroke-width="1.6" stroke-linejoin="round"/></svg>'; document.body.appendChild(c); PCUR.el = c;
-  const st = document.createElement('style'); st.textContent = '#padCur{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;display:none;filter:drop-shadow(0 0 6px rgba(34,211,238,.9)) drop-shadow(0 2px 3px rgba(0,0,0,.6));transition:transform .06s linear}#padCur.click svg{transform:scale(.85)}.pc-hover{outline:2px solid var(--acc)!important;outline-offset:2px;filter:brightness(1.18)}'; document.head.appendChild(st);
+  const c = document.createElement('div'); c.id = 'padCur'; c.innerHTML = '<svg viewBox="-20 -20 40 40" width="40" height="40"><g class="pc-rot"><circle r="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="12 5.3"/></g><g class="pc-tk" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M0-18v5M0 13v5M-18 0h5M13 0h5"/></g><circle r="2.2" fill="#fff"/><circle r="4.5" fill="none" stroke="#04101f" stroke-width="1" opacity=".6"/></svg>'; document.body.appendChild(c); PCUR.el = c;
+  const st = document.createElement('style'); st.textContent = '#padCur{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;display:none;color:var(--pa,#22d3ee);filter:drop-shadow(0 0 5px currentColor) drop-shadow(0 1px 2px rgba(0,0,0,.8))}#padCur svg{display:block;transition:transform .15s cubic-bezier(.2,.9,.3,1.4)}#padCur .pc-rot{animation:pcRot 4s linear infinite;transform-origin:0 0}@keyframes pcRot{to{transform:rotate(360deg)}}#padCur .pc-tk{transition:transform .15s}#padCur.on .pc-tk{transform:scale(.7)}#padCur.on svg{transform:scale(1.18)}#padCur.on{color:#fbbf24}#padCur.click svg{transform:scale(.75)}.pc-hover{outline:2px solid var(--acc)!important;outline-offset:2px;filter:brightness(1.18)}'; document.head.appendChild(st);
   const hide = () => { if (PCUR.on) { PCUR.on = false; c.style.display = 'none'; if (PCUR.hov) PCUR.hov.classList.remove('pc-hover'); PCUR.hov = null; } };
   window.addEventListener('mousemove', e => { if (Math.abs(e.movementX) + Math.abs(e.movementY) > 2) hide(); }, true);
   window.addEventListener('keydown', hide, true);
@@ -9954,8 +9955,8 @@ function pcClick(el) {
     if (PCUR.on) {
       const tgt = pcTarget(), slow = tgt ? .55 : 1, sp = (900 + 900 * Math.min(1, Math.hypot(mx, my))) * slow * (Math.min(innerWidth, innerHeight) / 900);
       PCUR.x = clamp(PCUR.x + Math.sign(mx) * mx * mx * sp * dt, 2, innerWidth - 2); PCUR.y = clamp(PCUR.y + Math.sign(my) * my * my * sp * dt, 2, innerHeight - 2);
-      PCUR.el.style.transform = 'translate(' + (PCUR.x - 4) + 'px,' + (PCUR.y - 3) + 'px)';
-      const h = pcTarget(); if (h !== PCUR.hov) { if (PCUR.hov) PCUR.hov.classList.remove('pc-hover'); PCUR.hov = h; if (h) h.classList.add('pc-hover'); }
+      PCUR.el.style.transform = 'translate(' + (PCUR.x - 20) + 'px,' + (PCUR.y - 20) + 'px)';
+      const h = pcTarget(); if (h !== PCUR.hov) { if (PCUR.hov) PCUR.hov.classList.remove('pc-hover'); PCUR.hov = h; if (h) h.classList.add('pc-hover'); PCUR.el.classList.toggle('on', !!h); if (h) try { tone(2600, 2200, .03, .02, 'sine'); } catch (e) { } }
       if (sx || sy) { let s = document.elementFromPoint(PCUR.x, PCUR.y); while (s && s !== document.body && !(s.scrollHeight > s.clientHeight + 2 && /auto|scroll/.test(getComputedStyle(s).overflowY)) && !(s.scrollWidth > s.clientWidth + 2 && /auto|scroll/.test(getComputedStyle(s).overflowX))) s = s.parentElement; if (s && s !== document.body) { s.scrollTop += sy * 900 * dt; s.scrollLeft += sx * 900 * dt; } }
       if (A && !P.A) pcClick(h);
       if (B && !P.B) { try { navBack(); } catch (e) { ACT.back && ACT.back(); } }
