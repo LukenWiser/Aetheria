@@ -6522,12 +6522,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V64';
+const GAME_VER = 'V65';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V65', 'Dialled In', ['New Graphics preset (Low / Medium / High) at the top of Settings > Graphics sets everything in one tap', 'On first launch the game picks a preset that suits your device', 'New Menu text size and HUD size options in Settings > Access', 'Playing on a controller? The HUD now shows your pad buttons for Ability and Super', 'The results screen always shows your next upgrade - UPGRADE READY with a Shop button, or how many cores you still need']],
   ['V64', 'Read the Room', ['Shot warnings: a glow charges up on an enemy right before it fires (can be turned off in Settings > Gameplay)', 'Elite enemies now have a signature volley every third shot, different in each world: FAN, RING, CROSS or SPIRAL - with a bigger red warning and the pattern name', 'The first three sectors of World 1 are gentler: enemies fire less often and threat scaling is off', 'In those learning sectors your hitbox glows, and a DODGING 101 tip explains it']],
   ['V63', 'Sound Check', ['New Warnings volume slider (Settings > Audio) for the heartbeat, alarm and hit sounds', 'Music dips out of the way when you get hit, when a boss appears and when a boss or your ship goes down', 'Music gets brighter the longer your combo runs', 'Cores climb a musical ladder when you grab them in a row', 'Shields shatter with a glassy crash when they break', 'New sounds for repair, shield and plasma pickups, wave starts, sector clears and an empty-gun click']],
   ['V62', 'Clean Lines', ['Menus restyled to match the new HUD: cut-corner buttons with a light sweep on hover, bracketed glass panels and sharp rows', 'Upright titles with ship-system tags (SORTIE, QUARTERMASTER, HANGAR BAY, COMMAND...) and accent strips', 'Main menu entries are numbered, with a sliding highlight bar', 'Screens open with a staged entrance - the panel wipes in and rows slide in one after another', 'Quiet hover ticks on buttons']],
@@ -9837,13 +9838,15 @@ h2{letter-spacing:.22em}
   const wipe = document.createElement('div'); wipe.id = 'vxWipe'; const u = document.getElementById('ui'); if (u) u.appendChild(wipe);
 })();
 const VX_EB = { scModes: ['01', 'SORTIE // SELECT OPERATION'], scSettings: ['SYS', 'SHIP SYSTEMS // CONFIG'], scShop: ['02', 'QUARTERMASTER // REQUISITION'], scHangar: ['03', 'HANGAR BAY // LOADOUT'], scMissions: ['04', 'COMMAND // ORDERS'], scProfile: ['05', 'PILOT RECORD'], scLocker: ['06', 'LOCKER // COSMETICS'], scMap: ['07', 'NAV // SECTOR CHART'], scUpdates: ['LOG', 'PATCH NOTES'], scCredits: ['END', 'CREDITS'], scSlots: ['MEM', 'SAVE CORE'], scKeys: ['SYS', 'INPUT MAP'], scDaily: ['08', 'DAILY OPS'], scJukebox: ['AUD', 'JUKEBOX'], scOnline: ['NET', 'COMMS ARRAY'], scBestiary: ['DB', 'THREAT DATABASE'] };
+function vxEyebrow(id) { const el = document.getElementById(id); if (!el || el.querySelector('.vx-eb')) return; const t = el.querySelector('.lay-t, .st-rail h2, .card > h2, .card .row > h2'); const lab = VX_EB[id]; if (t && lab) t.insertAdjacentHTML('afterbegin', '<span class="vx-eb"><i>' + lab[0] + '</i>' + lab[1] + '</span>'); }
+const _refVX = UI.refresh.bind(UI); UI.refresh = function () { const r = _refVX.apply(this, arguments); try { if (UI.top) vxEyebrow(UI.top); } catch (e) { } return r; };
 const _showVX = UI.show.bind(UI);
 UI.show = function (id) {
   const prev = UI.top, r = _showVX.apply(this, arguments);
   try {
     if (id && id !== prev && !SET.reduce) {
       const el = document.getElementById(id); if (el) { el.classList.remove('vin'); void el.offsetWidth; el.classList.add('vin'); clearTimeout(el._vin); el._vin = setTimeout(() => el.classList.remove('vin'), 650); }
-      if (el && !el.querySelector('.vx-eb')) { const t = el.querySelector('.lay-t, .st-rail h2, .card > h2, .card .row > h2'); const lab = VX_EB[id]; if (t && lab) t.insertAdjacentHTML('afterbegin', '<span class="vx-eb"><i>' + lab[0] + '</i>' + lab[1] + '</span>'); }
+      vxEyebrow(id);
       const w = document.getElementById('vxWipe'); if (w && G.scene !== 'play' && !document.body.classList.contains('shipm')) { w.classList.remove('go'); void w.offsetWidth; w.classList.add('go'); }
     }
   } catch (e) { }
@@ -9992,6 +9995,70 @@ render = function () {
   return r;
 };
 try { if (SETS.GAMEPLAY && !SETS.GAMEPLAY.some(r => r[0] === 'tele')) SETS.GAMEPLAY.push(['tele', 'tog', 'Shot warnings', 'A glow charges up where an enemy is about to fire']); if (SET.tele === undefined) SET.tele = true; } catch (e) { }
+
+// ================= V65: graphics presets, text/HUD size, controller prompts, next-upgrade hook =================
+const PRESETS = {
+  low: { q: 1, back: 0, parts: .4, glow: .5, bloom: false, weather: false, daynight: false, detail: false },
+  med: { q: 1.5, back: 1, parts: .75, glow: .8, bloom: true, weather: true, daynight: true, detail: true },
+  high: { q: 2, back: 2, parts: 1, glow: 1, bloom: true, weather: true, daynight: true, detail: true }
+};
+try {
+  const GR = SETS.GRAPHICS; if (GR && !GR.some(r => r[0] === 'preset')) GR.unshift(['preset', 'sel', 'Graphics preset', 'Sets everything below in one go', [['custom', 'Custom'], ['low', 'Low (old phones)'], ['med', 'Medium'], ['high', 'High']]]);
+  const AX = SETS.ACCESS || SETS.ACCESSIBILITY || SETS.GAMEPLAY;
+  if (AX && !AX.some(r => r[0] === 'uiz')) AX.push(['uiz', 'sel', 'Menu text size', '', [[.9, 'Small'], [1, 'Normal'], [1.15, 'Large'], [1.3, 'Huge']]], ['hudz', 'sel', 'HUD size', 'Pilot panel, top strip and combo', [[.85, 'Small'], [1, 'Normal'], [1.2, 'Large'], [1.4, 'Huge']]]);
+  if (SET.preset === undefined) SET.preset = 'custom'; if (SET.uiz === undefined) SET.uiz = 1; if (SET.hudz === undefined) SET.hudz = 1;
+} catch (e) { }
+function applyPreset(k) { const P = PRESETS[k]; if (!P) return; for (const s in P) { SET[s] = P[s]; try { applySet(s); } catch (e) { } } SET.preset = k; try { saveSet(); } catch (e) { } }
+function applySizes() { const d = document.documentElement.style; d.setProperty('--uiz', String(+SET.uiz || 1)); d.setProperty('--hudz', String(+SET.hudz || 1)); }
+(function () { const st = document.createElement('style'); st.textContent = '#ui .scr .card,#ui .scr .lay{zoom:var(--uiz,1)}#hud .hx .fr,#top,#hcmb{zoom:var(--hudz,1)}'; document.head.appendChild(st); applySizes(); })();
+const _applySetZ = applySet;
+applySet = function (k) {
+  if (k === 'preset') { if (SET.preset !== 'custom') { applyPreset(SET.preset); if (UI.top === 'scSettings') UI.refresh(); } return; }
+  if (k === 'uiz' || k === 'hudz') { SET[k] = parseFloat(SET[k]) || 1; applySizes(); try { saveSet(); } catch (e) { } return; }
+  const r = _applySetZ.apply(this, arguments); if (PRESETS.low[k] !== undefined && SET.preset !== 'custom') { SET.preset = 'custom'; try { saveSet(); } catch (e) { } } return r;
+};
+// first launch: pick a preset for this device
+setTimeout(() => {
+  try {
+    if (SET.presetAuto) return; SET.presetAuto = 1;
+    const mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8, small = Math.min(innerWidth, innerHeight) < 500;
+    const k = mem <= 2 || cores <= 2 ? 'low' : (mem <= 4 || cores <= 4 || (IS_TOUCH && small)) ? 'med' : 'high';
+    if (k !== 'high') { applyPreset(k); toast('GRAPHICS', 'Set to ' + (k === 'low' ? 'Low' : 'Medium') + ' for this device. Change it any time in Settings > Graphics.', '#22d3ee'); } else { SET.preset = 'high'; saveSet(); }
+  } catch (e) { }
+}, 4000);
+
+// ---- controller prompts: HUD shows pad buttons when you're playing on a gamepad ----
+G.padUI = false;
+function setPadUI(on) { if (G.padUI === on) return; G.padUI = on; try { if (G.scene === 'play' && G.run) buildHud(); } catch (e) { } }
+window.addEventListener('keydown', () => setPadUI(false), true);
+window.addEventListener('pointerdown', () => setPadUI(false), true);
+setInterval(() => { try { const ps = navigator.getGamepads ? navigator.getGamepads() : []; for (const p of ps) { if (!p) continue; if (p.buttons.some(b => b.pressed) || p.axes.some(a => Math.abs(a) > .5)) { setPadUI(true); break; } } } catch (e) { } }, 250);
+const _hudPanelZ = hudPanel;
+hudPanel = function (p) {
+  let h = _hudPanelZ.apply(this, arguments);
+  if (G.padUI && p.id === 0) try { const a = padLabel('ab'), v = padLabel('sup'); h = h.replace(/(id="hda0"[^>]*>[\s\S]*?<\/span>)(<em>[^<]*<\/em>)?/, '$1<em>' + a + '</em>').replace(/(id="hdu0"[^>]*>[\s\S]*?<\/span>)(<em>[^<]*<\/em>)?/, '$1<em>' + v + '</em>'); } catch (e) { }
+  return h;
+};
+
+// ---- results: always show the next upgrade within reach ----
+function nextUpgrade() {
+  const pl = SAVE.pl[0]; let best = null;
+  for (const k in UPG) { const lv = pl.up[k] | 0; if (lv >= UPG[k].max) continue; const pr = upPrice(k, lv); if (!best || pr < best.pr) best = { k, lv, pr }; }
+  return best;
+}
+const _showZ = UI.show.bind(UI);
+UI.show = function (id) {
+  const r = _showZ.apply(this, arguments);
+  if (id === 'scResult') try {
+    const el = document.getElementById('scResult'), d = UI.res, nu = nextUpgrade(); if (!el || !nu || el.querySelector('.rsx-up') || (d && d.mode === 'training')) return r;
+    const can = SAVE.cores >= nu.pr, box = document.createElement('div'); box.className = 'rsx-up';
+    box.style.cssText = 'margin-top:12px;padding:9px 12px;border-left:3px solid ' + (can ? '#fbbf24' : '#22d3ee') + ';background:linear-gradient(90deg,' + (can ? 'rgba(251,191,36,.16)' : 'rgba(34,211,238,.12)') + ',transparent);font:700 11px var(--mono);letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between;gap:10px';
+    const pct = Math.min(100, Math.round(SAVE.cores / nu.pr * 100));
+    box.innerHTML = '<span><b style="color:' + (can ? '#fde68a' : '#a5f3fc') + ';letter-spacing:.2em;font-size:10px">' + (can ? 'UPGRADE READY' : 'NEXT UPGRADE') + '</b><br>' + UPG[nu.k].nm + ' LV' + (nu.lv + 1) + ' - ' + (can ? fmt(nu.pr) + ' cores' : fmt(nu.pr - SAVE.cores) + ' more cores') + '<i style="display:block;height:3px;margin-top:5px;background:rgba(255,255,255,.1)"><i style="display:block;height:100%;width:' + pct + '%;background:' + (can ? '#fbbf24' : '#22d3ee') + '"></i></i></span>' + (can ? '<button class="btn sm gold" data-act="shop">SHOP</button>' : '');
+    const hero = el.querySelector('.rs-hero') || el.querySelector('.tc') || el.querySelector('.card'); if (hero) hero.appendChild(box);
+  } catch (e) { console.warn(e); }
+  return r;
+};
 
 // ================= BOOT =================
 function boot() {

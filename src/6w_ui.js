@@ -59,13 +59,15 @@ h2{letter-spacing:.22em}
   const wipe = document.createElement('div'); wipe.id = 'vxWipe'; const u = document.getElementById('ui'); if (u) u.appendChild(wipe);
 })();
 const VX_EB = { scModes: ['01', 'SORTIE // SELECT OPERATION'], scSettings: ['SYS', 'SHIP SYSTEMS // CONFIG'], scShop: ['02', 'QUARTERMASTER // REQUISITION'], scHangar: ['03', 'HANGAR BAY // LOADOUT'], scMissions: ['04', 'COMMAND // ORDERS'], scProfile: ['05', 'PILOT RECORD'], scLocker: ['06', 'LOCKER // COSMETICS'], scMap: ['07', 'NAV // SECTOR CHART'], scUpdates: ['LOG', 'PATCH NOTES'], scCredits: ['END', 'CREDITS'], scSlots: ['MEM', 'SAVE CORE'], scKeys: ['SYS', 'INPUT MAP'], scDaily: ['08', 'DAILY OPS'], scJukebox: ['AUD', 'JUKEBOX'], scOnline: ['NET', 'COMMS ARRAY'], scBestiary: ['DB', 'THREAT DATABASE'] };
+function vxEyebrow(id) { const el = document.getElementById(id); if (!el || el.querySelector('.vx-eb')) return; const t = el.querySelector('.lay-t, .st-rail h2, .card > h2, .card .row > h2'); const lab = VX_EB[id]; if (t && lab) t.insertAdjacentHTML('afterbegin', '<span class="vx-eb"><i>' + lab[0] + '</i>' + lab[1] + '</span>'); }
+const _refVX = UI.refresh.bind(UI); UI.refresh = function () { const r = _refVX.apply(this, arguments); try { if (UI.top) vxEyebrow(UI.top); } catch (e) { } return r; };
 const _showVX = UI.show.bind(UI);
 UI.show = function (id) {
   const prev = UI.top, r = _showVX.apply(this, arguments);
   try {
     if (id && id !== prev && !SET.reduce) {
       const el = document.getElementById(id); if (el) { el.classList.remove('vin'); void el.offsetWidth; el.classList.add('vin'); clearTimeout(el._vin); el._vin = setTimeout(() => el.classList.remove('vin'), 650); }
-      if (el && !el.querySelector('.vx-eb')) { const t = el.querySelector('.lay-t, .st-rail h2, .card > h2, .card .row > h2'); const lab = VX_EB[id]; if (t && lab) t.insertAdjacentHTML('afterbegin', '<span class="vx-eb"><i>' + lab[0] + '</i>' + lab[1] + '</span>'); }
+      vxEyebrow(id);
       const w = document.getElementById('vxWipe'); if (w && G.scene !== 'play' && !document.body.classList.contains('shipm')) { w.classList.remove('go'); void w.offsetWidth; w.classList.add('go'); }
     }
   } catch (e) { }
