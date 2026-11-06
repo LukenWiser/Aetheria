@@ -5853,12 +5853,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V74';
+const GAME_VER = 'V75';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V75', 'Steady', ['Fixed: switching main menu tabs could sometimes leave the menu pushed up, showing only the pilot card and the Driftwire footer. The menu frame can no longer scroll, each tab starts at the top, and on short screens only the tile area scrolls']],
   ['V74', 'Alive', ['THE STATION, REBUILT: a nebula sky and a planet with a glowing atmosphere, a two-deck rotating ring with lit windows, and modules you can watch working - ore streams from the refinery, turrets swivel and fire, the lab dish scans, drones orbit the bay and a shield bubble wraps the station. Shuttles fly in and out, and unbuilt modules show as holographic blueprints', 'STATION PANEL: a big card for the selected module (what it does now and next), a refinery storage bar with a Collect button, and a colour-coded card for every module with its level. Fixed: the Modules tab stayed lit on the Forge tab', 'BUTTONS: every button now has its own colour and a light band on top. Main buttons gently breathe and shimmer, everything lifts and glows on hover and squashes when pressed, and every click bursts into sparks in the button\'s colour', 'MAIN MENU: each tab has its own colour (Play cyan, Ship orange, Station violet, Career gold, Online green), tile icons pop on hover, a spotlight follows your pointer across tiles and the tab underline slides between tabs', 'MOTION: switching tabs slides the content in from the side you moved towards with tiles popping in one after another, and changing screens slides the old one out as the new one comes in', 'All modes: every mode tile has its own colour']],
   ['V73', 'Lighter', ['Performance pass: while you are in the ship menus, the effects layer is no longer cleared and redrawn every frame (nothing was visible on it)', 'Floating ship panels no longer blur what is behind them - the panels move slightly every frame, so the blur was being recalculated constantly. They use a darker glass instead', 'The HUD reads panel positions twice a second instead of every few frames, which avoids layout stalls in busy fights', 'The danger overlay only updates the screen when something actually changes', 'The FPS counter (Settings > Graphics) now also shows average frame time and the slowest frame of the last second']],
   ['V72', 'Locked On', ['Fixed: the old main menu background flashed for a split second when switching tabs, opening screens, leaving a run and at the end of the intro - the ship now stays on screen the whole time', 'The old menu background no longer keeps drawing behind the ship, which saves some power', 'The controller cursor is now a spinning targeting reticle in your accent colour - it tightens and turns gold when it locks onto a button, with a soft tick']],
@@ -9871,7 +9872,7 @@ SCR.scMenu = function () {
     '<button class="mm-news" data-act="updates"><b>' + U[0] + '</b> ' + escH(U[1]) + '</button><span class="mm-keys">' + (touchOn() ? '' : '1-5 or [ ] switch tabs') + '</span><button class="mm-cred" data-act="credits">' + dwEmblem('dw-sm') + '<b>Driftwire</b> Games</button></footer></div>';
 };
 Object.assign(ACT, {
-  mtab(a) { if (UI.mtab === a[0]) return; UI.mtab = a[0]; SFX.click(); UI.refresh(); },
+  mtab(a) { if (UI.mtab === a[0]) return; UI.mtab = a[0]; SFX.click(); const b = document.querySelector('#scMenu .mx-body'); if (b) b.scrollTop = 0; UI.refresh(); mxUnscroll(); },
   mxstory() { if (!SAVE.tut && !G._tutAsked) { G._tutAsked = 1; UI.show('scTut'); return; } startLevel(0, 0, 1); },
   mxmap() { const n = qNext(); UI.mode = 'expedition'; UI.w = UI.w !== undefined && UI.w < SAVE.wu ? UI.w : n.w; UI.tier = UI.tier || 1; UI.sel = firstOpen(UI.w, UI.tier); UI.show('scMap'); },
   mxcoop() { SAVE.players = SAVE.players === 2 ? 1 : 2; saveGame(); SFX.click(); UI.refresh(); },
@@ -9886,8 +9887,8 @@ document.addEventListener('keydown', e => {
 });
 (function () {
   const st = document.createElement('style'); st.textContent = `
-.mx{position:relative;display:flex;flex-direction:column;width:100%;height:100%;padding:max(14px,env(safe-area-inset-top)) max(3.5vw,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(3.5vw,env(safe-area-inset-left));gap:12px;color:#e7eefb;box-sizing:border-box}
-.mx-top{display:flex;align-items:center;gap:18px}
+.mx{position:relative;overflow:hidden;display:flex;flex-direction:column;width:100%;height:100%;padding:max(14px,env(safe-area-inset-top)) max(3.5vw,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(3.5vw,env(safe-area-inset-left));gap:12px;color:#e7eefb;box-sizing:border-box}
+#scMenu{overflow:hidden}.mx-top{flex:none;display:flex;align-items:center;gap:18px}
 .mx-brand{display:flex;flex-direction:column;line-height:1}.mx-brand b{font:900 22px var(--disp);letter-spacing:.12em;color:#fff}.mx-brand span{font:800 8px var(--mono);letter-spacing:.5em;color:var(--acc);margin-top:3px}
 .mx-tabs{flex:1;display:flex;justify-content:center;align-items:center;gap:4px}
 .mx-tab{position:relative;background:none;border:0;cursor:pointer;padding:10px 18px;font:900 clamp(14px,1.5vw,20px) var(--disp);letter-spacing:.14em;text-transform:uppercase;color:rgba(203,213,225,.65);transition:color .15s}
@@ -9912,7 +9913,7 @@ document.addEventListener('keydown', e => {
 .mx-tt{display:flex;flex-direction:column;gap:3px;min-width:0}.mx-tt b{font:900 15px var(--disp);letter-spacing:.08em;text-transform:uppercase}.mx-tt small{font:600 11px/1.4 var(--mono);color:#94a3b8}
 .mx-badge{position:absolute;top:8px;right:10px;font:900 9px var(--mono);font-style:normal;letter-spacing:.14em;color:#04101f;background:#fbbf24;padding:1px 6px}
 .mx-intro{text-align:center;font:600 12px/1.6 var(--mono);color:#cbd5e1;max-width:70ch;margin:0 auto 14px}
-.mx-foot{display:flex;align-items:center;gap:14px}
+.mx-foot{flex:none;display:flex;align-items:center;gap:14px}
 .mx-pilot{display:flex;flex-direction:column;gap:2px;min-width:180px;padding:6px 10px;border-left:3px solid var(--pa,var(--acc));background:rgba(8,18,38,.7)}.mx-pn{font:900 13px var(--mono);color:#fff;letter-spacing:.08em}.mx-pr{font:700 9px var(--mono);color:#94a3b8;letter-spacing:.14em}.mx-xp{display:block;height:3px;background:rgba(255,255,255,.1)}.mx-xp b{display:block;height:100%;background:linear-gradient(90deg,#8b5cf6,#e879f9)}
 .mx-foot .mm-news{flex:1;text-align:left;background:none;border:0;box-shadow:none;font:700 10px var(--mono);letter-spacing:.12em;color:#94a3b8;cursor:pointer;padding:0}.mx-foot .mm-news b{color:var(--acc);margin-right:6px}.mx-foot .mm-keys{font:700 9px var(--mono);letter-spacing:.12em;color:#64748b;white-space:nowrap}
 .mx-goals{display:flex;gap:18px;align-items:flex-start;justify-content:center;flex-wrap:wrap;margin-top:12px}.mx-goals:empty{display:none}.mx .q-sess,.mx .q-hk{display:none}.mx .q-close,.mx #qWish{margin-top:0}
@@ -9969,6 +9970,12 @@ function pcClick(el) {
     PCUR.prev = { A, B, LB, RB };
   } catch (e) { }
 })(performance.now());
+
+// the menu frame itself must never scroll: a stray focus jump or scroll restore could push it up and leave
+// only the footer (pilot card, Driftwire) on screen
+function mxUnscroll() { ['ui', 'shipWrap', 'shipCam', 'scMenu'].forEach(id => { const e = document.getElementById(id); if (e && (e.scrollTop || e.scrollLeft)) { e.scrollTop = 0; e.scrollLeft = 0; } }); const m = document.querySelector('#scMenu .mx'); if (m && (m.scrollTop || m.scrollLeft)) { m.scrollTop = 0; m.scrollLeft = 0; } const se = document.scrollingElement; if (se && (se.scrollTop || se.scrollLeft)) { se.scrollTop = 0; se.scrollLeft = 0; } }
+document.addEventListener('scroll', e => { const t = e.target; if (t === document || (t && (t.id === 'ui' || t.id === 'shipWrap' || t.id === 'shipCam' || t.id === 'scMenu' || (t.classList && t.classList.contains('mx'))))) mxUnscroll(); }, true);
+QPOST.push(id => { if (id === 'scMenu') { mxUnscroll(); requestAnimationFrame(mxUnscroll); } });
 
 // ================= V70: QoL batch 4 - hangar, settings, saves =================
 (function () { const st = document.createElement('style'); st.textContent = `
