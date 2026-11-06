@@ -147,6 +147,6 @@ document.addEventListener('keydown', e => {
   const map = { KeyP: 'play', KeyS: 'shop', KeyH: 'hangar', KeyC: 'cont', KeyG: 'galaxy', KeyL: 'locker' }, a = map[e.code];
   if (a && ACT[a] && !(a === 'cont' && MAINNAV[0][0] !== 'cont')) { e.preventDefault(); ACT[a]([]); }
 });
-QPOST.push((id, el) => { if (id !== 'scMenu' || !el || touchOn()) return; const k = el.querySelector('.mm-keys'); if (k && !k.querySelector('.q-hk')) k.insertAdjacentHTML('beforeend', '<span class="q-hk">' + (MAINNAV[0][0] === 'cont' ? 'C continue - ' : '') + 'P play - S shop - H hangar - Backspace back</span>'); });
+QPOST.push((id, el) => { if (id !== 'scMenu' || !el || touchOn()) return; const k = el.querySelector('.mm-keys'); if (k && !k.querySelector('.q-hk')) k.insertAdjacentHTML('beforeend', '<span class="q-hk"> - ' + (MAINNAV[0][0] === 'cont' ? 'C continue - ' : '') + 'S shop - H hangar</span>'); });
 // ---------- 29: double-click a sector to launch it ----------
 document.addEventListener('dblclick', e => { const n = e.target.closest && e.target.closest('.node[data-act^="lvl:"]'); if (!n || n.classList.contains('lk')) return; const a = n.dataset.act.split(':').slice(1); ACT.lvl(a); if (UI.sel === +a[0]) ACT.start(); }, true);
