@@ -6179,7 +6179,7 @@ const SCR = {
     const i = pi(), pl = SAVE.pl[i], tabsP = SAVE.players === 2 ? '<div class="seg" style="width:140px">' + [0, 1].map(n => '<button data-act="ptab:' + n + '" class="' + (n === i ? 'on' : '') + '">P' + (n + 1) + '</button>').join('') + '</div>' : '';
     const up = Object.keys(UPG).map(k => {
       const U = UPG[k], lv = pl.up[k], mx = lv >= U.max, pr = upPrice(k, lv), can = SAVE.cores >= pr;
-      return '<div class="item"><div class="ic acc">' + ICO[U.ic] + '</div><div class="fl"><div class="b sm">' + U.nm.toUpperCase() + '</div><div class="xs mut">' + U.ds + '</div><div class="pips">' + Array.from({ length: U.max }, (_, n) => '<i class="' + (n < lv ? 'on' : '') + '"></i>').join('') + '</div></div><button class="btn sm gold' + (mx || !can ? ' off' : '') + '" data-act="buy:' + k + '">' + (mx ? 'MAX' : fmt(pr)) + '</button></div>';
+      return '<div class="item"><div class="ic acc">' + ICO[U.ic] + '</div><div class="fl"><div class="b sm">' + U.nm.toUpperCase() + '</div><div class="xs mut">' + U.ds + '</div><div class="pips">' + Array.from({ length: U.max }, (_, n) => '<i class="' + (n < lv ? 'on' : '') + '"></i>').join('') + '</div></div><button class="btn sm gold' + (mx || !can ? ' off' : '') + '" data-act="buy:' + k + '">' + (mx ? 'MAX' : fmt(pr)) + '</button>' + (!mx && can ? '<button class="btn sm" data-act="buymax:' + k + '">MAX</button>' : '') + '</div>';
     }).join('');
     const wp = WORDER.map(id => { const w = WPN[id], own = pl.wown.indexOf(id) >= 0; return '<div class="item"><div class="ic" style="color:' + w.c + '">' + ICO.dmg + '</div><div class="fl"><div class="b sm" style="color:' + w.c + '">' + wName(pl, id).toUpperCase() + '</div><div class="xs mut">' + w.ds + '</div>' + wupHtml(pl, id) + '</div>' + (own ? '<button class="btn sm' + (pl.wpn === id ? ' on' : '') + '" data-act="wpn:' + id + '">' + (pl.wpn === id ? 'EQUIPPED' : 'EQUIP') + '</button>' : '<button class="btn sm gold' + (SAVE.cores < w.price ? ' off' : '') + '" data-act="wpn:' + id + '">' + fmt(w.price) + '</button>') + '</div>'; }).join('');
     return '<div class="card wide"><div class="row sp"><h2>Shop</h2>' + tabsP + '<span class="gold b">' + fmt(SAVE.cores) + ' <span class="mut xs">CORES</span></span></div><p class="xs mut" style="margin:6px 0 10px">Upgrades get pricier with every level you buy. Prices shown are for the NEXT level.</p><div class="grid2">' + up + '</div><h2 style="margin-top:16px">Weapons</h2><div class="grid2" style="margin-top:8px">' + wp + '</div><div class="row sp" style="margin-top:14px"><button class="btn sm" data-act="back">BACK</button><button class="btn sm" data-act="hangar">HANGAR</button></div></div>';
@@ -6522,12 +6522,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V65';
+const GAME_VER = 'V66';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V66', 'Less Clicking', ['New MAX button on shop upgrades: buys as many levels as you can afford in one go (Shift+click a price does the same)', 'Buying or toggling something no longer throws you back to the top of the list - every scroll position is kept', 'Sector maps can be dragged around with the mouse or a finger, and the mouse wheel scrolls them sideways']],
   ['V65', 'Dialled In', ['New Graphics preset (Low / Medium / High) at the top of Settings > Graphics sets everything in one tap', 'On first launch the game picks a preset that suits your device', 'New Menu text size and HUD size options in Settings > Access', 'Playing on a controller? The HUD now shows your pad buttons for Ability and Super', 'The results screen always shows your next upgrade - UPGRADE READY with a Shop button, or how many cores you still need']],
   ['V64', 'Read the Room', ['Shot warnings: a glow charges up on an enemy right before it fires (can be turned off in Settings > Gameplay)', 'Elite enemies now have a signature volley every third shot, different in each world: FAN, RING, CROSS or SPIRAL - with a bigger red warning and the pattern name', 'The first three sectors of World 1 are gentler: enemies fire less often and threat scaling is off', 'In those learning sectors your hitbox glows, and a DODGING 101 tip explains it']],
   ['V63', 'Sound Check', ['New Warnings volume slider (Settings > Audio) for the heartbeat, alarm and hit sounds', 'Music dips out of the way when you get hit, when a boss appears and when a boss or your ship goes down', 'Music gets brighter the longer your combo runs', 'Cores climb a musical ladder when you grab them in a row', 'Shields shatter with a glassy crash when they break', 'New sounds for repair, shield and plasma pickups, wave starts, sector clears and an empty-gun click']],
@@ -7632,7 +7633,7 @@ SCR.scShop = () => {
   const i = pi(), pl = SAVE.pl[i], cat = UI.shc === 'wpn' ? 'wpn' : 'up';
   const tabsP = SAVE.players === 2 ? '<div class="mm-seg">' + [0, 1].map(n => '<button data-act="ptab:' + n + '" class="' + (n === i ? 'on' : '') + '">P' + (n + 1) + '</button>').join('') + '</div>' : '';
   const rows = cat === 'up' ? Object.keys(UPG).map(k => { const U = UPG[k], lv = pl.up[k], mx = lv >= U.max, pr = upPrice(k, lv), can = SAVE.cores >= pr;
-      return '<div class="sh-row"><span class="sh-ic">' + ICO[U.ic] + '</span><div class="sh-tx"><b>' + U.nm + '</b><span>' + U.ds + '</span><div class="sh-pips">' + Array.from({ length: U.max }, (_, n) => '<i class="' + (n < lv ? 'on' : '') + '"></i>').join('') + '</div></div><button class="btn' + (mx ? ' off' : can ? ' gold' : ' off') + '" data-act="buy:' + k + '">' + (mx ? 'Maxed' : fmt(pr)) + '</button></div>'; }).join('')
+      return '<div class="sh-row"><span class="sh-ic">' + ICO[U.ic] + '</span><div class="sh-tx"><b>' + U.nm + '</b><span>' + U.ds + '</span><div class="sh-pips">' + Array.from({ length: U.max }, (_, n) => '<i class="' + (n < lv ? 'on' : '') + '"></i>').join('') + '</div></div><button class="btn' + (mx ? ' off' : can ? ' gold' : ' off') + '" data-act="buy:' + k + '">' + (mx ? 'Maxed' : fmt(pr)) + '</button>' + (!mx && can ? '<button class="btn sm sh-max" data-act="buymax:' + k + '" title="Buy as many levels as you can afford">MAX</button>' : '') + '</div>'; }).join('')
     : WORDER.map(id => { const w = WPN[id], own = pl.wown.indexOf(id) >= 0, eq = pl.wpn === id;
       return '<div class="sh-row"><span class="sh-ic" style="color:' + w.c + '">' + ICO.dmg + '</span><div class="sh-tx"><b style="color:' + w.c + '">' + wName(pl, id) + '</b><span>' + w.ds + '</span>' + (own ? wupHtml(pl, id) : '<span class="xs mut">Damage ' + w.d + ', ' + (60 / w.r).toFixed(1) + ' shots a second</span>') + '</div>' + (own ? '<button class="btn' + (eq ? ' on' : '') + '" data-act="wpn:' + id + '">' + (eq ? 'Equipped' : 'Equip') + '</button>' : '<button class="btn gold' + (SAVE.cores < w.price ? ' off' : '') + '" data-act="wpn:' + id + '">' + fmt(w.price) + '</button>') + '</div>'; }).join('');
   return '<div class="lay lay-shop"><header class="lay-h"><h1 class="lay-t">Shop</h1>' + tabsP + '<div class="sh-wallet"><span>Cores</span><b>' + fmt(SAVE.cores) + '</b></div></header>' +
@@ -10059,6 +10060,48 @@ UI.show = function (id) {
   } catch (e) { console.warn(e); }
   return r;
 };
+
+// ================= V66: quality of life =================
+// ---- MAX: buy as many levels of an upgrade as you can afford (also Shift+click on a price) ----
+function buyMax(pl, k) {
+  const U = UPG[k]; let n = 0, spent = 0;
+  while (pl.up[k] < U.max) { const pr = upPrice(k, pl.up[k]); if (SAVE.cores < pr) break; SAVE.cores -= pr; spent += pr; pl.up[k]++; n++; }
+  if (!n) { SFX.no(); alertMsg('NOT ENOUGH CORES'); return; }
+  SFX.buy(); saveGame(); toast(U.nm.toUpperCase() + ' +' + n, 'Now level ' + pl.up[k] + '/' + U.max + ' for ' + fmt(spent) + ' cores', '#fbbf24'); UI.refresh();
+}
+Object.assign(ACT, { buymax(a) { buyMax(SAVE.pl[UI.pi | 0], a[0]); } });
+document.addEventListener('click', e => { if (!e.shiftKey) return; const b = e.target.closest && e.target.closest('[data-act^="buy:"]'); if (!b) return; e.preventDefault(); e.stopPropagation(); buyMax(SAVE.pl[UI.pi | 0], b.dataset.act.split(':')[1]); }, true);
+(function () { const st = document.createElement('style'); st.textContent = '.sh-row .sh-max{margin-left:6px;padding:9px 10px;font-size:10px}.wm-map{cursor:grab;touch-action:none}.wm-map.drag{cursor:grabbing}.wm-map.drag *{pointer-events:none}'; document.head.appendChild(st); })();
+
+// ---- keep every scroll position when a screen refreshes (not just the outer panel) ----
+function qolScrollKey(el, root) { const path = []; let n = el; while (n && n !== root) { const p = n.parentElement; path.push((n.id ? '#' + n.id : n.tagName + '.' + (n.className || '').toString().split(' ')[0]) + ':' + (p ? Array.prototype.indexOf.call(p.children, n) : 0)); n = p; } return path.join('<'); }
+const _refQ = UI.refresh.bind(UI);
+UI.refresh = function () {
+  const root = this.top && document.getElementById(this.top), saved = [];
+  if (root) root.querySelectorAll('*').forEach(el => { if (el.scrollTop > 0 || el.scrollLeft > 0) saved.push([qolScrollKey(el, root), el.scrollTop, el.scrollLeft]); });
+  const r = _refQ.apply(this, arguments);
+  if (root && saved.length) { const map = new Map(saved.map(s => [s[0], s])); const apply = () => root.querySelectorAll('*').forEach(el => { if (el.scrollHeight <= el.clientHeight && el.scrollWidth <= el.clientWidth) return; const s = map.get(qolScrollKey(el, root)); if (s) { el.scrollTop = s[1]; el.scrollLeft = s[2]; } }); apply(); requestAnimationFrame(apply); }
+  return r;
+};
+
+// ---- sector map: click-and-drag (or finger-drag) to pan; a drag never counts as a click ----
+(function () {
+  let st = null, moved = false;
+  document.addEventListener('pointerdown', e => {
+    const m = e.target.closest && e.target.closest('#mapScroll'); if (!m || e.button > 0) return;
+    st = { m, x: e.clientX, y: e.clientY, sl: m.scrollLeft, stp: m.scrollTop, id: e.pointerId }; moved = false;
+  }, true);
+  document.addEventListener('pointermove', e => {
+    if (!st || e.pointerId !== st.id) return; const dx = e.clientX - st.x, dy = e.clientY - st.y;
+    if (!moved && Math.hypot(dx, dy) > 6) { moved = true; st.m.classList.add('drag'); try { st.m.setPointerCapture(e.pointerId); } catch (er) { } }
+    if (moved) { st.m.scrollLeft = st.sl - dx; st.m.scrollTop = st.stp - dy; UI._keepScroll = st.m.scrollLeft; e.preventDefault(); }
+  }, true);
+  const end = () => { if (st) st.m.classList.remove('drag'); st = null; setTimeout(() => { moved = false; }, 0); };
+  document.addEventListener('pointerup', end, true); document.addEventListener('pointercancel', end, true);
+  document.addEventListener('click', e => { if (moved && e.target.closest && e.target.closest('#mapScroll')) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+  // mouse wheel scrolls the map sideways too
+  document.addEventListener('wheel', e => { const m = e.target.closest && e.target.closest('#mapScroll'); if (!m || e.ctrlKey) return; if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && m.scrollWidth > m.clientWidth && m.scrollHeight <= m.clientHeight + 4) { m.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false, capture: true });
+})();
 
 // ================= BOOT =================
 function boot() {
