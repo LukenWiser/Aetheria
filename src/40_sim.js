@@ -275,7 +275,7 @@ function updPB() {
 function updEB() {
   const A = G.ent.eb, ts = G.ts || 1;
   for (let i = A.length - 1; i >= 0; i--) {
-    const b = A[i]; let rm = false;
+    const b = A[i]; if (!b) continue; let rm = false;
     if (b.hm && b.l < 380) { const P = nearP(b.x, b.y); if (P) { const sp = Math.hypot(b.vx, b.vy), want = Math.atan2(P.y - b.y, P.x - b.x), cur = Math.atan2(b.vy, b.vx); let df = want - cur; while (df > PI) df -= TAU; while (df < -PI) df += TAU; const na = cur + clamp(df, -.028, .028); b.vx = Math.cos(na) * sp; b.vy = Math.sin(na) * sp; } }
     b.x += b.vx * ts; b.y += b.vy * ts; b.l--; b.arm++;
     for (const p of G.players) if (p.alive && p.wallT > 0 && Math.abs(b.y - p.y) < 100 && Math.abs(b.x - (p.x + 54)) < 14) { spark(b.x, b.y, 3, '#7dd3fc', 3, 12, 2); rm = true; break; }
