@@ -205,17 +205,24 @@ function togglePause() { if (G.net) { netPauseKey(); return; } if (!G.inCombat |
 
 // ---------- tutorial ----------
 const TUT = [
-  { t: 'WELCOME, PILOT', x: () => 'This is a 2-minute flight briefing. You can leave any time with SKIP.', btn: 1 },
-  { t: 'MOVE', x: () => touchOn() ? (SET.scheme === 'stick' ? 'Use the LEFT STICK to fly. Fly around to continue.' : 'Drag your finger anywhere - the ship follows. Fly around to continue.') : 'Fly with WASD or the ARROW KEYS, or just move the MOUSE. Fly around to continue.' },
-  { t: 'SHOOT', x: () => (touchOn() ? (SET.scheme === 'stick' ? 'Hold the red FIRE button' : 'Keep your finger down - the ship fires while you touch') : 'Hold SPACE or click and hold') + ' to shoot. Destroy the 3 target drones!', hl: '#hp0 [data-k=am]' },
-  { t: 'PLASMA (YOUR AMMO)', x: () => 'Every shot burns PLASMA (the teal gauge at the bottom of your panel). At zero you only get a weak backup blaster. Enemies drop teal PLASMA CELLS - capsules inside a spinning bracket. Grab them!', hl: '#hp0 [data-k=am]' },
-  { t: 'ENEMY FIRE', x: () => 'Glowing RED orbs with a dark core are ENEMY shots - they hurt. Your real hitbox is tiny, so weave between them. Destroy the 2 gunships.', hl: '#hp0 [data-k=hull]' },
-  { t: 'PICKUPS', x: () => 'Green cross = REPAIR hull. Blue shield = SHIELD. Gold hex = CORES (money). Orange bolt = OVERDRIVE (+50% damage). Collect all four.' },
-  { t: 'RAMMING', x: () => 'Crash into a normal enemy and it explodes - but you take damage too. Shields soak it first. Ram the drone to see (or dodge it!).' },
-  { t: 'WEAPONS', x: () => (touchOn() ? 'Tap GUN' : 'Press Q / E (or 1-6)') + ' to cycle weapons you own. Buy new guns in the SHOP and equip your favorite there.' },
-  { t: 'YOUR ABILITY', x: () => 'Every hull has a special ABILITY on a cooldown - the yellow dial. Yours is ' + abilOf(G.players[0]).nm + ': ' + abilOf(G.players[0]).ds.toLowerCase() + ' ' + (touchOn() ? 'Tap the ABILITY button now.' : 'Press SHIFT or R now.'), hl: '#hp0 [data-k=ab]' },
-  { t: 'YOUR HOME BASE', x: () => 'After missions: SHOP = upgrades (each costs more than the last), HANGAR = custom ship parts and paint, EXPEDITION = 15 worlds. Tap PLAYERS for 2-player co-op.', btn: 1, last: 1 }
+  { id: 'hi', t: 'WELCOME TO THE COCKPIT', x: () => 'This is a live practice flight. Nothing here can hurt your save. Each step tells you what to do; leave any time with SKIP.', btn: 1 },
+  { id: 'move', t: 'MOVE', x: () => touchOn() ? (SET.scheme === 'stick' ? 'Use the LEFT STICK to fly. Fly around to continue.' : 'Drag your finger anywhere - the ship follows it. Fly around to continue.') : 'Fly with WASD or the ARROW KEYS (or move the MOUSE). A controller works too: left stick. Fly around to continue.' },
+  { id: 'shoot', t: 'SHOOT', x: () => (touchOn() ? (SET.scheme === 'stick' ? 'Hold the red FIRE button' : 'Keep your finger down - you fire while you touch') : 'Hold SPACE or the mouse button (controller: RT)') + ' to shoot. Destroy the 3 target drones.' },
+  { id: 'hull', t: 'HULL CELLS', x: () => 'Bottom-left is your pilot panel. The red CELLS are your hull: each cell is about one enemy bullet, so you can read how many hits you have left at a glance. The number under them is your exact hull.', hl: '#hp0 [data-k=hull]', btn: 1 },
+  { id: 'shield', t: 'SHIELD', x: () => 'The blue bar above your hull is your SHIELD. It soaks damage before your hull does. Blue shield pickups refill it.', hl: '#hp0 [data-k=sh]', btn: 1 },
+  { id: 'ammo', t: 'PLASMA (YOUR AMMO)', x: () => 'Every shot burns PLASMA - the teal gauge. At zero you only have a weak backup blaster. Enemies drop teal PLASMA CELLS (a capsule in a spinning bracket). Grab them now!', hl: '#hp0 [data-k=am]' },
+  { id: 'fire', t: 'ENEMY FIRE', x: () => 'Glowing RED orbs with a dark core are enemy shots. Your real hitbox is the small dot in the middle of your ship, so you can weave through gaps. Destroy the 2 gunships.', hl: '#hp0 [data-k=hull]' },
+  { id: 'pick', t: 'PICKUPS', x: () => 'Green cross = REPAIR. Blue shield = SHIELD. Gold hex = CORES (your money). Orange bolt = OVERDRIVE (+50% damage for a while). Collect all four.' },
+  { id: 'danger', t: 'LOW HULL', x: () => 'When one more hit would destroy you, the screen edges pulse red, the hull panel flashes and an alarm sounds. Play safe and hunt for green repairs - enemies drop many more of them while your hull is low.', btn: 1 },
+  { id: 'ram', t: 'RAMMING', x: () => 'Crashing into an enemy damages it, but costs you a big chunk of hull, and it has a cooldown. It is a last resort, not a weapon. Dodge this drone (or ram it to see).' },
+  { id: 'wpn', t: 'WEAPONS', x: () => 'Your current gun shows in the panel header. ' + (touchOn() ? 'Tap GUN' : 'Press Q / E, 1-6 or the mouse wheel (controller: LB / RB)') + ' to switch between guns you own. Buy and level guns in SHIP > Weapons.', hl: '#hw0', btn: 1 },
+  { id: 'ab', t: 'ABILITY', x: () => 'The yellow dial is your hull ABILITY, on a cooldown. Yours is ' + abilOf(G.players[0]).nm + ': ' + abilOf(G.players[0]).ds.toLowerCase() + ' ' + (touchOn() ? 'Tap the ABILITY button now.' : 'Press ' + tutKey('a', 'SHIFT') + ' now (controller: X).'), hl: '#hp0 [data-k=ab]' },
+  { id: 'sup', t: 'SUPER', x: () => 'The pink dial is your SUPER. It charges as you fight and graze bullets; when it glows, ' + (touchOn() ? 'tap SUPER' : 'press ' + tutKey('v', 'V') + ' (controller: Y)') + ' to wipe bullets and blast everything on screen. It is full now - fire it!', hl: '#hp0 [data-k=sup]' },
+  { id: 'top', t: 'TOP BAR', x: () => 'Across the top: your OBJECTIVE, SCORE, COMBO (keep killing to raise your multiplier) and the CORES you have picked up this run. Boss health bars appear here too.', hl: '#top', btn: 1 },
+  { id: 'pause', t: 'PAUSE', x: () => (touchOn() ? 'Tap the pause button' : 'Press ESC or P (controller: START)') + ' any time to pause: settings, restart, your run stats and quit.', btn: 1 },
+  { id: 'end', t: 'READY FOR LAUNCH', x: () => 'That is everything. Back on the bridge, open PLAY > Expedition map to take the helm of your ship and fly to your first world in the galaxy. Good hunting, pilot.', btn: 1, last: 1 }
 ];
+function tutKey(k, d) { try { const c = (KB[0] || {})[k]; return c && c[0] ? keyLabel(c[0]) : d; } catch (e) { return d; } }
 function coachShow(i) {
   const c = $('coach'), s = TUT[i]; c.classList.add('on');
   c.innerHTML = '<div class="ct"><span>' + s.t + '</span><span>' + (i + 1) + '/' + TUT.length + '</span></div><div class="cx">' + s.x() + '</div><div class="row sp"><div class="dots">' + TUT.map((_, k) => '<i class="' + (k < i ? 'd' : k === i ? 'on' : '') + '"></i>').join('') + '</div><div class="row"><button class="btn sm" data-act="tutskip">SKIP</button>' + (s.btn ? '<button class="btn sm big" data-act="tutnext">' + (s.last ? 'FINISH' : 'NEXT') + '</button>' : '') + '</div></div>';
@@ -227,38 +234,34 @@ function layoutHl(sel) {
   const r = el.getBoundingClientRect(); Object.assign(h.style, { display: 'block', left: r.left - 6 + 'px', top: r.top - 4 + 'px', width: r.width + 12 + 'px', height: r.height + 8 + 'px' });
 }
 function tutGo(i) {
-  const R = G.run, T = R.tut, p = G.players[0]; T.step = i; T.t = 0; T.ok = false; T.picked = {}; T.rammed = false; T.abUsed = false; G.ent.en.length = 0; G.ent.eb.length = 0; coachShow(i);
+  const R = G.run, T = R.tut, p = G.players[0], id = TUT[i].id; T.step = i; T.t = 0; T.ok = false; T.picked = {}; T.rammed = false; T.abUsed = false; T.supUsed = false; G.ent.en.length = 0; G.ent.eb.length = 0; coachShow(i);
   const E = G.ent.pk;
-  if (i === 2) { T.kills0 = R.kills; for (let k = 0; k < 3; k++) mkEnemy('dummy', V.W * .72 + k * 60, V.H * (.3 + k * .2), {}).tx = 1; }
-  if (i === 3) { p.am = p.mam * .12; E.push({ k: 'ammo', x: V.W * .75, y: p.y - 80, vx: -1, vy: 0, l: 1500 }, { k: 'ammo', x: V.W * .9, y: p.y + 60, vx: -1, vy: 0, l: 1500 }); }
-  if (i === 4) { T.kills0 = R.kills; R.nodmg = false; for (let k = 0; k < 2; k++) mkEnemy('jet', V.W * .85 + k * 80, V.H * (.35 + k * .3)); G.ent.en.forEach(e => { e.hp = e.mhp = 18; e.fcd = 40 + e.x % 50; }); }
-  if (i === 5) { ['hp', 'sh', 'core', 'od'].forEach((k, n) => E.push({ k, v: 5, x: V.W * (.6 + n * .08), y: V.H * (.25 + n * .17), vx: -.6, vy: 0, l: 1800 })); p.hp = p.mhp * .6; p.sh = 0; }
-  if (i === 6) { const e = mkEnemy('drone', V.W + 40, p.y, {}); e.hp = e.mhp = 4; e.d = Object.assign({}, e.d, { f: null, ai: 'line', sp: 1.4 }); }
-  if (i === 8) { p.abCd = 0; }
+  if (id === 'shoot') { T.kills0 = R.kills; for (let k = 0; k < 3; k++) mkEnemy('dummy', V.W * .72 + k * 60, V.H * (.3 + k * .2), {}).tx = 1; }
+  if (id === 'hull') { p.hp = p.mhp * .7; }
+  if (id === 'shield') { p.sh = (p.msh || 30) * .8; }
+  if (id === 'ammo') { p.am = p.mam * .12; E.push({ k: 'ammo', x: V.W * .75, y: p.y - 80, vx: -1, vy: 0, l: 1500 }, { k: 'ammo', x: V.W * .9, y: p.y + 60, vx: -1, vy: 0, l: 1500 }); }
+  if (id === 'fire') { T.kills0 = R.kills; R.nodmg = false; for (let k = 0; k < 2; k++) mkEnemy('jet', V.W * .85 + k * 80, V.H * (.35 + k * .3)); G.ent.en.forEach(e => { e.hp = e.mhp = 18; e.fcd = 40 + e.x % 50; }); }
+  if (id === 'pick') { ['hp', 'sh', 'core', 'od'].forEach((k, n) => E.push({ k, v: 5, x: V.W * (.6 + n * .08), y: V.H * (.25 + n * .17), vx: -.6, vy: 0, l: 1800 })); p.hp = p.mhp * .6; p.sh = 0; }
+  if (id === 'danger') { R.nodmg = true; T.hp0 = p.hp; p.hp = Math.max(1, p.mhp * .2); }
+  if (id === 'ram') { R.nodmg = false; p.hp = p.mhp; const e = mkEnemy('drone', V.W + 40, p.y, {}); e.hp = e.mhp = 4; e.d = Object.assign({}, e.d, { f: null, ai: 'line', sp: 1.4 }); }
+  if (id === 'wpn') { R.nodmg = true; p.hp = p.mhp; }
+  if (id === 'ab') { p.abCd = 0; }
+  if (id === 'sup') { p.sup = 100; p.supT = 0; for (let k = 0; k < 4; k++) mkEnemy('dummy', V.W * .7 + k * 50, V.H * (.25 + k * .15), {}).tx = 1; }
 }
 function tutTick(R) {
   const T = R.tut, p = G.players[0]; if (T.step < 0) { R.nodmg = true; tutGo(0); return; }
-  T.t++; const s = TUT[T.step]; if (T.step === 0 || s.last) return;
+  T.t++; const s = TUT[T.step], id = s.id; if (s.btn) { if (id === 'danger' && T.t % 50 === 0) p.hp = Math.max(1, p.mhp * .2); return; }
   const E = G.ent.pk; let ok = false;
-  if (T.step !== 3 && p.am < p.mam * .2) p.am = p.mam * .6;
-  if (T.step === 1) { T.moved += Math.hypot(p.x - T.lx, p.y - T.ly); T.lx = p.x; T.ly = p.y; ok = T.moved > 900 && T.t > 90; }
-  else if (T.step === 2) { ok = R.kills - T.kills0 >= 3; if (!G.ent.en.length && !ok) for (let k = 0; k < 3; k++) mkEnemy('dummy', V.W * .72 + k * 60, V.H * (.3 + k * .2), {}).tx = 1; }
-  else if (T.step === 3) { ok = !!T.picked.ammo; if (!ok && !E.some(k => k.k === 'ammo')) E.push({ k: 'ammo', x: V.W + 20, y: clamp(p.y + rnd(-90, 90), 90, V.H - 90), vx: -1, vy: 0, l: 1500 }); }
-  else if (T.step === 4) {
-    const need = 2 - (R.kills - T.kills0); ok = need <= 0; if (p.hp < 25) p.hp = p.mhp;
-    if (!ok && G.ent.en.filter(e => !e.dead).length < need) { const e = mkEnemy('jet', V.W + 40, V.H * rnd(.3, .7)); e.hp = e.mhp = 18; e.fcd = 50; }
-  }
-  else if (T.step === 5) {
-    ok = T.picked.hp && T.picked.sh && T.picked.core && T.picked.od;
-    ['hp', 'sh', 'core', 'od'].forEach((k, n) => { if (!T.picked[k] && !E.some(q => q.k === k)) E.push({ k, v: 5, x: V.W + 20 + n * 24, y: V.H * (.25 + n * .17), vx: -.6, vy: 0, l: 1800 }); });
-  }
-  else if (T.step === 6) {
-    ok = R.kills - (T.k6 = T.k6 === undefined ? R.kills : T.k6) >= 1 || T.t > 600; if (T.t > 600) p.hp = p.mhp;
-    if (!ok && !G.ent.en.some(e => !e.dead)) { const e = mkEnemy('drone', V.W + 40, p.y, {}); e.hp = e.mhp = 4; e.d = Object.assign({}, e.d, { f: null, ai: 'line', sp: 1.4 }); }
-  }
-  else if (T.step === 7) ok = T.t > 240;
-  else if (T.step === 8) ok = !!T.abUsed || T.t > 1500;
-  if (!ok && T.step >= 1 && T.t > 2700) ok = true; // never trap a player in a step
+  if (id !== 'ammo' && p.am < p.mam * .2) p.am = p.mam * .6;
+  if (id === 'move') { T.moved += Math.hypot(p.x - T.lx, p.y - T.ly); T.lx = p.x; T.ly = p.y; ok = T.moved > 900 && T.t > 90; }
+  else if (id === 'shoot') { ok = R.kills - T.kills0 >= 3; if (!G.ent.en.length && !ok) for (let k = 0; k < 3; k++) mkEnemy('dummy', V.W * .72 + k * 60, V.H * (.3 + k * .2), {}).tx = 1; }
+  else if (id === 'ammo') { ok = !!T.picked.ammo; if (!ok && !E.some(k => k.k === 'ammo')) E.push({ k: 'ammo', x: V.W + 20, y: clamp(p.y + rnd(-90, 90), 90, V.H - 90), vx: -1, vy: 0, l: 1500 }); }
+  else if (id === 'fire') { const need = 2 - (R.kills - T.kills0); ok = need <= 0; if (p.hp < p.mhp * .4) p.hp = p.mhp; if (!ok && G.ent.en.filter(e => !e.dead).length < need) { const e = mkEnemy('jet', V.W + 40, V.H * rnd(.3, .7)); e.hp = e.mhp = 18; e.fcd = 50; } }
+  else if (id === 'pick') { ok = T.picked.hp && T.picked.sh && T.picked.core && T.picked.od; ['hp', 'sh', 'core', 'od'].forEach((k, n) => { if (!T.picked[k] && !E.some(q => q.k === k)) E.push({ k, v: 5, x: V.W + 20 + n * 24, y: V.H * (.25 + n * .17), vx: -.6, vy: 0, l: 1800 }); }); }
+  else if (id === 'ram') { ok = R.kills - (T.k6 = T.k6 === undefined ? R.kills : T.k6) >= 1 || T.t > 600; if (p.hp < p.mhp * .4) p.hp = p.mhp; if (!ok && !G.ent.en.some(e => !e.dead)) { const e = mkEnemy('drone', V.W + 40, p.y, {}); e.hp = e.mhp = 4; e.d = Object.assign({}, e.d, { f: null, ai: 'line', sp: 1.4 }); } }
+  else if (id === 'ab') ok = !!T.abUsed || T.t > 1500;
+  else if (id === 'sup') { if (p.supT > 0) T.supUsed = true; ok = !!T.supUsed || T.t > 1500; if (!T.supUsed && p.sup < 100) p.sup = 100; }
+  if (!ok && T.t > 2700) ok = true; // never trap a player in a step
   if (ok && !T.ok) { T.ok = true; SFX.clear(); banner('NICE', '', false); setTimeout(() => { if (G.run === R && !R.over) tutGo(T.step + 1); }, 900); }
 }
 function tutFinish(skip) {

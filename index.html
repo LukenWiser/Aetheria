@@ -4756,17 +4756,24 @@ function togglePause() { if (G.net) { netPauseKey(); return; } if (!G.inCombat |
 
 // ---------- tutorial ----------
 const TUT = [
-  { t: 'WELCOME, PILOT', x: () => 'This is a 2-minute flight briefing. You can leave any time with SKIP.', btn: 1 },
-  { t: 'MOVE', x: () => touchOn() ? (SET.scheme === 'stick' ? 'Use the LEFT STICK to fly. Fly around to continue.' : 'Drag your finger anywhere - the ship follows. Fly around to continue.') : 'Fly with WASD or the ARROW KEYS, or just move the MOUSE. Fly around to continue.' },
-  { t: 'SHOOT', x: () => (touchOn() ? (SET.scheme === 'stick' ? 'Hold the red FIRE button' : 'Keep your finger down - the ship fires while you touch') : 'Hold SPACE or click and hold') + ' to shoot. Destroy the 3 target drones!', hl: '#hp0 [data-k=am]' },
-  { t: 'PLASMA (YOUR AMMO)', x: () => 'Every shot burns PLASMA (the teal gauge at the bottom of your panel). At zero you only get a weak backup blaster. Enemies drop teal PLASMA CELLS - capsules inside a spinning bracket. Grab them!', hl: '#hp0 [data-k=am]' },
-  { t: 'ENEMY FIRE', x: () => 'Glowing RED orbs with a dark core are ENEMY shots - they hurt. Your real hitbox is tiny, so weave between them. Destroy the 2 gunships.', hl: '#hp0 [data-k=hull]' },
-  { t: 'PICKUPS', x: () => 'Green cross = REPAIR hull. Blue shield = SHIELD. Gold hex = CORES (money). Orange bolt = OVERDRIVE (+50% damage). Collect all four.' },
-  { t: 'RAMMING', x: () => 'Crash into a normal enemy and it explodes - but you take damage too. Shields soak it first. Ram the drone to see (or dodge it!).' },
-  { t: 'WEAPONS', x: () => (touchOn() ? 'Tap GUN' : 'Press Q / E (or 1-6)') + ' to cycle weapons you own. Buy new guns in the SHOP and equip your favorite there.' },
-  { t: 'YOUR ABILITY', x: () => 'Every hull has a special ABILITY on a cooldown - the yellow dial. Yours is ' + abilOf(G.players[0]).nm + ': ' + abilOf(G.players[0]).ds.toLowerCase() + ' ' + (touchOn() ? 'Tap the ABILITY button now.' : 'Press SHIFT or R now.'), hl: '#hp0 [data-k=ab]' },
-  { t: 'YOUR HOME BASE', x: () => 'After missions: SHOP = upgrades (each costs more than the last), HANGAR = custom ship parts and paint, EXPEDITION = 15 worlds. Tap PLAYERS for 2-player co-op.', btn: 1, last: 1 }
+  { id: 'hi', t: 'WELCOME TO THE COCKPIT', x: () => 'This is a live practice flight. Nothing here can hurt your save. Each step tells you what to do; leave any time with SKIP.', btn: 1 },
+  { id: 'move', t: 'MOVE', x: () => touchOn() ? (SET.scheme === 'stick' ? 'Use the LEFT STICK to fly. Fly around to continue.' : 'Drag your finger anywhere - the ship follows it. Fly around to continue.') : 'Fly with WASD or the ARROW KEYS (or move the MOUSE). A controller works too: left stick. Fly around to continue.' },
+  { id: 'shoot', t: 'SHOOT', x: () => (touchOn() ? (SET.scheme === 'stick' ? 'Hold the red FIRE button' : 'Keep your finger down - you fire while you touch') : 'Hold SPACE or the mouse button (controller: RT)') + ' to shoot. Destroy the 3 target drones.' },
+  { id: 'hull', t: 'HULL CELLS', x: () => 'Bottom-left is your pilot panel. The red CELLS are your hull: each cell is about one enemy bullet, so you can read how many hits you have left at a glance. The number under them is your exact hull.', hl: '#hp0 [data-k=hull]', btn: 1 },
+  { id: 'shield', t: 'SHIELD', x: () => 'The blue bar above your hull is your SHIELD. It soaks damage before your hull does. Blue shield pickups refill it.', hl: '#hp0 [data-k=sh]', btn: 1 },
+  { id: 'ammo', t: 'PLASMA (YOUR AMMO)', x: () => 'Every shot burns PLASMA - the teal gauge. At zero you only have a weak backup blaster. Enemies drop teal PLASMA CELLS (a capsule in a spinning bracket). Grab them now!', hl: '#hp0 [data-k=am]' },
+  { id: 'fire', t: 'ENEMY FIRE', x: () => 'Glowing RED orbs with a dark core are enemy shots. Your real hitbox is the small dot in the middle of your ship, so you can weave through gaps. Destroy the 2 gunships.', hl: '#hp0 [data-k=hull]' },
+  { id: 'pick', t: 'PICKUPS', x: () => 'Green cross = REPAIR. Blue shield = SHIELD. Gold hex = CORES (your money). Orange bolt = OVERDRIVE (+50% damage for a while). Collect all four.' },
+  { id: 'danger', t: 'LOW HULL', x: () => 'When one more hit would destroy you, the screen edges pulse red, the hull panel flashes and an alarm sounds. Play safe and hunt for green repairs - enemies drop many more of them while your hull is low.', btn: 1 },
+  { id: 'ram', t: 'RAMMING', x: () => 'Crashing into an enemy damages it, but costs you a big chunk of hull, and it has a cooldown. It is a last resort, not a weapon. Dodge this drone (or ram it to see).' },
+  { id: 'wpn', t: 'WEAPONS', x: () => 'Your current gun shows in the panel header. ' + (touchOn() ? 'Tap GUN' : 'Press Q / E, 1-6 or the mouse wheel (controller: LB / RB)') + ' to switch between guns you own. Buy and level guns in SHIP > Weapons.', hl: '#hw0', btn: 1 },
+  { id: 'ab', t: 'ABILITY', x: () => 'The yellow dial is your hull ABILITY, on a cooldown. Yours is ' + abilOf(G.players[0]).nm + ': ' + abilOf(G.players[0]).ds.toLowerCase() + ' ' + (touchOn() ? 'Tap the ABILITY button now.' : 'Press ' + tutKey('a', 'SHIFT') + ' now (controller: X).'), hl: '#hp0 [data-k=ab]' },
+  { id: 'sup', t: 'SUPER', x: () => 'The pink dial is your SUPER. It charges as you fight and graze bullets; when it glows, ' + (touchOn() ? 'tap SUPER' : 'press ' + tutKey('v', 'V') + ' (controller: Y)') + ' to wipe bullets and blast everything on screen. It is full now - fire it!', hl: '#hp0 [data-k=sup]' },
+  { id: 'top', t: 'TOP BAR', x: () => 'Across the top: your OBJECTIVE, SCORE, COMBO (keep killing to raise your multiplier) and the CORES you have picked up this run. Boss health bars appear here too.', hl: '#top', btn: 1 },
+  { id: 'pause', t: 'PAUSE', x: () => (touchOn() ? 'Tap the pause button' : 'Press ESC or P (controller: START)') + ' any time to pause: settings, restart, your run stats and quit.', btn: 1 },
+  { id: 'end', t: 'READY FOR LAUNCH', x: () => 'That is everything. Back on the bridge, open PLAY > Expedition map to take the helm of your ship and fly to your first world in the galaxy. Good hunting, pilot.', btn: 1, last: 1 }
 ];
+function tutKey(k, d) { try { const c = (KB[0] || {})[k]; return c && c[0] ? keyLabel(c[0]) : d; } catch (e) { return d; } }
 function coachShow(i) {
   const c = $('coach'), s = TUT[i]; c.classList.add('on');
   c.innerHTML = '<div class="ct"><span>' + s.t + '</span><span>' + (i + 1) + '/' + TUT.length + '</span></div><div class="cx">' + s.x() + '</div><div class="row sp"><div class="dots">' + TUT.map((_, k) => '<i class="' + (k < i ? 'd' : k === i ? 'on' : '') + '"></i>').join('') + '</div><div class="row"><button class="btn sm" data-act="tutskip">SKIP</button>' + (s.btn ? '<button class="btn sm big" data-act="tutnext">' + (s.last ? 'FINISH' : 'NEXT') + '</button>' : '') + '</div></div>';
@@ -4778,38 +4785,34 @@ function layoutHl(sel) {
   const r = el.getBoundingClientRect(); Object.assign(h.style, { display: 'block', left: r.left - 6 + 'px', top: r.top - 4 + 'px', width: r.width + 12 + 'px', height: r.height + 8 + 'px' });
 }
 function tutGo(i) {
-  const R = G.run, T = R.tut, p = G.players[0]; T.step = i; T.t = 0; T.ok = false; T.picked = {}; T.rammed = false; T.abUsed = false; G.ent.en.length = 0; G.ent.eb.length = 0; coachShow(i);
+  const R = G.run, T = R.tut, p = G.players[0], id = TUT[i].id; T.step = i; T.t = 0; T.ok = false; T.picked = {}; T.rammed = false; T.abUsed = false; T.supUsed = false; G.ent.en.length = 0; G.ent.eb.length = 0; coachShow(i);
   const E = G.ent.pk;
-  if (i === 2) { T.kills0 = R.kills; for (let k = 0; k < 3; k++) mkEnemy('dummy', V.W * .72 + k * 60, V.H * (.3 + k * .2), {}).tx = 1; }
-  if (i === 3) { p.am = p.mam * .12; E.push({ k: 'ammo', x: V.W * .75, y: p.y - 80, vx: -1, vy: 0, l: 1500 }, { k: 'ammo', x: V.W * .9, y: p.y + 60, vx: -1, vy: 0, l: 1500 }); }
-  if (i === 4) { T.kills0 = R.kills; R.nodmg = false; for (let k = 0; k < 2; k++) mkEnemy('jet', V.W * .85 + k * 80, V.H * (.35 + k * .3)); G.ent.en.forEach(e => { e.hp = e.mhp = 18; e.fcd = 40 + e.x % 50; }); }
-  if (i === 5) { ['hp', 'sh', 'core', 'od'].forEach((k, n) => E.push({ k, v: 5, x: V.W * (.6 + n * .08), y: V.H * (.25 + n * .17), vx: -.6, vy: 0, l: 1800 })); p.hp = p.mhp * .6; p.sh = 0; }
-  if (i === 6) { const e = mkEnemy('drone', V.W + 40, p.y, {}); e.hp = e.mhp = 4; e.d = Object.assign({}, e.d, { f: null, ai: 'line', sp: 1.4 }); }
-  if (i === 8) { p.abCd = 0; }
+  if (id === 'shoot') { T.kills0 = R.kills; for (let k = 0; k < 3; k++) mkEnemy('dummy', V.W * .72 + k * 60, V.H * (.3 + k * .2), {}).tx = 1; }
+  if (id === 'hull') { p.hp = p.mhp * .7; }
+  if (id === 'shield') { p.sh = (p.msh || 30) * .8; }
+  if (id === 'ammo') { p.am = p.mam * .12; E.push({ k: 'ammo', x: V.W * .75, y: p.y - 80, vx: -1, vy: 0, l: 1500 }, { k: 'ammo', x: V.W * .9, y: p.y + 60, vx: -1, vy: 0, l: 1500 }); }
+  if (id === 'fire') { T.kills0 = R.kills; R.nodmg = false; for (let k = 0; k < 2; k++) mkEnemy('jet', V.W * .85 + k * 80, V.H * (.35 + k * .3)); G.ent.en.forEach(e => { e.hp = e.mhp = 18; e.fcd = 40 + e.x % 50; }); }
+  if (id === 'pick') { ['hp', 'sh', 'core', 'od'].forEach((k, n) => E.push({ k, v: 5, x: V.W * (.6 + n * .08), y: V.H * (.25 + n * .17), vx: -.6, vy: 0, l: 1800 })); p.hp = p.mhp * .6; p.sh = 0; }
+  if (id === 'danger') { R.nodmg = true; T.hp0 = p.hp; p.hp = Math.max(1, p.mhp * .2); }
+  if (id === 'ram') { R.nodmg = false; p.hp = p.mhp; const e = mkEnemy('drone', V.W + 40, p.y, {}); e.hp = e.mhp = 4; e.d = Object.assign({}, e.d, { f: null, ai: 'line', sp: 1.4 }); }
+  if (id === 'wpn') { R.nodmg = true; p.hp = p.mhp; }
+  if (id === 'ab') { p.abCd = 0; }
+  if (id === 'sup') { p.sup = 100; p.supT = 0; for (let k = 0; k < 4; k++) mkEnemy('dummy', V.W * .7 + k * 50, V.H * (.25 + k * .15), {}).tx = 1; }
 }
 function tutTick(R) {
   const T = R.tut, p = G.players[0]; if (T.step < 0) { R.nodmg = true; tutGo(0); return; }
-  T.t++; const s = TUT[T.step]; if (T.step === 0 || s.last) return;
+  T.t++; const s = TUT[T.step], id = s.id; if (s.btn) { if (id === 'danger' && T.t % 50 === 0) p.hp = Math.max(1, p.mhp * .2); return; }
   const E = G.ent.pk; let ok = false;
-  if (T.step !== 3 && p.am < p.mam * .2) p.am = p.mam * .6;
-  if (T.step === 1) { T.moved += Math.hypot(p.x - T.lx, p.y - T.ly); T.lx = p.x; T.ly = p.y; ok = T.moved > 900 && T.t > 90; }
-  else if (T.step === 2) { ok = R.kills - T.kills0 >= 3; if (!G.ent.en.length && !ok) for (let k = 0; k < 3; k++) mkEnemy('dummy', V.W * .72 + k * 60, V.H * (.3 + k * .2), {}).tx = 1; }
-  else if (T.step === 3) { ok = !!T.picked.ammo; if (!ok && !E.some(k => k.k === 'ammo')) E.push({ k: 'ammo', x: V.W + 20, y: clamp(p.y + rnd(-90, 90), 90, V.H - 90), vx: -1, vy: 0, l: 1500 }); }
-  else if (T.step === 4) {
-    const need = 2 - (R.kills - T.kills0); ok = need <= 0; if (p.hp < 25) p.hp = p.mhp;
-    if (!ok && G.ent.en.filter(e => !e.dead).length < need) { const e = mkEnemy('jet', V.W + 40, V.H * rnd(.3, .7)); e.hp = e.mhp = 18; e.fcd = 50; }
-  }
-  else if (T.step === 5) {
-    ok = T.picked.hp && T.picked.sh && T.picked.core && T.picked.od;
-    ['hp', 'sh', 'core', 'od'].forEach((k, n) => { if (!T.picked[k] && !E.some(q => q.k === k)) E.push({ k, v: 5, x: V.W + 20 + n * 24, y: V.H * (.25 + n * .17), vx: -.6, vy: 0, l: 1800 }); });
-  }
-  else if (T.step === 6) {
-    ok = R.kills - (T.k6 = T.k6 === undefined ? R.kills : T.k6) >= 1 || T.t > 600; if (T.t > 600) p.hp = p.mhp;
-    if (!ok && !G.ent.en.some(e => !e.dead)) { const e = mkEnemy('drone', V.W + 40, p.y, {}); e.hp = e.mhp = 4; e.d = Object.assign({}, e.d, { f: null, ai: 'line', sp: 1.4 }); }
-  }
-  else if (T.step === 7) ok = T.t > 240;
-  else if (T.step === 8) ok = !!T.abUsed || T.t > 1500;
-  if (!ok && T.step >= 1 && T.t > 2700) ok = true; // never trap a player in a step
+  if (id !== 'ammo' && p.am < p.mam * .2) p.am = p.mam * .6;
+  if (id === 'move') { T.moved += Math.hypot(p.x - T.lx, p.y - T.ly); T.lx = p.x; T.ly = p.y; ok = T.moved > 900 && T.t > 90; }
+  else if (id === 'shoot') { ok = R.kills - T.kills0 >= 3; if (!G.ent.en.length && !ok) for (let k = 0; k < 3; k++) mkEnemy('dummy', V.W * .72 + k * 60, V.H * (.3 + k * .2), {}).tx = 1; }
+  else if (id === 'ammo') { ok = !!T.picked.ammo; if (!ok && !E.some(k => k.k === 'ammo')) E.push({ k: 'ammo', x: V.W + 20, y: clamp(p.y + rnd(-90, 90), 90, V.H - 90), vx: -1, vy: 0, l: 1500 }); }
+  else if (id === 'fire') { const need = 2 - (R.kills - T.kills0); ok = need <= 0; if (p.hp < p.mhp * .4) p.hp = p.mhp; if (!ok && G.ent.en.filter(e => !e.dead).length < need) { const e = mkEnemy('jet', V.W + 40, V.H * rnd(.3, .7)); e.hp = e.mhp = 18; e.fcd = 50; } }
+  else if (id === 'pick') { ok = T.picked.hp && T.picked.sh && T.picked.core && T.picked.od; ['hp', 'sh', 'core', 'od'].forEach((k, n) => { if (!T.picked[k] && !E.some(q => q.k === k)) E.push({ k, v: 5, x: V.W + 20 + n * 24, y: V.H * (.25 + n * .17), vx: -.6, vy: 0, l: 1800 }); }); }
+  else if (id === 'ram') { ok = R.kills - (T.k6 = T.k6 === undefined ? R.kills : T.k6) >= 1 || T.t > 600; if (p.hp < p.mhp * .4) p.hp = p.mhp; if (!ok && !G.ent.en.some(e => !e.dead)) { const e = mkEnemy('drone', V.W + 40, p.y, {}); e.hp = e.mhp = 4; e.d = Object.assign({}, e.d, { f: null, ai: 'line', sp: 1.4 }); } }
+  else if (id === 'ab') ok = !!T.abUsed || T.t > 1500;
+  else if (id === 'sup') { if (p.supT > 0) T.supUsed = true; ok = !!T.supUsed || T.t > 1500; if (!T.supUsed && p.sup < 100) p.sup = 100; }
+  if (!ok && T.t > 2700) ok = true; // never trap a player in a step
   if (ok && !T.ok) { T.ok = true; SFX.clear(); banner('NICE', '', false); setTimeout(() => { if (G.run === R && !R.over) tutGo(T.step + 1); }, 900); }
 }
 function tutFinish(skip) {
@@ -6780,12 +6783,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V87';
+const GAME_VER = 'V88';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V88', 'Flight School, Rebuilt', ['Flight School now starts with a guided tour of the real menus: a spotlight walks you through the five tabs, the story card, the galaxy map, all modes, Ship, Station, Career, Online, your wallet, settings and pilot rank', 'Then a practice flight explains every part of the HUD as you fly: hull cells, shield, plasma, enemy fire, pickups, the low-hull warning, ramming, weapons, your ability dial, your super dial, the top bar and pausing', 'Works with keyboard, mouse, touch and controller (A next, B back); new players can also take just the practice flight', 'Find it any time on the Play tab > Flight school']],
   ['V87', 'The Open Galaxy', ['The Map is now a galaxy you fly through: take the helm of your capital ship in a chase camera and travel between all the worlds', 'Every world is its own place in space: a city planet glowing at night, jungle and ice worlds, a rusted desert, a black hole with a burning disk, a magma moon, a neon grid world, a brass clockwork planet, a ring station, a crystal world, a storm giant, a graveyard of wrecks and a glowing core', 'Nebulae you can fly through, three spiral galaxies, an asteroid belt, moons and rings, a dashed route linking the worlds and space dust streaking past at speed', 'Your ship: armoured hull in your paint and accent colours, lit bridge, turrets, spinning radar dish, blinking masts, running lights and four main engines with plumes that grow when you boost', 'Fly up to a world to open its drop-in panel: pick a sector and drop straight in, or open the full route map', 'Autopilot (N) flies you to your next world; click any world name to fly there; the radar, target marker and edge arrows show the way', 'Keyboard and mouse, touch and controller all supported; prefer the old map? Settings > Graphics > Galaxy flight map', 'Enemies drop repairs much more often when your hull is low, with a guaranteed repair if you go too long without one']],
   ['V86', 'Hotfix', ['Cel shading has been retired: the game always uses the standard lighting now, and the option is gone from Settings']],
   ['V85', 'Worlds Rebuilt, Part 3', ['Aetheria Skylines: a plaza on the near side of the avenue with tree planters, a two-tier fountain, benches, a glass bus shelter with a lit ad, hydrants, newspaper boxes and bike racks', 'Neon Mainframe: data towers wrapped in cable with glowing bands, energy pylons with crackling rings, holo-trees, floating platforms and rows of server racks with blinking lights', 'Heart of Aetheria: glyph-banded obelisks topped with light, guardian statues, flickering braziers, hanging banners, reflecting pools, crystal growths and slowly turning rings of light']],
@@ -11962,6 +11966,83 @@ body.walking #qCrumb,body.walking #shipTag,body.walking .toastWrap,body.walking 
 `; document.head.appendChild(st);
 })();
 
+// ================= V88: Flight School part 1 - a spotlight tour of the real menus =================
+const TOUR = [
+  { t: 'WELCOME ABOARD', x: 'This is Flight School. First a quick tour of your ship\'s menus, then a short practice flight that explains everything on your HUD. About three minutes - skip any time.' },
+  { sel: '.mx-tabs', tab: 'play', t: 'FIVE TABS', x: () => 'Everything lives in these five tabs. ' + (touchOn() ? 'Tap one to switch.' : 'Click them, press 1-5 or [ and ] (controller: LB / RB).') },
+  { sel: '.mx-hero', tab: 'play', t: 'CONTINUE THE STORY', x: 'The big card always launches your next sector, so this is the fastest way back into the action.' },
+  { sel: '[data-act="mxmap"]', tab: 'play', t: 'THE GALAXY', x: 'Opens the galaxy. Take the helm of your capital ship and fly between the worlds; fly close to one to drop into its sectors. Press N for autopilot to your next world.' },
+  { sel: '[data-act="play"]', tab: 'play', t: 'ALL MODES', x: 'Endless, Boss Rush, Hardcore, Training and every other way to play.' },
+  { sel: '.mx-body', tab: 'ship', t: 'SHIP', x: 'HANGAR: hull parts, wings, engines and paint. UPGRADES: spend cores on hull, shield and damage (MAX buys every level you can afford). WEAPONS: buy and level guns. LOCKER: cosmetics.' },
+  { sel: '.mx-body', tab: 'station', t: 'STATION', x: 'Your base keeps earning cores while you are away. Build modules, craft hybrid guns in the Forge and arm drones that fight beside you.' },
+  { sel: '.mx-body', tab: 'career', t: 'CAREER', x: 'Missions and the daily challenge pay out cores. Profile holds your stats and the Bestiary of everything you have fought. Patch notes show what is new.' },
+  { sel: '.mx-body', tab: 'social', t: 'ONLINE', x: 'Team up in online co-op or go head to head in versus with friends.' },
+  { sel: '.mx-right .mx-wal', tab: 'play', t: 'YOUR WALLET', x: 'CORES buy upgrades and guns - you earn them in every run. FLUX, once you have some, is only for cosmetics.' },
+  { sel: '.mx-right [data-act="settings"]', tab: 'play', t: 'SETTINGS', x: 'Graphics presets, controls and key rebinding, accessibility options, audio and your save data.' },
+  { sel: '.mx-pilot', tab: 'play', t: 'PILOT RANK', x: 'Every run earns XP toward your pilot level and rank.' },
+  { t: 'NOW, THE COCKPIT', x: 'Next is a short practice flight that shows you every part of your HUD while you fly.', last: true }
+];
+const TOURS = { on: false, i: 0, el: null, raf: 0 };
+function tourStart() {
+  if (TOURS.on) return; if (G.fly && typeof FLY !== 'undefined') FLY.close(true);
+  if (UI.top !== 'scMenu') UI.show('scMenu', true);
+  try { if (typeof SHIP !== 'undefined' && SHIP.on && !SHIP.room && !SHIP.S.travel) SHIP.go('bridge'); } catch (e) { }
+  TOURS.on = true; TOURS.i = 0; G.tour = true;
+  const d = document.createElement('div'); d.id = 'tourHud'; d.innerHTML = '<div class="tr-spot"></div><div class="tr-card"></div>'; document.body.appendChild(d); TOURS.el = d;
+  d.addEventListener('click', e => { const b = e.target.closest('[data-tr]'); if (!b) return; e.stopPropagation(); const f = b.dataset.tr; if (f === 'next') tourGo(TOURS.i + 1); else if (f === 'back') tourGo(TOURS.i - 1); else if (f === 'skip') tourEnd(false); else if (f === 'fly') tourEnd(true); });
+  tourGo(0); const loop = () => { if (!TOURS.on) return; TOURS.raf = requestAnimationFrame(loop); tourPlace(); }; loop();
+}
+function tourGo(i) {
+  if (!TOURS.on) return; i = Math.max(0, Math.min(TOUR.length - 1, i)); TOURS.i = i; const s = TOUR[i];
+  if (s.tab && UI.mtab !== s.tab) { try { ACT.mtab([s.tab]); } catch (e) { } }
+  const c = TOURS.el.querySelector('.tr-card'), x = typeof s.x === 'function' ? s.x() : s.x;
+  c.innerHTML = '<div class="tr-h"><b>' + s.t + '</b><span>' + (i + 1) + ' / ' + TOUR.length + '</span></div><p>' + x + '</p><div class="tr-dots">' + TOUR.map((_, k) => '<i class="' + (k < i ? 'd' : k === i ? 'on' : '') + '"></i>').join('') + '</div>'
+    + '<div class="tr-row">' + (s.last ? '<button data-tr="skip">FINISH HERE</button><button data-tr="fly" class="go">START PRACTICE FLIGHT</button>' : '<button data-tr="skip">SKIP TOUR</button>' + (i ? '<button data-tr="back">BACK</button>' : '') + '<button data-tr="next" class="go">NEXT</button>') + '</div>';
+  c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); try { SFX.click(); } catch (e) { }
+  TOURS.el.classList.toggle('nospot', !s.sel); tourPlace(true);
+}
+function tourPlace() {
+  if (!TOURS.on) return; const s = TOUR[TOURS.i], sp = TOURS.el.querySelector('.tr-spot'), c = TOURS.el.querySelector('.tr-card'), W = innerWidth, H = innerHeight;
+  const el = s.sel ? document.querySelector('#scMenu ' + s.sel) || document.querySelector(s.sel) : null; const r = el && el.getBoundingClientRect();
+  if (!r || r.width < 2) { sp.style.opacity = 0; c.style.left = (W - c.offsetWidth) / 2 + 'px'; c.style.top = (H - c.offsetHeight) / 2 + 'px'; return; }
+  const pad = 8; sp.style.opacity = 1; sp.style.left = r.left - pad + 'px'; sp.style.top = r.top - pad + 'px'; sp.style.width = r.width + pad * 2 + 'px'; sp.style.height = r.height + pad * 2 + 'px';
+  const cw = c.offsetWidth, ch = c.offsetHeight; let top = r.bottom + 18; if (top + ch > H - 10) top = r.top - ch - 18; if (top < 10) top = Math.min(H - ch - 10, Math.max(10, r.top + r.height / 2 - ch / 2));
+  let left = Math.max(10, Math.min(W - cw - 10, r.left + r.width / 2 - cw / 2)); if (top < r.bottom && top + ch > r.top && r.width > W * .5) left = Math.max(10, Math.min(W - cw - 10, left)); c.style.left = left + 'px'; c.style.top = top + 'px';
+}
+function tourEnd(fly) {
+  if (!TOURS.on) return; TOURS.on = false; G.tour = false; cancelAnimationFrame(TOURS.raf); if (TOURS.el) TOURS.el.remove(); TOURS.el = null;
+  try { ACT.mtab(['play']); } catch (e) { }
+  if (fly) { UI.hideAll(); beginRun({ mode: 'tutorial', w: 0 }); } else { SAVE.tut = true; saveGame(); }
+}
+addEventListener('keydown', e => { if (!TOURS.on) return; e.stopPropagation(); if (e.code === 'Enter' || e.code === 'ArrowRight' || e.code === 'Space') { e.preventDefault(); if (TOUR[TOURS.i].last) tourEnd(true); else tourGo(TOURS.i + 1); } else if (e.code === 'ArrowLeft' || e.code === 'Backspace') { e.preventDefault(); tourGo(TOURS.i - 1); } else if (e.code === 'Escape') { e.preventDefault(); tourEnd(false); } }, true);
+// controller: A next, B back, Start skips
+(function pad() { let prev = {}; (function l() { requestAnimationFrame(l); if (!TOURS.on) { prev = {}; return; } const gp = (navigator.getGamepads ? navigator.getGamepads() : [])[0]; if (!gp) return; const b = n => !!(gp.buttons[n] && gp.buttons[n].pressed), ed = n => b(n) && !prev[n]; if (ed(0)) { if (TOUR[TOURS.i].last) tourEnd(true); else tourGo(TOURS.i + 1); } else if (ed(1)) tourGo(TOURS.i - 1); else if (ed(9)) tourEnd(false); prev = { 0: b(0), 1: b(1), 9: b(9) }; })(); })();
+// Flight School now starts with the tour
+ACT.tutorial = () => tourStart();
+ACT.tutpractice = () => { UI.hideAll(); beginRun({ mode: 'tutorial', w: 0 }); };
+try { SCR.scTut = () => '<div class="card" style="width:min(500px,100%)"><div class="title" style="font-size:clamp(22px,6vw,34px)">WELCOME, PILOT</div><div class="subt">NEW HERE?</div><p class="tc mut" style="line-height:1.7;margin-bottom:18px">Take <b class="acc">Flight School</b>: a quick tour of your ship\'s menus - the galaxy, hangar, station and more - then a practice flight that explains every part of your HUD.</p><div class="stack"><button class="btn big" data-act="tutorial">START FLIGHT SCHOOL</button><button class="btn" data-act="tutpractice">JUST THE PRACTICE FLIGHT</button><button class="btn" data-act="tutlater">SKIP - I KNOW WHAT I\'M DOING</button></div></div>'; } catch (e) { }
+(function () {
+  const st = document.createElement('style'); st.textContent = `
+#tourHud{position:fixed;inset:0;z-index:70;pointer-events:auto;font-family:var(--mono)}
+#tourHud .tr-spot{position:absolute;border:2px solid #fbbf24;border-radius:10px;box-shadow:0 0 0 9999px rgba(2,6,23,.66),0 0 24px rgba(251,191,36,.7);transition:left .35s ease,top .35s ease,width .35s ease,height .35s ease,opacity .25s;pointer-events:none;animation:trGlow 1.6s ease-in-out infinite}
+#tourHud.nospot{background:rgba(2,6,23,.66)}
+@keyframes trGlow{50%{box-shadow:0 0 0 9999px rgba(2,6,23,.66),0 0 40px rgba(251,191,36,.95)}}
+#tourHud .tr-card{position:absolute;width:min(380px,calc(100vw - 20px));background:linear-gradient(180deg,rgba(15,23,42,.97),rgba(2,6,23,.97));border:1px solid rgba(251,191,36,.6);border-top:3px solid #fbbf24;padding:14px 16px 12px;box-shadow:0 18px 50px rgba(0,0,0,.6);transition:left .35s ease,top .35s ease}
+#tourHud .tr-card.pop{animation:trPop .3s ease}
+@keyframes trPop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+#tourHud .tr-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+#tourHud .tr-h b{font:italic 900 18px var(--disp,system-ui);letter-spacing:.08em;color:#fde68a}
+#tourHud .tr-h span{font:800 10px var(--mono);letter-spacing:.16em;color:#94a3b8}
+#tourHud p{margin:8px 0 10px;font:600 13px/1.55 system-ui;color:#e2e8f0}
+#tourHud .tr-dots{display:flex;gap:4px;margin-bottom:10px}#tourHud .tr-dots i{width:14px;height:4px;background:rgba(148,163,184,.3)}#tourHud .tr-dots i.d{background:rgba(251,191,36,.5)}#tourHud .tr-dots i.on{background:#fbbf24}
+#tourHud .tr-row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+#tourHud button{font:900 11px var(--mono);letter-spacing:.14em;color:#e2e8f0;background:rgba(30,41,59,.9);border:1px solid rgba(148,163,184,.4);padding:9px 14px;cursor:pointer}
+#tourHud button:hover{border-color:#fbbf24}
+#tourHud button.go{background:#fbbf24;color:#1c1917;border-color:#fbbf24}
+`; document.head.appendChild(st);
+})();
+window.__TOUR = { start: tourStart, go: tourGo, end: tourEnd, get i() { return TOURS.i; } };
+
 // ================= BOOT =================
 function boot() {
   layout(); initInput(); initUI();
@@ -11971,7 +12052,7 @@ function boot() {
   try { if ((SET.intro !== false && SET.intro !== 'false' && !navigator.webdriver && (typeof qIntroOk !== 'function' || qIntroOk())) || window.__intro) introPlay(); } catch (e) { console.warn('intro', e); INTRO.on = false; }
   requestAnimationFrame(frame);
 }
-window.AET = {
+window.AET = { tutGo: (i) => tutGo(i),
   G, SET, V, UI, ACT, IN, update, render, beginRun, finishRun, spawnBoss, mkEnemy, killEnemy, hurt, fireP, layout, exitToMenu, startLevel, startMode,
   get SAVE() { return SAVE; }, get R3() { return R3; }, get ok3d() { return !!(R3 && R3.on); },
   step(n) { for (let i = 0; i < n; i++) update(); render(); },

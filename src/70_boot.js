@@ -7,7 +7,7 @@ function boot() {
   try { if ((SET.intro !== false && SET.intro !== 'false' && !navigator.webdriver && (typeof qIntroOk !== 'function' || qIntroOk())) || window.__intro) introPlay(); } catch (e) { console.warn('intro', e); INTRO.on = false; }
   requestAnimationFrame(frame);
 }
-window.AET = {
+window.AET = { tutGo: (i) => tutGo(i),
   G, SET, V, UI, ACT, IN, update, render, beginRun, finishRun, spawnBoss, mkEnemy, killEnemy, hurt, fireP, layout, exitToMenu, startLevel, startMode,
   get SAVE() { return SAVE; }, get R3() { return R3; }, get ok3d() { return !!(R3 && R3.on); },
   step(n) { for (let i = 0; i < n; i++) update(); render(); },
