@@ -610,6 +610,7 @@ const SHIP = (() => {
   function frame(now) {
     requestAnimationFrame(frame);
     const rdt = Math.max(0, Math.min(.5, (now - lastT) / 1000)), dt = Math.min(.05, rdt); lastT = now; S.t += dt;
+    if (G.fly) return; // the open galaxy has the 3D view
     const want = wanted();
     if (want && !S.on) enable(); else if (!want && S.on) disable();
     if (!S.on) return;

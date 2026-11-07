@@ -223,7 +223,10 @@ function dropLoot(e) {
   const lowAm = G.players.some(p => p.alive && p.am < p.mam * .55 && !(R.freeAmmo));
   const roll = () => Math.random();
   if (!R.freeAmmo && (roll() < (lowAm ? .38 : .17) * (R.ammoDrop || 1) || d.elite)) E.push({ k: 'ammo', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
-  if (roll() < (d.elite ? .45 : .03)) E.push({ k: 'hp', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
+  // repair drops get much likelier the lower your hull is, and a pity timer guarantees one if you have gone a while without
+  const lowF = G.players.reduce((m, q) => q.alive ? Math.min(m, q.hp / q.mhp) : m, 1), onField = E.reduce((c, q) => c + (q.k === 'hp'), 0);
+  const hpCh = d.elite ? .45 : lowF < .5 ? .03 + (.5 - lowF) * .7 : .03, pity = lowF < .35 && G.t - (G.lastHpDrop || 0) > 480;
+  if (onField < 2 && (roll() < hpCh || pity)) { G.lastHpDrop = G.t; E.push({ k: 'hp', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 }); }
   if (roll() < (d.elite ? .45 : .035)) E.push({ k: 'sh', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
   if (roll() < (d.elite ? .3 : .02)) E.push({ k: 'od', x: e.x, y: e.y, vx: -1, vy: rnd(-1, 1), l: 760 });
 }
