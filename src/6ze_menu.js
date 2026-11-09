@@ -95,7 +95,7 @@ document.addEventListener('keydown', e => {
 .mx-lb{font:900 9px var(--mono);font-style:normal;color:#64748b;border:1px solid #334155;border-radius:4px;padding:2px 5px;margin:0 6px}
 .mx-right{display:flex;align-items:center;gap:10px}
 .mx-wal{display:flex;flex-direction:column;align-items:flex-end;line-height:1.05;padding:0 6px}.mx-wal small{font:800 8px var(--mono);letter-spacing:.24em;color:#94a3b8}.mx-wal b{font:900 18px var(--mono);color:#fbbf24}.mx-wal.fx b{color:#c084fc}
-.mx-ib{width:38px;height:38px;display:grid;place-items:center;background:rgba(10,22,44,.85);border:1px solid var(--line);cursor:pointer;color:#cbd5e1;clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px)}.mx-ib svg{width:18px;height:18px}.mx-ib:hover{color:#fff;border-color:var(--acc)}
+.mx-ib{width:38px;height:38px;display:grid;place-items:center;background:rgba(10,22,44,.85);border:1px solid var(--line);cursor:pointer;color:#cbd5e1;clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px)}.mx-ib svg{width:18px;height:18px}.mx-ib svg:not([fill]),.mx-ti svg:not([fill]){fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.mx-ib:hover{color:#fff;border-color:var(--acc)}
 .mx-sub{text-align:center;font:700 11px var(--mono);letter-spacing:.2em;color:#7dd3fc;text-transform:uppercase;margin-top:-4px}
 .mx-body{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column}.mx-body>:first-child{margin-top:auto}.mx-body>:last-child{margin-bottom:auto}
 .mx-split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px;align-items:stretch}
