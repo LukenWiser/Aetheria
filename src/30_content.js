@@ -291,7 +291,7 @@ const MODES = {
   expedition: { nm: 'Expedition', ds: 'The campaign. Fight through ' + WORLDS.length + ' worlds, 13 stages each, ending in a boss.', ic: 'map' },
   endless: { nm: 'Endless', ds: 'Survive escalating waves across every world. Chase the high score.', ic: 'inf' },
   rush: { nm: 'Boss Rush', ds: 'Every boss you have beaten, back to back. Repairs between fights.', ic: 'skull' },
-  blitz: { nm: 'Blitz', ds: '90 seconds. Unlimited plasma. Kills add time. Combos multiply score.', ic: 'bolt' },
+  blitz: { nm: 'Blitz', ds: '90 seconds. Unlimited plasma. Elite kills add time. Combos multiply score.', ic: 'bolt' },
   training: { nm: 'Training', ds: 'No damage, no pressure. Test weapons on any world.', ic: 'target' },
   daily: { nm: 'Daily Challenge', ds: 'A new modifier every day. Same waves all day. Build a streak.', ic: 'clock', cat: 1 },
   defense: { nm: 'Station Defense', ds: 'Protect the station for 10 waves. Anything that slips past hurts it.', ic: 'sh', cat: 1 },

@@ -109,7 +109,7 @@ hudTick = function () {
   const r = _hudTickQ.apply(this, arguments);
   try {
     const R = G.run; if (!R) return r; const pe = $('hpips');
-    if (pe && R.stage === 'wave') { const n = G.ent.en.filter(e => !e.dead && !e.minion).length + (R.q ? R.q.length : 0), k = 'L' + n; if (pe._ql !== k) { pe._ql = k; let s = pe.parentElement.querySelector('.q-left'); if (!s) { s = document.createElement('span'); s.className = 'q-left'; s.style.cssText = 'font:800 9px var(--mono);letter-spacing:.16em;color:#94a3b8;margin-left:8px'; pe.parentElement.appendChild(s); } s.textContent = n + ' ENEMIES LEFT'; } }
+    if (pe && R.stage === 'wave' && !R.blitz && R.mode !== 'training') { const n = G.ent.en.filter(e => !e.dead && !e.minion).length + (R.q ? R.q.length : 0), k = 'L' + n; if (pe._ql !== k) { pe._ql = k; let s = pe.parentElement.querySelector('.q-left'); if (!s) { s = document.createElement('span'); s.className = 'q-left'; s.style.cssText = 'font:800 9px var(--mono);letter-spacing:.16em;color:#94a3b8;margin-left:8px'; pe.parentElement.appendChild(s); } s.textContent = n + ' ENEMIES LEFT'; } }
     else if (pe) { const s = pe.parentElement.querySelector('.q-left'); if (s && s.textContent) { s.textContent = ''; pe._ql = ''; } }
     for (const p of G.players) { const h = $('hw' + p.id); if (!h || !p.alive) continue; const W = WPN[p.wpn], c = (W.am * (1 - .03 * wlvOf(p.pl, p.wpn))).toFixed(1).replace('.0', ''), k = p.wpn + c; let q = h.querySelector('.qa'); if (!q) { h.insertAdjacentHTML('beforeend', '<i class="qa" style="color:#5eead4;margin-left:6px"></i>'); q = h.querySelector('.qa'); } if (q.textContent !== c + '/SHOT') q.textContent = c + '/SHOT'; }
   } catch (e) { }

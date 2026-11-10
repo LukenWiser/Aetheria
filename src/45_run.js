@@ -49,7 +49,7 @@ function objText(R) {
   const m = R.mode; if (R.var) return varObj(R); if (m === 'expedition' && R.spec && ALT_INFO[R.spec.type] && R.stage !== 'boss') return ALT_INFO[R.spec.type].nm + ' - WAVE ' + Math.min(R.wave + 1, R.waves) + '/' + R.waves; if (m === 'defense') return 'STATION DEFENSE - WAVE ' + Math.min(R.wave + 1, R.waves) + '/' + R.waves + (R.assist ? ' - ASSIST' : '');
   if (m === 'expedition') return R.stage === 'boss' ? 'BOSS FIGHT' : (R.spec ? (R.spec.type === 'h' ? 'HAZARD ZONE' : R.spec.type === 'e' ? 'ELITE AMBUSH' : R.spec.type === 's' ? 'SUPPLY RUN' : 'SECTOR') : '') + ' - WAVE ' + Math.min(R.wave + 1, R.waves) + '/' + R.waves;
   if (m === 'endless') return (G.mapX ? G.mapX.nm.toUpperCase() : 'ENDLESS') + ' - WAVE ' + (R.wave + 1) + (G.mapX ? '' : ' - ' + WORLDS[R.w].nm.toUpperCase());
-  if (m === 'blitz') return 'BLITZ - ' + Math.max(0, Math.ceil(R.time)) + 's';
+  if (m === 'blitz') return 'BLITZ - ' + (R.time < 10 ? Math.max(0, R.time).toFixed(1) : Math.ceil(R.time)) + 's';
   if (m === 'rush') return 'BOSS RUSH - ' + Math.min(R.ri + 1, R.rush.length) + '/' + R.rush.length;
   if (m === 'training') return 'TRAINING - ' + WORLDS[R.w].nm.toUpperCase();
   if (m === 'tutorial') return 'FLIGHT SCHOOL';

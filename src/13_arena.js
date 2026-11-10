@@ -27,6 +27,7 @@ function arenaDT(kind) {
   const d = g.getImageData(0, 0, S, S), a = d.data; let sum = 0; for (let i = 0; i < a.length; i += 4) sum += a[i]; const k = 128 / (sum / (a.length / 4)); for (let i = 0; i < a.length; i += 4) { const v = Math.min(255, a[i] * k); a[i] = a[i + 1] = a[i + 2] = v; } g.putImageData(d, 0, 0);
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; return (ARENA_DT[kind] = t);
 }
+function noDet(o) { if (!('detail' in o || 'dscale' in o || 'dstr' in o)) return o; const c = Object.assign({}, o); delete c.detail; delete c.dscale; delete c.dstr; return c; }
 function arenaDetail(m, o) {
   if (!m || o.detail === false || (m.color && m.color.r + m.color.g + m.color.b < .03)) return m;
   const kind = o.detail || ((o.metalness || 0) >= .45 ? 'metal' : o.transparent ? 'glass' : 'rock'), sc = o.dscale || (kind === 'metal' ? 1 / 150 : kind === 'organic' ? 1 / 90 : 1 / 200), str = o.dstr !== undefined ? o.dstr : kind === 'glass' ? .35 : .75;
@@ -53,7 +54,7 @@ function buildArena(kind, X) {
   const MAT0 = (o) => {
     if (SET.toon) { const m = new T.MeshToonMaterial({ color: o.color !== undefined ? lc(o.color) : new T.Color(1, 1, 1), map: o.map || null, gradientMap: toonGrad(), vertexColors: o.vertexColors !== false, transparent: !!o.transparent, opacity: o.opacity !== undefined ? o.opacity : 1 });
       if (o.emissive !== undefined) { m.emissive = lc(o.emissive); m.emissiveIntensity = o.emissiveIntensity !== undefined ? o.emissiveIntensity : 1; } if (o.emissiveMap) m.emissiveMap = o.emissiveMap; if (o.color === '#000000') m.userData.glow = 1; return track(m); }
-    return track(new T.MeshStandardMaterial(Object.assign({ roughness: .85, metalness: .1, flatShading: true, vertexColors: true }, o, o.color !== undefined ? { color: lc(o.color) } : {}, o.emissive !== undefined ? { emissive: lc(o.emissive) } : {})));
+    return track(new T.MeshStandardMaterial(Object.assign({ roughness: .85, metalness: .1, flatShading: true, vertexColors: true }, noDet(o), o.color !== undefined ? { color: lc(o.color) } : {}, o.emissive !== undefined ? { emissive: lc(o.emissive) } : {})));
   };
   const BAS = (o) => track(new T.MeshBasicMaterial(Object.assign({ transparent: true, depthWrite: false, blending: T.AdditiveBlending, toneMapped: false, fog: false }, o, o.color !== undefined ? { color: lc(o.color) } : {})));
   const G = {

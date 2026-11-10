@@ -88,7 +88,7 @@ killEnemy = function (e, own) { const was = e && !e.dead; const r = _killB.apply
 const _beginB = beginRun;
 beginRun = function (o) { const r = _beginB.apply(this, arguments); try { DR.x = 0; DR.shots.length = 0; DR.t = 0; const a = bLv('armory'); if (a && !G.net) G.players.forEach(p => { p.mhp = Math.round(p.mhp * (1 + .04 * a)); p.hp = p.mhp; }); } catch (e) { } return r; };
 const _uiResB = UI.result;
-UI.result = function (d) { try { const l = bLv('lab'); if (l && d && !d.online && (d.bonus || d.cores)) { d.labB = Math.round(((d.bonus | 0) + (d.cores | 0)) * .04 * l); SAVE.cores += d.labB; saveGame(); } } catch (e) { } return _uiResB.apply(this, arguments); };
+UI.result = function (d) { try { const l = bLv('lab'); if (l && d && !d.online && d.mode !== 'training' && (d.bonus || d.cores)) { d.labB = Math.round(((d.bonus | 0) + (d.cores | 0)) * .04 * l); SAVE.cores += d.labB; saveGame(); } } catch (e) { } return _uiResB.apply(this, arguments); };
 
 // ---------- the station screen ----------
 const BV = { sel: 'refinery', tab: 'station', raf: 0, t: 0, hit: [] };

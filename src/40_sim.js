@@ -171,7 +171,7 @@ function updEnemy(e) {
   if (e.x < -e.w * 1.6 || e.y < -120 - (d.ai === 'drop' ? 0 : 60) || e.y > Hh + 120) { e.dead = true; e.esc = true; if (!e.minion && G.run) G.run.esc++; return; }
   // fire
   if (d.f && e.x < W - 24 && e.x > 20 && !e.hide) {
-    if (--e.fcd <= 0) { fireEnemy(e); e.fcd = Math.max(6, d.f.r * (d.elite ? 1 : 1.25) * rnd(.85, 1.15) / (1 + (G.run.diff - 1) * .1)); }
+    if (--e.fcd <= 0) { const n0 = G.ent.eb.length; fireEnemy(e); if (G.run && G.run.stn && e.t > e.dfT) for (let q = n0; q < G.ent.eb.length; q++) G.ent.eb[q].stn = 1; e.fcd = Math.max(6, d.f.r * (d.elite ? 1 : 1.25) * rnd(.85, 1.15) / (1 + (G.run.diff - 1) * .1)); }
     if (e.bq > 0 && --e.bcd <= 0) { ebullet(e.x - e.w * .35, e.y, Math.cos(e.bang) * d.f.s, Math.sin(e.bang) * d.f.s, 'shard'); e.bq--; e.bcd = 6; }
   }
   if (d.summon && e.x < W - 40 && e.t % 340 === 220 && G.ent.en.filter(q => q.minion).length < 6) for (let i = 0; i < 2; i++) mkEnemy(d.summon, e.x - 30, e.y + (i ? 60 : -60), { minion: 1, hpm: .7 });
@@ -211,13 +211,13 @@ function killEnemy(e, own) {
   if (R && R.mode !== 'tutorial' && e.id !== 'dummy') { if (!SAVE.kd[e.id]) toast('BESTIARY: ' + d.nm.toUpperCase(), 'New entry - see Profile > Bestiary', '#22d3ee'); SAVE.kd[e.id] = (SAVE.kd[e.id] || 0) + 1; }
   boom2D(e.x, e.y, e.w * .75, col); SFX.boom(); if (R3) R3.boom(e.x, e.y, Math.min(14, 4 + (e.w / 12 | 0)), hx(d.m[1].c || 0x555555), 5 + e.w / 40, 6 + e.w / 12);
   R.kills++; R.combo = R.comboT > 0 ? R.combo + 1 : 1; R.comboT = 150; if (R.combo > R.maxCombo) R.maxCombo = R.combo; const mul = 1 + Math.min(R.combo, 20) * .1; R.score += Math.round(d.sc * mul); const pl = G.players[own]; if (pl) { pl.kills++; pl.score += d.sc; if (pl.alive && pl.mod.vamp) pl.hp = Math.min(pl.mhp, pl.hp + pl.mod.vamp * (d.elite ? 3 : .35)); }
-  if (R.blitz) R.time += .5; shake(d.elite ? 8 : 2, d.elite ? 14 : 5); if (d.elite) { G.freeze = 5; shock(e.x, e.y, '#fff', 160, 26); shock(e.x, e.y, col, 270, 34); boom2D(e.x + rnd(-18, 18), e.y + rnd(-18, 18), e.w * .9, col); }
+  if (R.blitz && d.elite) { const a = Math.min(3, Math.max(0, 30 - (R.tAdd || 0))); if (a > 0) { R.tAdd = (R.tAdd || 0) + a; R.time += a; ftext(e.x, e.y - 30, '+' + a + 's', '#fbbf24', 14); } } shake(d.elite ? 8 : 2, d.elite ? 14 : 5); if (d.elite) { G.freeze = 5; shock(e.x, e.y, '#fff', 160, 26); shock(e.x, e.y, col, 270, 34); boom2D(e.x + rnd(-18, 18), e.y + rnd(-18, 18), e.w * .9, col); }
   dropLoot(e); onKillC(e, own); if (e.id === 'rival') rivalDown(e); killFx(e); { const kp = G.players[own]; if (kp && R) { const wk = R.wk || (R.wk = {}); wk[kp.wpn] = (wk[kp.wpn] | 0) + 1; } }
   if (d.burst) for (let i = 0; i < d.burst; i++) { const a = i / d.burst * TAU; ebullet(e.x, e.y, Math.cos(a) * 3.2, Math.sin(a) * 3.2, 'shard'); }
   if (d.split) for (let i = 0; i < 2; i++) { const c = mkEnemy(d.split, e.x, e.y + (i ? 26 : -26), { hpm: 1 }); c.vy = i ? 2 : -2; c.st = 9; }
 }
 function dropLoot(e) {
-  const d = e.d, R = G.run, E = G.ent.pk; let cv = ECON * ((R.lootM || 1) * d.cr * (e.gold ? 3 : 1) * (1 + (R.w || 0) * .12) * (1 + (R.remix ? .3 * (R.remix - 1) : 0)) * (1 + G.players.reduce((a, q) => a + q.mod.loot, 0))); cv = Math.floor(cv) + (Math.random() < cv % 1 ? 1 : 0); if (R.mode === 'training' || R.mode === 'tutorial') cv = Math.min(cv, 1);
+  const d = e.d, R = G.run, E = G.ent.pk; let cv = ECON * ((R.lootM || 1) * d.cr * (e.gold ? 3 : 1) * (1 + (R.w || 0) * .12) * (1 + (R.remix ? .3 * (R.remix - 1) : 0)) * (1 + G.players.reduce((a, q) => a + q.mod.loot, 0))); cv = Math.floor(cv) + (Math.random() < cv % 1 ? 1 : 0); if (R.mode === 'training') cv = 0; else if (R.mode === 'tutorial') cv = Math.min(cv, 1);
   const n = cv <= 0 ? 0 : cv <= 4 ? 1 : cv <= 14 ? 3 : 6, each = Math.max(1, Math.round(cv / n));
   for (let i = 0; i < n; i++) E.push({ k: 'core', v: each, x: e.x + rnd(-14, 14), y: e.y + rnd(-14, 14), vx: rnd(-1.5, 1), vy: rnd(-1.5, 1.5), l: 700 });
   const lowAm = G.players.some(p => p.alive && p.am < p.mam * .55 && !(R.freeAmmo));
@@ -241,7 +241,7 @@ function updPickups() {
 }
 function collect(p, k) {
   const R = G.run; SFX.pick();
-  if (k.k === 'core') { if (p.remote) { R.rCores = (R.rCores | 0) + k.v; ftext(p.x, p.y - 22, '+' + k.v, '#fbbf24', 12); } else { SAVE.cores += k.v; R.cores += k.v; } ftext(p.x, p.y - 22, '+' + k.v, '#fbbf24', 12); }
+  if (k.k === 'core' && R.mode === 'training') { } else if (k.k === 'core') { if (p.remote) { R.rCores = (R.rCores | 0) + k.v; ftext(p.x, p.y - 22, '+' + k.v, '#fbbf24', 12); } else { SAVE.cores += k.v; R.cores += k.v; } ftext(p.x, p.y - 22, '+' + k.v, '#fbbf24', 12); }
   else if (k.k === 'ammo') { const a = Math.max(30, p.mam * .4); p.am = Math.min(p.mam, p.am + a); ftext(p.x, p.y - 22, '+PLASMA', '#2dd4bf', 12); shock(p.x, p.y, '#2dd4bf', 50, 14); }
   else if (k.k === 'hp') { const a = Math.max(20, p.mhp * .2); p.hp = Math.min(p.mhp, p.hp + a); ftext(p.x, p.y - 22, '+HULL', '#4ade80', 12); shock(p.x, p.y, '#4ade80', 56, 16); SFX.power(); if (R3) { if (p.hp > p.mhp * .9) R3.repair(p); } }
   else if (k.k === 'sh') { p.sh = Math.min(p.msh, p.sh + Math.max(20, p.msh * .4)); ftext(p.x, p.y - 22, '+SHIELD', '#38bdf8', 12); shock(p.x, p.y, '#38bdf8', 56, 16); SFX.power(); }
@@ -291,7 +291,7 @@ function updEB() {
       if (d2 < rr * rr) { G.lastB = b; hurt(p, bulletDmg(p, b.d), 'b'); if (b.ice) { p.slow = 100; ftext(p.x, p.y - 36, 'FROZEN', '#bae6fd', 11); } rm = true; break; }
       if (!b.gz && d2 < (rr + 18) * (rr + 18)) graze(p, b);
     }
-    if (!rm && G.run && G.run.stn && b.x < STN_X && b.vx < 0 && !b.mine) { stnHit(G.run, b.d * .3, b.x, b.y); rm = true; }
+    if (!rm && G.run && G.run.stn && b.stn && b.x < STN_X && b.vx < 0 && !b.mine) { stnHit(G.run, b.d * .3, b.x, b.y); rm = true; }
     if (rm || b.l <= 0 || b.x < -40 || b.x > V.W + 80 || b.y < -40 || b.y > V.H + 40) A.splice(i, 1);
   }
 }
