@@ -3,7 +3,7 @@ const TOUR = [
   { t: 'WELCOME ABOARD', x: 'This is Flight School. First a quick tour of your ship\'s menus, then a short practice flight that explains everything on your HUD. About three minutes - skip any time.' },
   { sel: '.mx-tabs', tab: 'play', t: 'FIVE TABS', x: () => 'Everything lives in these five tabs. ' + (touchOn() ? 'Tap one to switch.' : 'Click them, press 1-5 or [ and ] (controller: LB / RB).') },
   { sel: '.mx-hero', tab: 'play', t: 'CONTINUE THE STORY', x: 'The big card always launches your next sector, so this is the fastest way back into the action.' },
-  { sel: '[data-act="mxmap"]', tab: 'play', t: 'THE GALAXY', x: 'Opens the galaxy. Take the helm of your capital ship and fly between the worlds; fly close to one to drop into its sectors. Press N for autopilot to your next world.' },
+  { sel: '[data-act="mxmap"]', tab: 'play', t: 'EXPEDITION MAP', x: 'Every world and sector of the campaign. Pick any sector you have unlocked, replay old ones for stars, and choose your route at the branches.' },
   { sel: '[data-act="play"]', tab: 'play', t: 'ALL MODES', x: 'Endless, Boss Rush, Hardcore, Training and every other way to play.' },
   { sel: '.mx-body', tab: 'ship', t: 'SHIP', x: 'HANGAR: hull parts, wings, engines and paint. UPGRADES: spend cores on hull, shield and damage (MAX buys every level you can afford). WEAPONS: buy and level guns. LOCKER: cosmetics.' },
   { sel: '.mx-body', tab: 'station', t: 'STATION', x: 'Your base keeps earning cores while you are away. Build modules, craft hybrid guns in the Forge and arm drones that fight beside you.' },
@@ -16,7 +16,7 @@ const TOUR = [
 ];
 const TOURS = { on: false, i: 0, el: null, raf: 0 };
 function tourStart() {
-  if (TOURS.on) return; if (G.fly && typeof FLY !== 'undefined') FLY.close(true);
+  if (TOURS.on) return;
   if (UI.top !== 'scMenu') UI.show('scMenu', true);
   try { if (typeof SHIP !== 'undefined' && SHIP.on && !SHIP.room && !SHIP.S.travel) SHIP.go('bridge'); } catch (e) { }
   TOURS.on = true; TOURS.i = 0; G.tour = true;
@@ -52,7 +52,7 @@ addEventListener('keydown', e => { if (!TOURS.on) return; e.stopPropagation(); i
 // Flight School now starts with the tour
 ACT.tutorial = () => tourStart();
 ACT.tutpractice = () => { UI.hideAll(); beginRun({ mode: 'tutorial', w: 0 }); };
-try { SCR.scTut = () => '<div class="card" style="width:min(500px,100%)"><div class="title" style="font-size:clamp(22px,6vw,34px)">WELCOME, PILOT</div><div class="subt">NEW HERE?</div><p class="tc mut" style="line-height:1.7;margin-bottom:18px">Take <b class="acc">Flight School</b>: a quick tour of your ship\'s menus - the galaxy, hangar, station and more - then a practice flight that explains every part of your HUD.</p><div class="stack"><button class="btn big" data-act="tutorial">START FLIGHT SCHOOL</button><button class="btn" data-act="tutpractice">JUST THE PRACTICE FLIGHT</button><button class="btn" data-act="tutlater">SKIP - I KNOW WHAT I\'M DOING</button></div></div>'; } catch (e) { }
+try { SCR.scTut = () => '<div class="card" style="width:min(500px,100%)"><div class="title" style="font-size:clamp(22px,6vw,34px)">WELCOME, PILOT</div><div class="subt">NEW HERE?</div><p class="tc mut" style="line-height:1.7;margin-bottom:18px">Take <b class="acc">Flight School</b>: a quick tour of your ship\'s menus - the map, hangar, station and more - then a practice flight that explains every part of your HUD.</p><div class="stack"><button class="btn big" data-act="tutorial">START FLIGHT SCHOOL</button><button class="btn" data-act="tutpractice">JUST THE PRACTICE FLIGHT</button><button class="btn" data-act="tutlater">SKIP - I KNOW WHAT I\'M DOING</button></div></div>'; } catch (e) { }
 (function () {
   const st = document.createElement('style'); st.textContent = `
 #tourHud{position:fixed;inset:0;z-index:70;pointer-events:auto;font-family:var(--mono)}

@@ -6112,12 +6112,13 @@ ACT.sec = a => { const pl = SAVE.pl[pi()]; if (SECW[a[0]]) pl.sec = a[0]; saveGa
 
 // ================= UPDATES (patch notes) + CREDITS =================
 const inVal = id => { const a = Array.from(document.querySelectorAll('[id="' + id + '"]')), el = a.find(e => e.closest('.scr.on')) || a.find(e => e.offsetParent) || a[a.length - 1]; return ((el || {}).value || '').trim(); };
-const GAME_VER = 'V89';
+const GAME_VER = 'V90';
 const STUDIO = 'Driftwire Games';
 let dwN = 0;
 function dwEmblem(cls) { const i = 'dw' + (++dwN); return '<svg class="dw-e ' + (cls || '') + '" viewBox="0 0 64 64" fill="none" aria-hidden="true"><defs><linearGradient id="' + i + 'g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#60a5fa"/><stop offset="1" stop-color="#c084fc"/></linearGradient><filter id="' + i + 'f" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><path class="dw-w" pathLength="1" d="M3 47C9 47 10 54 17 54H30C45 54 54 44 54 32C54 20 45 10 30 10H19V36" stroke="url(#' + i + 'g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="dw-w2" pathLength="1" d="M27 21H30C38 21 43 26 43 32C43 38 38 43 30 43H27" stroke="url(#' + i + 'g)" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><g class="dw-n"><circle cx="19" cy="40" r="5.5" fill="#fff" filter="url(#' + i + 'f)" opacity=".9"/><circle cx="19" cy="40" r="3.2" fill="#fff"/></g></svg>'; }
 const dwLogo = cls => '<div class="dw ' + (cls || '') + '" role="img" aria-label="' + STUDIO + '">' + dwEmblem() + '<div class="dw-t"><div class="dw-1">DRIFTWIRE</div><div class="dw-2">GAMES</div></div></div>';
 const UPDATES = [
+  ['V90', 'Back to the Map', ['The flyable galaxy has been retired - the Expedition Map is back as the way to pick worlds and sectors','Flight School updated to match']],
   ['V89', 'Hotfix', ['Fixed the Settings and Full screen buttons and the menu tile icons showing as solid black shapes - they draw as clean line icons again']],
   ['V88', 'Flight School, Rebuilt', ['Flight School now starts with a guided tour of the real menus: a spotlight walks you through the five tabs, the story card, the galaxy map, all modes, Ship, Station, Career, Online, your wallet, settings and pilot rank', 'Then a practice flight explains every part of the HUD as you fly: hull cells, shield, plasma, enemy fire, pickups, the low-hull warning, ramming, weapons, your ability dial, your super dial, the top bar and pausing', 'Works with keyboard, mouse, touch and controller (A next, B back); new players can also take just the practice flight', 'Find it any time on the Play tab > Flight school']],
   ['V87', 'The Open Galaxy', ['The Map is now a galaxy you fly through: take the helm of your capital ship in a chase camera and travel between all the worlds', 'Every world is its own place in space: a city planet glowing at night, jungle and ice worlds, a rusted desert, a black hole with a burning disk, a magma moon, a neon grid world, a brass clockwork planet, a ring station, a crystal world, a storm giant, a graveyard of wrecks and a glowing core', 'Nebulae you can fly through, three spiral galaxies, an asteroid belt, moons and rings, a dashed route linking the worlds and space dust streaking past at speed', 'Your ship: armoured hull in your paint and accent colours, lit bridge, turrets, spinning radar dish, blinking masts, running lights and four main engines with plumes that grow when you boost', 'Fly up to a world to open its drop-in panel: pick a sector and drop straight in, or open the full route map', 'Autopilot (N) flies you to your next world; click any world name to fly there; the radar, target marker and edge arrows show the way', 'Keyboard and mouse, touch and controller all supported; prefer the old map? Settings > Graphics > Galaxy flight map', 'Enemies drop repairs much more often when your hull is low, with a guaranteed repair if you go too long without one']],
@@ -9052,7 +9053,6 @@ const SHIP = (() => {
   function frame(now) {
     requestAnimationFrame(frame);
     const rdt = Math.max(0, Math.min(.5, (now - lastT) / 1000)), dt = Math.min(.05, rdt); lastT = now; S.t += dt;
-    if (G.fly) return; // the open galaxy has the 3D view
     const want = wanted();
     if (want && !S.on) enable(); else if (!want && S.on) disable();
     if (!S.on) return;
@@ -10463,7 +10463,7 @@ function pcClick(el) {
   requestAnimationFrame(loop);
   try {
     const dt = Math.min(.05, (now - (PCUR.last || now)) / 1000); PCUR.last = now;
-    if (SET.padCursor === false || G.cut || G.photo || G.padBind || G.fly) { if (G.fly && PCUR.on) { PCUR.on = false; if (PCUR.el) PCUR.el.style.display = 'none'; } return; }
+    if (SET.padCursor === false || G.cut || G.photo || G.padBind) return;
     const inUI = !G.inCombat || G.paused || G.pick || G.brief; if (!inUI) { if (PCUR.on) { PCUR.on = false; PCUR.el.style.display = 'none'; } return; }
     const gps = navigator.getGamepads ? navigator.getGamepads() : []; let gp = null; for (const g of gps) if (g && g.connected) { gp = g; break; } if (!gp) return;
     const dz = Math.max(.15, SET.dead || .2), b = i => gp.buttons[i] && gp.buttons[i].pressed, ax = v => Math.abs(v) > dz ? (v - Math.sign(v) * dz) / (1 - dz) : 0;
@@ -11301,7 +11301,7 @@ const TOUR = [
   { t: 'WELCOME ABOARD', x: 'This is Flight School. First a quick tour of your ship\'s menus, then a short practice flight that explains everything on your HUD. About three minutes - skip any time.' },
   { sel: '.mx-tabs', tab: 'play', t: 'FIVE TABS', x: () => 'Everything lives in these five tabs. ' + (touchOn() ? 'Tap one to switch.' : 'Click them, press 1-5 or [ and ] (controller: LB / RB).') },
   { sel: '.mx-hero', tab: 'play', t: 'CONTINUE THE STORY', x: 'The big card always launches your next sector, so this is the fastest way back into the action.' },
-  { sel: '[data-act="mxmap"]', tab: 'play', t: 'THE GALAXY', x: 'Opens the galaxy. Take the helm of your capital ship and fly between the worlds; fly close to one to drop into its sectors. Press N for autopilot to your next world.' },
+  { sel: '[data-act="mxmap"]', tab: 'play', t: 'EXPEDITION MAP', x: 'Every world and sector of the campaign. Pick any sector you have unlocked, replay old ones for stars, and choose your route at the branches.' },
   { sel: '[data-act="play"]', tab: 'play', t: 'ALL MODES', x: 'Endless, Boss Rush, Hardcore, Training and every other way to play.' },
   { sel: '.mx-body', tab: 'ship', t: 'SHIP', x: 'HANGAR: hull parts, wings, engines and paint. UPGRADES: spend cores on hull, shield and damage (MAX buys every level you can afford). WEAPONS: buy and level guns. LOCKER: cosmetics.' },
   { sel: '.mx-body', tab: 'station', t: 'STATION', x: 'Your base keeps earning cores while you are away. Build modules, craft hybrid guns in the Forge and arm drones that fight beside you.' },
@@ -11314,7 +11314,7 @@ const TOUR = [
 ];
 const TOURS = { on: false, i: 0, el: null, raf: 0 };
 function tourStart() {
-  if (TOURS.on) return; if (G.fly && typeof FLY !== 'undefined') FLY.close(true);
+  if (TOURS.on) return;
   if (UI.top !== 'scMenu') UI.show('scMenu', true);
   try { if (typeof SHIP !== 'undefined' && SHIP.on && !SHIP.room && !SHIP.S.travel) SHIP.go('bridge'); } catch (e) { }
   TOURS.on = true; TOURS.i = 0; G.tour = true;
@@ -11350,7 +11350,7 @@ addEventListener('keydown', e => { if (!TOURS.on) return; e.stopPropagation(); i
 // Flight School now starts with the tour
 ACT.tutorial = () => tourStart();
 ACT.tutpractice = () => { UI.hideAll(); beginRun({ mode: 'tutorial', w: 0 }); };
-try { SCR.scTut = () => '<div class="card" style="width:min(500px,100%)"><div class="title" style="font-size:clamp(22px,6vw,34px)">WELCOME, PILOT</div><div class="subt">NEW HERE?</div><p class="tc mut" style="line-height:1.7;margin-bottom:18px">Take <b class="acc">Flight School</b>: a quick tour of your ship\'s menus - the galaxy, hangar, station and more - then a practice flight that explains every part of your HUD.</p><div class="stack"><button class="btn big" data-act="tutorial">START FLIGHT SCHOOL</button><button class="btn" data-act="tutpractice">JUST THE PRACTICE FLIGHT</button><button class="btn" data-act="tutlater">SKIP - I KNOW WHAT I\'M DOING</button></div></div>'; } catch (e) { }
+try { SCR.scTut = () => '<div class="card" style="width:min(500px,100%)"><div class="title" style="font-size:clamp(22px,6vw,34px)">WELCOME, PILOT</div><div class="subt">NEW HERE?</div><p class="tc mut" style="line-height:1.7;margin-bottom:18px">Take <b class="acc">Flight School</b>: a quick tour of your ship\'s menus - the map, hangar, station and more - then a practice flight that explains every part of your HUD.</p><div class="stack"><button class="btn big" data-act="tutorial">START FLIGHT SCHOOL</button><button class="btn" data-act="tutpractice">JUST THE PRACTICE FLIGHT</button><button class="btn" data-act="tutlater">SKIP - I KNOW WHAT I\'M DOING</button></div></div>'; } catch (e) { }
 (function () {
   const st = document.createElement('style'); st.textContent = `
 #tourHud{position:fixed;inset:0;z-index:70;pointer-events:auto;font-family:var(--mono)}
